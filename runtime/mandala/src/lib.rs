@@ -48,10 +48,9 @@ pub use frame_support::{
 	PalletId, RuntimeDebug, StorageValue,
 };
 use frame_system::{EnsureRoot, RawOrigin};
-use hex_literal::hex;
 use module_asset_registry::{AssetIdMaps, EvmErc20InfoMapping};
 use module_cdp_engine::CollateralCurrencyIds;
-use module_currencies::{BasicCurrencyAdapter, Currency};
+use module_currencies::BasicCurrencyAdapter;
 use module_evm::{runner::RunnerExtended, CallInfo, CreateInfo, EvmChainId, EvmTask};
 use module_evm_accounts::EvmAddressMapping;
 use module_support::{AssetIdMapping, DispatchableTask, ExchangeRateProvider, PoolId};
@@ -172,8 +171,6 @@ parameter_types! {
 	// This Pallet is only used to payment fee pool, it's not added to whitelist by design.
 	// because transaction payment pallet will ensure the accounts always have enough ED.
 	pub const TransactionPaymentPalletId: PalletId = PalletId(*b"aca/fees");
-	// Ecosystem modules
-	pub const StarportPalletId: PalletId = PalletId(*b"aca/stpt");
 	pub const StableAssetPalletId: PalletId = PalletId(*b"nuts/sta");
 	// lock identifier for earning module
 	pub const EarningLockIdentifier: LockIdentifier = *b"aca/earn";
@@ -189,7 +186,6 @@ pub fn get_all_module_accounts() -> Vec<AccountId> {
 		IncentivesPalletId::get().into_account_truncating(),
 		TreasuryReservePalletId::get().into_account_truncating(),
 		CollatorPotId::get().into_account_truncating(),
-		StarportPalletId::get().into_account_truncating(),
 		UnreleasedNativeVaultAccountId::get(),
 		StableAssetPalletId::get().into_account_truncating(),
 	]
@@ -1361,40 +1357,6 @@ impl pallet_proxy::Config for Runtime {
 }
 
 parameter_types! {
-	pub const RENBTCCurrencyId: CurrencyId = RENBTC;
-	pub const RENBTCIdentifier: [u8; 32] = hex!["f6b5b360905f856404bd4cf39021b82209908faa44159e68ea207ab8a5e13197"];
-}
-
-impl ecosystem_renvm_bridge::Config for Runtime {
-	type Event = Event;
-	type Currency = Balances;
-	type BridgedTokenCurrency = Currency<Runtime, RENBTCCurrencyId>;
-	type CurrencyIdentifier = RENBTCIdentifier;
-	type UnsignedPriority = runtime_common::RenvmBridgeUnsignedPriority;
-	type ChargeTransactionPayment = module_transaction_payment::ChargeTransactionPayment<Runtime>;
-}
-
-parameter_types! {
-	pub const CashCurrencyId: CurrencyId = CurrencyId::Token(TokenSymbol::CASH);
-	pub const PercentThresholdForGatewayAuthoritySignature: Perbill = Perbill::from_percent(50);
-}
-
-impl ecosystem_starport::Config for Runtime {
-	type Event = Event;
-	type Currency = Currencies;
-	type CashCurrencyId = CashCurrencyId;
-	type PalletId = StarportPalletId;
-	type MaxGatewayAuthorities = ConstU32<8>;
-	type PercentThresholdForAuthoritySignature = PercentThresholdForGatewayAuthoritySignature;
-	type Cash = CompoundCash;
-}
-
-impl ecosystem_compound_cash::Config for Runtime {
-	type Event = Event;
-	type UnixTime = Timestamp;
-}
-
-parameter_types! {
 	pub NetworkContractSource: H160 = H160::from_low_u64_be(0);
 	pub PrecompilesValue: AllPrecompiles<Runtime> = AllPrecompiles::<_>::mandala();
 }
@@ -1777,11 +1739,6 @@ construct_runtime!(
 		Incentives: module_incentives = 140,
 		NFT: module_nft = 141,
 		AssetRegistry: module_asset_registry = 142,
-
-		// Ecosystem modules
-		RenVmBridge: ecosystem_renvm_bridge = 150,
-		Starport: ecosystem_starport = 151,
-		CompoundCash: ecosystem_compound_cash exclude_parts { Call } = 152,
 
 		// Parachain
 		ParachainInfo: parachain_info exclude_parts { Call } = 161,

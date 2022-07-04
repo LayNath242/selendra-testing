@@ -31,7 +31,6 @@ use serde_json::map::Map;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{crypto::UncheckedInto, sr25519, H160};
 use sp_finality_grandpa::AuthorityId as GrandpaId;
-use sp_runtime::{traits::Zero, FixedPointNumber, FixedU128};
 use sp_std::{collections::btree_map::BTreeMap, str::FromStr};
 use tiny_keccak::{Hasher, Keccak};
 
@@ -312,8 +311,8 @@ fn testnet_genesis(
 		CollatorSelectionConfig, DexConfig, EVMConfig, EnabledTradingPairs, ExistentialDeposits,
 		FinancialCouncilMembershipConfig, GeneralCouncilMembershipConfig, IndicesConfig,
 		NativeTokenExistentialDeposit, OperatorMembershipAcalaConfig, OrmlNFTConfig, ParachainInfoConfig,
-		PolkadotXcmConfig, RenVmBridgeConfig, SessionConfig, SessionDuration, SessionKeys, SessionManagerConfig,
-		StarportConfig, SudoConfig, SystemConfig, TechnicalCommitteeMembershipConfig, TokensConfig, ACA,
+		PolkadotXcmConfig, SessionConfig, SessionDuration, SessionKeys, SessionManagerConfig,
+		SudoConfig, SystemConfig, TechnicalCommitteeMembershipConfig, TokensConfig, ACA,
 		AUSD, DOT, LDOT, RENBTC,
 	};
 
@@ -352,9 +351,6 @@ fn testnet_genesis(
 		system: SystemConfig {
 			// Add Wasm runtime to storage.
 			code: wasm_binary.to_vec(),
-		},
-		starport: StarportConfig {
-			initial_authorities: vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
 		},
 		indices: IndicesConfig { indices: vec![] },
 		balances: BalancesConfig { balances },
@@ -395,32 +391,7 @@ fn testnet_genesis(
 			],
 		},
 		cdp_engine: CdpEngineConfig {
-			collaterals_params: vec![
-				(
-					DOT,
-					Some(FixedU128::zero()),                             // interest rate per sec for this collateral
-					Some(FixedU128::saturating_from_rational(150, 100)), // liquidation ratio
-					Some(FixedU128::saturating_from_rational(10, 100)),  // liquidation penalty rate
-					Some(FixedU128::saturating_from_rational(150, 100)), // required liquidation ratio
-					10_000_000 * dollar(AUSD),                           // maximum debit value in aUSD (cap)
-				),
-				(
-					LDOT,
-					Some(FixedU128::zero()),
-					Some(FixedU128::saturating_from_rational(150, 100)),
-					Some(FixedU128::saturating_from_rational(10, 100)),
-					Some(FixedU128::saturating_from_rational(180, 100)),
-					10_000_000 * dollar(AUSD),
-				),
-				(
-					RENBTC,
-					Some(FixedU128::zero()),
-					Some(FixedU128::saturating_from_rational(150, 100)),
-					Some(FixedU128::saturating_from_rational(10, 100)),
-					Some(FixedU128::saturating_from_rational(150, 100)),
-					10_000_000 * dollar(AUSD),
-				),
-			],
+			collaterals_params: vec![],
 		},
 		asset_registry: AssetRegistryConfig {
 			assets: vec![
@@ -457,9 +428,6 @@ fn testnet_genesis(
 		},
 		parachain_info: ParachainInfoConfig {
 			parachain_id: PARA_ID.into(),
-		},
-		ren_vm_bridge: RenVmBridgeConfig {
-			ren_vm_public_key: hex!["4b939fc8ade87cb50b78987b1dda927460dc456a"],
 		},
 		orml_nft: OrmlNFTConfig { tokens: vec![] },
 		collator_selection: CollatorSelectionConfig {
@@ -502,13 +470,13 @@ fn mandala_genesis(
 	endowed_accounts: Vec<AccountId>,
 ) -> mandala_runtime::GenesisConfig {
 	use mandala_runtime::{
-		cent, dollar, get_all_module_accounts, AssetRegistryConfig, BalancesConfig, CdpEngineConfig, CdpTreasuryConfig,
-		CollatorSelectionConfig, DexConfig, EVMConfig, EnabledTradingPairs, ExistentialDeposits,
+		dollar, get_all_module_accounts, BalancesConfig, CdpEngineConfig, CdpTreasuryConfig,
+		CollatorSelectionConfig, DexConfig, EVMConfig, EnabledTradingPairs,
 		FinancialCouncilMembershipConfig, GeneralCouncilMembershipConfig, IndicesConfig,
 		NativeTokenExistentialDeposit, OperatorMembershipAcalaConfig, OrmlNFTConfig, ParachainInfoConfig,
-		PolkadotXcmConfig, RenVmBridgeConfig, SessionConfig, SessionDuration, SessionKeys, SessionManagerConfig,
-		StarportConfig, SudoConfig, SystemConfig, TechnicalCommitteeMembershipConfig, TokensConfig, ACA,
-		AUSD, DOT, LDOT, RENBTC,
+		PolkadotXcmConfig, SessionConfig, SessionDuration, SessionKeys, SessionManagerConfig,
+		SudoConfig, SystemConfig, TechnicalCommitteeMembershipConfig, TokensConfig, ACA,
+		DOT,
 	};
 
 	let existential_deposit = NativeTokenExistentialDeposit::get();
@@ -547,9 +515,6 @@ fn mandala_genesis(
 			// Add Wasm runtime to storage.
 			code: wasm_binary.to_vec(),
 		},
-		starport: StarportConfig {
-			initial_authorities: vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
-		},
 		indices: IndicesConfig { indices: vec![] },
 		balances: BalancesConfig { balances },
 		sudo: SudoConfig {
@@ -579,44 +544,13 @@ fn mandala_genesis(
 		tokens: TokensConfig {
 			balances: vec![(root_key, DOT, initial_balance)],
 		},
-		cdp_treasury: CdpTreasuryConfig {},
+		cdp_treasury: CdpTreasuryConfig {
+			expected_collateral_auction_size: vec![]
+		},
 		cdp_engine: CdpEngineConfig {
-			collaterals_params: vec![
-				(
-					DOT,
-					Some(FixedU128::zero()),                             // interest rate per sec for this collateral
-					Some(FixedU128::saturating_from_rational(105, 100)), // liquidation ratio
-					Some(FixedU128::saturating_from_rational(3, 100)),   // liquidation penalty rate
-					Some(FixedU128::saturating_from_rational(110, 100)), // required liquidation ratio
-					10_000_000 * dollar(AUSD),                           // maximum debit value in aUSD (cap)
-				),
-				(
-					LDOT,
-					Some(FixedU128::zero()),
-					Some(FixedU128::saturating_from_rational(120, 100)),
-					Some(FixedU128::saturating_from_rational(10, 100)),
-					Some(FixedU128::saturating_from_rational(130, 100)),
-					10_000_000 * dollar(AUSD),
-				),
-				(
-					RENBTC,
-					Some(FixedU128::zero()),
-					Some(FixedU128::saturating_from_rational(110, 100)),
-					Some(FixedU128::saturating_from_rational(4, 100)),
-					Some(FixedU128::saturating_from_rational(115, 100)),
-					10_000_000 * dollar(AUSD),
-				),
-			],
+			collaterals_params: vec![],
 		},
-		asset_registry: AssetRegistryConfig {
-			assets: vec![
-				(ACA, NativeTokenExistentialDeposit::get()),
-				(AUSD, ExistentialDeposits::get(&AUSD)),
-				(DOT, ExistentialDeposits::get(&DOT)),
-				(LDOT, ExistentialDeposits::get(&LDOT)),
-				(RENBTC, ExistentialDeposits::get(&RENBTC)),
-			],
-		},
+		asset_registry:  Default::default(),
 		evm: EVMConfig {
 			chain_id: 595u64,
 			accounts: evm_genesis_accounts,
@@ -628,9 +562,6 @@ fn mandala_genesis(
 		},
 		parachain_info: ParachainInfoConfig {
 			parachain_id: PARA_ID.into(),
-		},
-		ren_vm_bridge: RenVmBridgeConfig {
-			ren_vm_public_key: hex!["4b939fc8ade87cb50b78987b1dda927460dc456a"],
 		},
 		orml_nft: OrmlNFTConfig { tokens: vec![] },
 		collator_selection: CollatorSelectionConfig {
