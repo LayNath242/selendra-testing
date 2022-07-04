@@ -196,7 +196,7 @@ where
 				SCHEDULER,
 				DEX,
 				STABLE_ASSET,
-				HOMA,
+				// HOMA,
 				EVM_ACCOUNTS,
 				HONZON,
 				INCENTIVES,
@@ -217,7 +217,7 @@ where
 	DEXPrecompile<R>: Precompile,
 	StableAssetPrecompile<R>: Precompile,
 	SchedulePrecompile<R>: Precompile,
-	HomaPrecompile<R>: Precompile,
+	// HomaPrecompile<R>: Precompile,
 	HonzonPrecompile<R>: Precompile,
 	IncentivesPrecompile<R>: Precompile,
 {
@@ -314,8 +314,9 @@ where
 				Some(StableAssetPrecompile::<R>::execute(
 					input, target_gas, context, is_static,
 				))
-			} else if address == HOMA {
-				Some(HomaPrecompile::<R>::execute(input, target_gas, context, is_static))
+			// } else if address == HOMA {
+			// 	Some(HomaPrecompile::<R>::execute(input, target_gas, context, is_static))
+			// }
 			} else if address == EVM_ACCOUNTS {
 				Some(EVMAccountsPrecompile::<R>::execute(
 					input, target_gas, context, is_static,

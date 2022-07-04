@@ -123,6 +123,16 @@ pub enum AuthoritysOriginId {
 
 #[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord, TypeInfo)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub enum AuthoritysOriginIdMadala {
+	Root,
+	Treasury,
+	HonzonTreasury,
+	TreasuryReserve,
+}
+
+
+#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord, TypeInfo)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum DataProviderId {
 	Aggregated = 0,
 	Acala = 1,

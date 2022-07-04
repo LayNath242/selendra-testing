@@ -54,7 +54,6 @@ use module_cdp_engine::CollateralCurrencyIds;
 use module_currencies::{BasicCurrencyAdapter, Currency};
 use module_evm::{runner::RunnerExtended, CallInfo, CreateInfo, EvmChainId, EvmTask};
 use module_evm_accounts::EvmAddressMapping;
-use module_relaychain::RelayChainCallBuilder;
 use module_support::{AssetIdMapping, DispatchableTask, ExchangeRateProvider, PoolId};
 use module_transaction_payment::TargetedFeeAdjustment;
 use scale_info::TypeInfo;
@@ -98,18 +97,18 @@ pub use constants::{fee::*, time::*};
 pub use primitives::{
 	currency::AssetIds,
 	evm::{BlockLimits, EstimateResourcesRequest},
-	AccountId, AccountIndex, Address, Amount, AuctionId, AuthoritysOriginId, Balance, BlockNumber, CurrencyId,
+	AccountId, AccountIndex, Address, Amount, AuctionId, AuthoritysOriginIdMadala, Balance, BlockNumber, CurrencyId,
 	DataProviderId, EraIndex, Hash, Lease, Moment, Multiplier, Nonce, ReserveIdentifier, Share, Signature, TokenSymbol,
 	TradingPair,
 };
 pub use runtime_common::{
 	cent, dollar, microcent, millicent, AcalaDropAssets, AllPrecompiles, EnsureRootOrAllGeneralCouncil,
 	EnsureRootOrAllTechnicalCommittee, EnsureRootOrHalfFinancialCouncil, EnsureRootOrHalfGeneralCouncil,
-	EnsureRootOrHalfHomaCouncil, EnsureRootOrOneGeneralCouncil, EnsureRootOrOneThirdsTechnicalCommittee,
+	EnsureRootOrOneGeneralCouncil, EnsureRootOrOneThirdsTechnicalCommittee,
 	EnsureRootOrThreeFourthsGeneralCouncil, EnsureRootOrTwoThirdsGeneralCouncil,
 	EnsureRootOrTwoThirdsTechnicalCommittee, ExchangeRate, ExistentialDepositsTimesOneHundred,
 	FinancialCouncilInstance, FinancialCouncilMembershipInstance, GasToWeight, GeneralCouncilInstance,
-	GeneralCouncilMembershipInstance, HomaCouncilInstance, HomaCouncilMembershipInstance, MaxTipsOfPriority,
+	GeneralCouncilMembershipInstance, MaxTipsOfPriority,
 	OffchainSolutionWeightLimit, OperationalFeeMultiplier, OperatorMembershipInstanceAcala, Price, ProxyType, Rate,
 	Ratio, RuntimeBlockLength, RuntimeBlockWeights, SystemContractsFilter, TechnicalCommitteeInstance,
 	TechnicalCommitteeMembershipInstance, TimeStampedPrice, TipPerWeightStep, ACA, AUSD, DOT, KSM, LDOT, RENBTC,
@@ -162,8 +161,6 @@ parameter_types! {
 	pub const DEXPalletId: PalletId = PalletId(*b"aca/dexm");
 	pub const CDPTreasuryPalletId: PalletId = PalletId(*b"aca/cdpt");
 	pub const HonzonTreasuryPalletId: PalletId = PalletId(*b"aca/hztr");
-	pub const HomaPalletId: PalletId = PalletId(*b"aca/homa");
-	pub const HomaTreasuryPalletId: PalletId = PalletId(*b"aca/hmtr");
 	pub const IncentivesPalletId: PalletId = PalletId(*b"aca/inct");
 	pub const CollatorPotId: PalletId = PalletId(*b"aca/cpot");
 	// Treasury reserve
@@ -189,7 +186,6 @@ pub fn get_all_module_accounts() -> Vec<AccountId> {
 		DEXPalletId::get().into_account_truncating(),
 		CDPTreasuryPalletId::get().into_account_truncating(),
 		HonzonTreasuryPalletId::get().into_account_truncating(),
-		HomaTreasuryPalletId::get().into_account_truncating(),
 		IncentivesPalletId::get().into_account_truncating(),
 		TreasuryReservePalletId::get().into_account_truncating(),
 		CollatorPotId::get().into_account_truncating(),
@@ -407,34 +403,6 @@ impl pallet_membership::Config<FinancialCouncilMembershipInstance> for Runtime {
 	type PrimeOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
 	type MembershipInitialized = FinancialCouncil;
 	type MembershipChanged = FinancialCouncil;
-	type MaxMembers = CouncilDefaultMaxMembers;
-	type WeightInfo = ();
-}
-
-parameter_types! {
-	pub const HomaCouncilMotionDuration: BlockNumber = 7 * DAYS;
-}
-
-impl pallet_collective::Config<HomaCouncilInstance> for Runtime {
-	type Origin = Origin;
-	type Proposal = Call;
-	type Event = Event;
-	type MotionDuration = HomaCouncilMotionDuration;
-	type MaxProposals = CouncilDefaultMaxProposals;
-	type MaxMembers = CouncilDefaultMaxMembers;
-	type DefaultVote = pallet_collective::PrimeDefaultVote;
-	type WeightInfo = ();
-}
-
-impl pallet_membership::Config<HomaCouncilMembershipInstance> for Runtime {
-	type Event = Event;
-	type AddOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
-	type RemoveOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
-	type SwapOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
-	type ResetOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
-	type PrimeOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
-	type MembershipInitialized = HomaCouncil;
-	type MembershipChanged = HomaCouncil;
 	type MaxMembers = CouncilDefaultMaxMembers;
 	type WeightInfo = ();
 }
@@ -674,57 +642,15 @@ impl orml_authority::Config for Runtime {
 	type PalletsOrigin = OriginCaller;
 	type Call = Call;
 	type Scheduler = Scheduler;
-	type AsOriginId = AuthoritysOriginId;
+	type AsOriginId = AuthoritysOriginIdMadala;
 	type AuthorityConfig = AuthorityConfigImpl;
 	type WeightInfo = weights::orml_authority::WeightInfo<Runtime>;
 }
 
-pub struct PaymentsDisputeResolver;
-impl orml_payments::DisputeResolver<AccountId> for PaymentsDisputeResolver {
-	fn get_resolver_account() -> AccountId {
-		Sudo::key().expect("Sudo key not set!")
-	}
-}
-
-pub struct PaymentsFeeHandler;
-impl orml_payments::FeeHandler<Runtime> for PaymentsFeeHandler {
-	fn apply_fees(
-		_from: &AccountId,
-		_to: &AccountId,
-		_detail: &orml_payments::PaymentDetail<Runtime>,
-		_remark: Option<&[u8]>,
-	) -> (AccountId, Percent) {
-		// we do not charge any fee
-		const MARKETPLACE_FEE_PERCENT: Percent = Percent::from_percent(0);
-		let fee_receiver = Sudo::key().expect("Sudo key not set!");
-		(fee_receiver, MARKETPLACE_FEE_PERCENT)
-	}
-}
-
 parameter_types! {
-	pub const IncentivePercentage: Percent = Percent::from_percent(5);
-	pub const MaxRemarkLength: u32 = 10;
-	// 1hr buffer period (60*60)/12
-	pub const CancelBufferBlockLength: BlockNumber = 300;
-	pub const MaxScheduledTaskListLength : u32 = 5;
-}
-
-impl orml_payments::Config for Runtime {
-	type Event = Event;
-	type Asset = Currencies;
-	type DisputeResolver = PaymentsDisputeResolver;
-	type IncentivePercentage = IncentivePercentage;
-	type FeeHandler = PaymentsFeeHandler;
-	type MaxRemarkLength = MaxRemarkLength;
-	type CancelBufferBlockLength = CancelBufferBlockLength;
-	type MaxScheduledTaskListLength = MaxScheduledTaskListLength;
-	type WeightInfo = orml_payments::weights::SubstrateWeight<Runtime>;
-}
-
-parameter_types! {
-	pub CandidacyBond: Balance = 10 * dollar(LDOT);
-	pub VotingBondBase: Balance = 2 * dollar(LDOT);
-	pub VotingBondFactor: Balance = dollar(LDOT);
+	pub CandidacyBond: Balance = 10 * dollar(ACA);
+	pub VotingBondBase: Balance = 2 * dollar(ACA);
+	pub VotingBondFactor: Balance = dollar(ACA);
 	pub const TermDuration: BlockNumber = 7 * DAYS;
 }
 
@@ -733,8 +659,8 @@ impl pallet_elections_phragmen::Config for Runtime {
 	type Event = Event;
 	type Currency = CurrencyAdapter<Runtime, GetLiquidCurrencyId>;
 	type CurrencyToVote = U128CurrencyToVote;
-	type ChangeMembers = HomaCouncil;
-	type InitializeMembers = HomaCouncil;
+	type ChangeMembers = GeneralCouncil;
+	type InitializeMembers = GeneralCouncil;
 	type CandidacyBond = CandidacyBond;
 	type VotingBondBase = VotingBondBase;
 	type VotingBondFactor = VotingBondFactor;
@@ -879,6 +805,14 @@ parameter_types! {
 	pub RewardRatePerRelaychainBlock: Rate = Rate::saturating_from_rational(2_492, 100_000_000_000u128);	// 14% annual staking reward rate of Polkadot
 }
 
+
+pub struct MockLiquidStakingExchangeProvider;
+impl ExchangeRateProvider for MockLiquidStakingExchangeProvider {
+	fn get_exchange_rate() -> ExchangeRate {
+		ExchangeRate::saturating_from_rational(1, 2)
+	}
+}
+
 impl module_prices::Config for Runtime {
 	type Event = Event;
 	type Source = AggregatedDataProvider;
@@ -887,7 +821,7 @@ impl module_prices::Config for Runtime {
 	type GetStakingCurrencyId = GetStakingCurrencyId;
 	type GetLiquidCurrencyId = GetLiquidCurrencyId;
 	type LockOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
-	type LiquidStakingExchangeRateProvider = Homa;
+	type LiquidStakingExchangeRateProvider = MockLiquidStakingExchangeProvider;
 	type DEX = Dex;
 	type Currency = Currencies;
 	type Erc20InfoMapping = EvmErc20InfoMapping<Runtime>;
@@ -942,16 +876,6 @@ impl EnsureOrigin<Origin> for EnsureRootOrTreasury {
 			.expect("infinite length input; no invalid inputs for type; qed");
 		Origin::from(RawOrigin::Signed(zero_account_id))
 	}
-}
-
-impl orml_vesting::Config for Runtime {
-	type Event = Event;
-	type Currency = pallet_balances::Pallet<Runtime>;
-	type MinVestedTransfer = ConstU128<0>;
-	type VestedTransferOrigin = EnsureRootOrTreasury;
-	type WeightInfo = weights::orml_vesting::WeightInfo<Runtime>;
-	type MaxVestingSchedules = ConstU32<100>;
-	type BlockNumberProvider = RelaychainBlockNumberProvider<Runtime>;
 }
 
 parameter_types! {
@@ -1171,7 +1095,7 @@ impl module_aggregated_dex::Config for Runtime {
 
 pub type RebasedStableAsset = module_support::RebasedStableAsset<
 	StableAsset,
-	ConvertBalanceHoma,
+	MockConvertBalance,
 	module_aggregated_dex::RebasedStableAssetErrorConvertor<Runtime>,
 >;
 
@@ -1263,24 +1187,6 @@ impl module_transaction_payment::Config for Runtime {
 	type DefaultFeeTokens = DefaultFeeTokens;
 }
 
-parameter_types! {
-	pub const InstantUnstakeFee: Permill = Permill::from_percent(10);
-}
-
-impl module_earning::Config for Runtime {
-	type Event = Event;
-	type Currency = Balances;
-	type OnBonded = module_incentives::OnEarningBonded<Runtime>;
-	type OnUnbonded = module_incentives::OnEarningUnbonded<Runtime>;
-	type OnUnstakeFee = Treasury; // fee goes to treasury
-	type MinBond = ConstU128<100>;
-	type UnbondingPeriod = ConstU32<3>;
-	type InstantUnstakeFee = InstantUnstakeFee;
-	type MaxUnbondingChunks = ConstU32<3>;
-	type LockIdentifier = EarningLockIdentifier;
-	type WeightInfo = ();
-}
-
 impl module_evm_accounts::Config for Runtime {
 	type Event = Event;
 	type Currency = Balances;
@@ -1331,83 +1237,6 @@ impl module_incentives::Config for Runtime {
 parameter_types! {
 	pub const GetLiquidCurrencyId: CurrencyId = LDOT;
 	pub const GetStakingCurrencyId: CurrencyId = DOT;
-	pub DefaultExchangeRate: ExchangeRate = ExchangeRate::saturating_from_rational(10, 100);	// 1 : 10
-}
-
-pub fn create_x2_parachain_multilocation(index: u16) -> MultiLocation {
-	MultiLocation::new(
-		1,
-		X1(AccountId32 {
-			network: NetworkId::Any,
-			id: Utility::derivative_account_id(ParachainInfo::get().into_account_truncating(), index).into(),
-		}),
-	)
-}
-
-parameter_types! {
-	pub HomaTreasuryAccount: AccountId = HomaTreasuryPalletId::get().into_account_truncating();
-	pub ActiveSubAccountsIndexList: Vec<u16> = vec![
-		0,  // 15sr8Dvq3AT3Z2Z1y8FnQ4VipekAHhmQnrkgzegUr1tNgbcn
-	];
-	pub MintThreshold: Balance = dollar(DOT);
-	pub RedeemThreshold: Balance = 10 * dollar(LDOT);
-}
-
-impl module_homa::Config for Runtime {
-	type Event = Event;
-	type Currency = Currencies;
-	type GovernanceOrigin = EnsureRootOrHalfGeneralCouncil;
-	type StakingCurrencyId = GetStakingCurrencyId;
-	type LiquidCurrencyId = GetLiquidCurrencyId;
-	type PalletId = HomaPalletId;
-	type TreasuryAccount = HomaTreasuryAccount;
-	type DefaultExchangeRate = DefaultExchangeRate;
-	type ActiveSubAccountsIndexList = ActiveSubAccountsIndexList;
-	type BondingDuration = ConstU32<28>;
-	type MintThreshold = MintThreshold;
-	type RedeemThreshold = RedeemThreshold;
-	type RelayChainBlockNumber = RelaychainBlockNumberProvider<Runtime>;
-	type XcmInterface = XcmInterface;
-	type WeightInfo = weights::module_homa::WeightInfo<Runtime>;
-}
-
-parameter_types! {
-	pub ParachainAccount: AccountId = ParachainInfo::get().into_account_truncating();
-}
-
-pub struct SubAccountIndexMultiLocationConvertor;
-impl Convert<u16, MultiLocation> for SubAccountIndexMultiLocationConvertor {
-	fn convert(sub_account_index: u16) -> MultiLocation {
-		create_x2_parachain_multilocation(sub_account_index)
-	}
-}
-
-impl module_xcm_interface::Config for Runtime {
-	type Event = Event;
-	type UpdateOrigin = EnsureRootOrHalfGeneralCouncil;
-	type StakingCurrencyId = GetStakingCurrencyId;
-	type ParachainAccount = ParachainAccount;
-	type RelayChainUnbondingSlashingSpans = ConstU32<5>;
-	type SovereignSubAccountLocationConvert = SubAccountIndexMultiLocationConvertor;
-	type RelayChainCallBuilder = RelayChainCallBuilder<Runtime, ParachainInfo>;
-	type XcmTransfer = XTokens;
-}
-
-parameter_types! {
-	pub MinCouncilBondThreshold: Balance = dollar(LDOT);
-}
-
-impl module_nominees_election::Config for Runtime {
-	type Event = Event;
-	type Currency = Currency<Runtime, GetLiquidCurrencyId>;
-	type NomineeId = AccountId;
-	type PalletId = NomineesElectionId;
-	type MinBond = MinCouncilBondThreshold;
-	type BondingDuration = ConstU32<28>;
-	type NominateesCount = ConstU32<7>;
-	type MaxUnbondingChunks = ConstU32<7>;
-	type NomineeFilter = runtime_common::DummyNomineeFilter;
-	type WeightInfo = weights::module_nominees_election::WeightInfo<Runtime>;
 }
 
 parameter_types! {
@@ -1460,7 +1289,7 @@ impl InstanceFilter<Call> for ProxyType {
 						| Call::Democracy(..) | Call::PhragmenElection(..)
 						| Call::GeneralCouncil(..)
 						| Call::FinancialCouncil(..)
-						| Call::HomaCouncil(..) | Call::TechnicalCommittee(..)
+						| Call::TechnicalCommittee(..)
 						| Call::Treasury(..) | Call::Bounties(..)
 						| Call::Tips(..)
 				)
@@ -1503,12 +1332,7 @@ impl InstanceFilter<Call> for ProxyType {
 						| Call::StableAsset(nutsfinance_stable_asset::Call::redeem_multi { .. })
 				)
 			}
-			ProxyType::Homa => {
-				matches!(
-					c,
-					Call::Homa(module_homa::Call::mint { .. }) | Call::Homa(module_homa::Call::request_redeem { .. })
-				)
-			}
+			ProxyType::Homa => todo!()
 		}
 	}
 	fn is_superset(&self, o: &Self) -> bool {
@@ -1689,33 +1513,16 @@ impl nutsfinance_stable_asset::traits::ValidateAssetId<CurrencyId> for EnsurePoo
 	}
 }
 
-pub struct ConvertBalanceHoma;
-impl orml_tokens::ConvertBalance<Balance, Balance> for ConvertBalanceHoma {
+pub struct MockConvertBalance;
+impl orml_tokens::ConvertBalance<Balance, Balance> for MockConvertBalance {
 	type AssetId = CurrencyId;
 
-	fn convert_balance(balance: Balance, asset_id: CurrencyId) -> Balance {
-		match asset_id {
-			CurrencyId::Token(TokenSymbol::LKSM) => {
-				Homa::get_exchange_rate().checked_mul_int(balance).unwrap_or_default()
-			}
-			_ => balance,
-		}
+	fn convert_balance(balance: Balance, _asset_id: CurrencyId) -> Balance {
+		balance * 100
 	}
 
-	fn convert_balance_back(balance: Balance, asset_id: CurrencyId) -> Balance {
-		/*
-		 * When overflow occurs, it's better to return 0 than max because returning zero will fail the
-		 * current transaction. If returning max here, the current transaction won't fail but latter
-		 * transactions have a possibility to fail, and this is undesirable.
-		 */
-		match asset_id {
-			CurrencyId::Token(TokenSymbol::LKSM) => Homa::get_exchange_rate()
-				.reciprocal()
-				.and_then(|x| x.checked_mul_int(balance))
-				.and_then(|x| x.checked_add(1))
-				.unwrap_or_default(),
-			_ => balance,
-		}
+	fn convert_balance_back(balance: Balance, _asset_id: CurrencyId) -> Balance {
+		balance / 100
 	}
 }
 
@@ -1729,7 +1536,7 @@ impl Contains<CurrencyId> for IsLiquidToken {
 type RebaseTokens = orml_tokens::Combiner<
 	AccountId,
 	IsLiquidToken,
-	orml_tokens::Mapper<AccountId, Currencies, ConvertBalanceHoma, Balance, GetStableAssetStakingCurrencyId>,
+	orml_tokens::Mapper<AccountId, Currencies, MockConvertBalance, Balance, GetStableAssetStakingCurrencyId>,
 	Currencies,
 >;
 
@@ -1771,10 +1578,6 @@ impl module_idle_scheduler::Config for Runtime {
 	type WeightInfo = ();
 	type Task = ScheduledTasks;
 	type MinimumWeightRemainInBlock = MinimumWeightRemainInBlock;
-	type RelayChainBlockNumberProvider = RelaychainBlockNumberProvider<Runtime>;
-	// Number of relay chain blocks produced with no parachain blocks finalized,
-	// once this number is reached idle scheduler is disabled as block production is slow
-	type DisableBlockThreshold = ConstU32<6>;
 }
 
 impl cumulus_pallet_aura_ext::Config for Runtime {}
@@ -1916,7 +1719,6 @@ construct_runtime!(
 		Balances: pallet_balances = 10,
 		Tokens: orml_tokens exclude_parts { Call } = 11,
 		Currencies: module_currencies = 12,
-		Vesting: orml_vesting = 13,
 		TransactionPayment: module_transaction_payment = 14,
 
 		// Treasury
@@ -1939,8 +1741,6 @@ construct_runtime!(
 		GeneralCouncilMembership: pallet_membership::<Instance1> = 51,
 		FinancialCouncil: pallet_collective::<Instance2> = 52,
 		FinancialCouncilMembership: pallet_membership::<Instance2> = 53,
-		HomaCouncil: pallet_collective::<Instance3> = 54,
-		HomaCouncilMembership: pallet_membership::<Instance3> = 55,
 		TechnicalCommittee: pallet_collective::<Instance4> = 56,
 		TechnicalCommitteeMembership: pallet_membership::<Instance4> = 57,
 
@@ -1972,11 +1772,6 @@ construct_runtime!(
 		CdpTreasury: module_cdp_treasury = 123,
 		CdpEngine: module_cdp_engine = 124,
 		EmergencyShutdown: module_emergency_shutdown = 125,
-
-		// Homa
-		NomineesElection: module_nominees_election = 131,
-		Homa: module_homa = 136,
-		XcmInterface: module_xcm_interface = 137,
 
 		// Acala Other
 		Incentives: module_incentives = 140,
@@ -2015,10 +1810,6 @@ construct_runtime!(
 
 		// Stable asset
 		StableAsset: nutsfinance_stable_asset = 200,
-		Payments: orml_payments = 201,
-
-		// Staking related pallets
-		Earning: module_earning = 210,
 
 		// Parachain System, always put it at the end
 		ParachainSystem: cumulus_pallet_parachain_system = 160,
@@ -2043,7 +1834,6 @@ mod benches {
 		[module_earning, benchmarking::earning]
 		[module_emergency_shutdown, benchmarking::emergency_shutdown]
 		[module_evm, benchmarking::evm]
-		[module_homa, benchmarking::homa]
 		[module_honzon, benchmarking::honzon]
 		[module_cdp_treasury, benchmarking::cdp_treasury]
 		[module_collator_selection, benchmarking::collator_selection]
@@ -2056,7 +1846,6 @@ mod benches {
 		[module_currencies, benchmarking::currencies]
 		[module_session_manager, benchmarking::session_manager]
 		[orml_tokens, benchmarking::tokens]
-		[orml_vesting, benchmarking::vesting]
 		[orml_auction, benchmarking::auction]
 		[orml_authority, benchmarking::authority]
 		[orml_oracle, benchmarking::oracle]

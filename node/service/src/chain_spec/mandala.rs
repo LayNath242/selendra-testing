@@ -310,10 +310,10 @@ fn testnet_genesis(
 	use mandala_runtime::{
 		dollar, get_all_module_accounts, AssetRegistryConfig, BalancesConfig, CdpEngineConfig, CdpTreasuryConfig,
 		CollatorSelectionConfig, DexConfig, EVMConfig, EnabledTradingPairs, ExistentialDeposits,
-		FinancialCouncilMembershipConfig, GeneralCouncilMembershipConfig, HomaCouncilMembershipConfig, IndicesConfig,
+		FinancialCouncilMembershipConfig, GeneralCouncilMembershipConfig, IndicesConfig,
 		NativeTokenExistentialDeposit, OperatorMembershipAcalaConfig, OrmlNFTConfig, ParachainInfoConfig,
 		PolkadotXcmConfig, RenVmBridgeConfig, SessionConfig, SessionDuration, SessionKeys, SessionManagerConfig,
-		StarportConfig, SudoConfig, SystemConfig, TechnicalCommitteeMembershipConfig, TokensConfig, VestingConfig, ACA,
+		StarportConfig, SudoConfig, SystemConfig, TechnicalCommitteeMembershipConfig, TokensConfig, ACA,
 		AUSD, DOT, LDOT, RENBTC,
 	};
 
@@ -371,11 +371,6 @@ fn testnet_genesis(
 			members: vec![root_key.clone()],
 			phantom: Default::default(),
 		},
-		homa_council: Default::default(),
-		homa_council_membership: HomaCouncilMembershipConfig {
-			members: vec![root_key.clone()],
-			phantom: Default::default(),
-		},
 		technical_committee: Default::default(),
 		technical_committee_membership: TechnicalCommitteeMembershipConfig {
 			members: vec![root_key.clone()],
@@ -393,7 +388,6 @@ fn testnet_genesis(
 				.flat_map(|x| vec![(x.clone(), DOT, initial_balance), (x.clone(), AUSD, initial_balance)])
 				.collect(),
 		},
-		vesting: VestingConfig { vesting: vec![] },
 		cdp_treasury: CdpTreasuryConfig {
 			expected_collateral_auction_size: vec![
 				(DOT, dollar(DOT)), // (currency_id, max size of a collateral auction)
@@ -510,10 +504,10 @@ fn mandala_genesis(
 	use mandala_runtime::{
 		cent, dollar, get_all_module_accounts, AssetRegistryConfig, BalancesConfig, CdpEngineConfig, CdpTreasuryConfig,
 		CollatorSelectionConfig, DexConfig, EVMConfig, EnabledTradingPairs, ExistentialDeposits,
-		FinancialCouncilMembershipConfig, GeneralCouncilMembershipConfig, HomaCouncilMembershipConfig, IndicesConfig,
+		FinancialCouncilMembershipConfig, GeneralCouncilMembershipConfig, IndicesConfig,
 		NativeTokenExistentialDeposit, OperatorMembershipAcalaConfig, OrmlNFTConfig, ParachainInfoConfig,
 		PolkadotXcmConfig, RenVmBridgeConfig, SessionConfig, SessionDuration, SessionKeys, SessionManagerConfig,
-		StarportConfig, SudoConfig, SystemConfig, TechnicalCommitteeMembershipConfig, TokensConfig, VestingConfig, ACA,
+		StarportConfig, SudoConfig, SystemConfig, TechnicalCommitteeMembershipConfig, TokensConfig, ACA,
 		AUSD, DOT, LDOT, RENBTC,
 	};
 
@@ -571,11 +565,6 @@ fn mandala_genesis(
 			members: vec![root_key.clone()],
 			phantom: Default::default(),
 		},
-		homa_council: Default::default(),
-		homa_council_membership: HomaCouncilMembershipConfig {
-			members: vec![root_key.clone()],
-			phantom: Default::default(),
-		},
 		technical_committee: Default::default(),
 		technical_committee_membership: TechnicalCommitteeMembershipConfig {
 			members: vec![root_key.clone()],
@@ -590,13 +579,7 @@ fn mandala_genesis(
 		tokens: TokensConfig {
 			balances: vec![(root_key, DOT, initial_balance)],
 		},
-		vesting: VestingConfig { vesting: vec![] },
-		cdp_treasury: CdpTreasuryConfig {
-			expected_collateral_auction_size: vec![
-				(DOT, dollar(DOT)), // (currency_id, max size of a collateral auction)
-				(RENBTC, 5 * cent(RENBTC)),
-			],
-		},
+		cdp_treasury: CdpTreasuryConfig {},
 		cdp_engine: CdpEngineConfig {
 			collaterals_params: vec![
 				(

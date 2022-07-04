@@ -125,7 +125,7 @@ module-xcm-interface = { path = "../../modules/xcm-interface", default-features 
 module-nominees-election = { path = "../../modules/nominees-election", default-features = false }
 module-session-manager = { path = "../../modules/session-manager", default-features = false }
 module-relaychain = { path = "../../modules/relaychain", default-features = false, features = ["polkadot"]}
-module-idle-scheduler = { path = "../../modules/idle-scheduler", default-features = false }
+module-idle-scheduler = { package = "mandala-module-idle-scheduler", path = "../../modules/midle-scheduler", default-features = false }
 module-aggregated-dex = { path = "../../modules/aggregated-dex", default-features = false }
 
 primitives = { package = "acala-primitives", path = "../../primitives", default-features = false }
