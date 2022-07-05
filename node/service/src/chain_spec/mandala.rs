@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-use acala_primitives::{orml_traits::GetByKey, AccountId, Balance, TokenSymbol};
+use acala_primitives::{AccountId, Balance, TokenSymbol};
 use coins_bip39::{English, Mnemonic, Wordlist};
 use elliptic_curve::sec1::ToEncodedPoint;
 use hex_literal::hex;
@@ -307,13 +307,13 @@ fn testnet_genesis(
 	evm_accounts: Vec<H160>,
 ) -> mandala_runtime::GenesisConfig {
 	use mandala_runtime::{
-		dollar, get_all_module_accounts, AssetRegistryConfig, BalancesConfig, CdpEngineConfig, CdpTreasuryConfig,
-		CollatorSelectionConfig, DexConfig, EVMConfig, EnabledTradingPairs, ExistentialDeposits,
+		dollar, get_all_module_accounts, BalancesConfig, CdpEngineConfig, CdpTreasuryConfig,
+		CollatorSelectionConfig, DexConfig, EVMConfig,
 		FinancialCouncilMembershipConfig, GeneralCouncilMembershipConfig, IndicesConfig,
 		NativeTokenExistentialDeposit, OperatorMembershipAcalaConfig, OrmlNFTConfig, ParachainInfoConfig,
 		PolkadotXcmConfig, SessionConfig, SessionDuration, SessionKeys, SessionManagerConfig,
 		SudoConfig, SystemConfig, TechnicalCommitteeMembershipConfig, TokensConfig, ACA,
-		AUSD, DOT, LDOT, RENBTC,
+		AUSD, DOT, RENBTC,
 	};
 
 	let existential_deposit = NativeTokenExistentialDeposit::get();
@@ -393,38 +393,18 @@ fn testnet_genesis(
 		cdp_engine: CdpEngineConfig {
 			collaterals_params: vec![],
 		},
-		asset_registry: AssetRegistryConfig {
-			assets: vec![
-				(ACA, NativeTokenExistentialDeposit::get()),
-				(AUSD, ExistentialDeposits::get(&AUSD)),
-				(DOT, ExistentialDeposits::get(&DOT)),
-				(LDOT, ExistentialDeposits::get(&LDOT)),
-				(RENBTC, ExistentialDeposits::get(&RENBTC)),
-			],
-		},
+		asset_registry: Default::default(),
 		evm: EVMConfig {
 			chain_id: 595u64,
 			accounts: evm_genesis_accounts,
 		},
 		dex: DexConfig {
 			initial_listing_trading_pairs: vec![],
-			initial_enabled_trading_pairs: EnabledTradingPairs::get(),
+			initial_enabled_trading_pairs: vec![],
 			#[cfg(feature = "runtime-benchmarks")]
 			initial_added_liquidity_pools: vec![],
 			#[cfg(not(feature = "runtime-benchmarks"))]
-			initial_added_liquidity_pools: vec![(
-				get_account_id_from_seed::<sr25519::Public>("Alice"),
-				vec![
-					(
-						mandala_runtime::TradingPair::from_currency_ids(AUSD, DOT).unwrap(),
-						(1_000_000 * dollar(AUSD), 2_000_000 * dollar(DOT)),
-					),
-					(
-						mandala_runtime::TradingPair::from_currency_ids(AUSD, ACA).unwrap(),
-						(1_000_000 * dollar(AUSD), 2_000_000 * dollar(ACA)),
-					),
-				],
-			)],
+			initial_added_liquidity_pools: vec![],
 		},
 		parachain_info: ParachainInfoConfig {
 			parachain_id: PARA_ID.into(),
@@ -471,7 +451,7 @@ fn mandala_genesis(
 ) -> mandala_runtime::GenesisConfig {
 	use mandala_runtime::{
 		dollar, get_all_module_accounts, BalancesConfig, CdpEngineConfig, CdpTreasuryConfig,
-		CollatorSelectionConfig, DexConfig, EVMConfig, EnabledTradingPairs,
+		CollatorSelectionConfig, DexConfig, EVMConfig,
 		FinancialCouncilMembershipConfig, GeneralCouncilMembershipConfig, IndicesConfig,
 		NativeTokenExistentialDeposit, OperatorMembershipAcalaConfig, OrmlNFTConfig, ParachainInfoConfig,
 		PolkadotXcmConfig, SessionConfig, SessionDuration, SessionKeys, SessionManagerConfig,
@@ -557,7 +537,7 @@ fn mandala_genesis(
 		},
 		dex: DexConfig {
 			initial_listing_trading_pairs: vec![],
-			initial_enabled_trading_pairs: EnabledTradingPairs::get(),
+			initial_enabled_trading_pairs: vec![],
 			initial_added_liquidity_pools: vec![],
 		},
 		parachain_info: ParachainInfoConfig {

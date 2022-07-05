@@ -130,11 +130,6 @@ macro_rules! create_currency_id {
 			)*
 
 			acala_tokens.push(Token {
-				symbol: stringify!(LCDOT).to_string(),
-				address: EvmAddress::try_from(LCDOT).unwrap(),
-			});
-
-			acala_tokens.push(Token {
 				symbol: "SA_DOT".to_string(),
 				address: EvmAddress::try_from(CurrencyId::StableAssetPoolToken(0)).unwrap(),
 			});
@@ -154,10 +149,6 @@ macro_rules! create_currency_id {
 					address: EvmAddress::try_from(TradingPair::from_currency_ids(CurrencyId::Token(DOT), CurrencyId::Token(AUSD)).unwrap().dex_share_currency_id()).unwrap(),
 				},
 				Token {
-					symbol: "LP_LDOT_AUSD".to_string(),
-					address: EvmAddress::try_from(TradingPair::from_currency_ids(CurrencyId::Token(LDOT), CurrencyId::Token(AUSD)).unwrap().dex_share_currency_id()).unwrap(),
-				},
-				Token {
 					symbol: "LP_RENBTC_AUSD".to_string(),
 					address: EvmAddress::try_from(TradingPair::from_currency_ids(CurrencyId::Token(RENBTC), CurrencyId::Token(AUSD)).unwrap().dex_share_currency_id()).unwrap(),
 				},
@@ -165,51 +156,6 @@ macro_rules! create_currency_id {
 			acala_tokens.append(&mut acala_lp_tokens);
 
 			frame_support::assert_ok!(std::fs::write("../predeploy-contracts/resources/acala_tokens.json", serde_json::to_string_pretty(&acala_tokens).unwrap()));
-
-			// Karura tokens
-			let mut karura_tokens = vec![];
-			$(
-				if $val >= 128 {
-					karura_tokens.push(Token {
-						symbol: stringify!($symbol).to_string(),
-						address: EvmAddress::try_from(CurrencyId::Token(TokenSymbol::$symbol)).unwrap(),
-					});
-				}
-			)*
-
-			karura_tokens.push(Token {
-				symbol: "FA_USDT".to_string(),
-				address: EvmAddress::try_from(CurrencyId::ForeignAsset(7)).unwrap(),
-			});
-
-
-			karura_tokens.push(Token {
-				symbol: "SA_KSM".to_string(),
-				address: EvmAddress::try_from(CurrencyId::StableAssetPoolToken(0)).unwrap(),
-			});
-
-			karura_tokens.push(Token {
-				symbol: "SA_3USD".to_string(),
-				address: EvmAddress::try_from(CurrencyId::StableAssetPoolToken(1)).unwrap(),
-			});
-
-			let mut karura_lp_tokens = vec![
-				Token {
-					symbol: "LP_KAR_KUSD".to_string(),
-					address: EvmAddress::try_from(TradingPair::from_currency_ids(CurrencyId::Token(KAR), CurrencyId::Token(KUSD)).unwrap().dex_share_currency_id()).unwrap(),
-				},
-				Token {
-					symbol: "LP_KSM_KUSD".to_string(),
-					address: EvmAddress::try_from(TradingPair::from_currency_ids(CurrencyId::Token(KSM), CurrencyId::Token(KUSD)).unwrap().dex_share_currency_id()).unwrap(),
-				},
-				Token {
-					symbol: "LP_LKSM_KUSD".to_string(),
-					address: EvmAddress::try_from(TradingPair::from_currency_ids(CurrencyId::Token(LKSM), CurrencyId::Token(KUSD)).unwrap().dex_share_currency_id()).unwrap(),
-				},
-			];
-			karura_tokens.append(&mut karura_lp_tokens);
-
-			frame_support::assert_ok!(std::fs::write("../predeploy-contracts/resources/karura_tokens.json", serde_json::to_string_pretty(&karura_tokens).unwrap()));
 		}
     }
 }
@@ -234,7 +180,7 @@ create_currency_id! {
 		ACA("Acala", 12) = 0,
 		AUSD("Acala Dollar", 12) = 1,
 		DOT("Polkadot", 10) = 2,
-		LDOT("Liquid DOT", 10) = 3,
+		LACA("Liquid Acala", 10) = 3,
 		TAP("Tapio", 12) = 4,
 		// 20 - 39: External tokens (e.g. bridged)
 		RENBTC("Ren Protocol BTC", 8) = 20,
@@ -276,7 +222,6 @@ pub type Lease = BlockNumber;
 pub enum DexShare {
 	Token(TokenSymbol),
 	Erc20(EvmAddress),
-	LiquidCrowdloan(Lease),
 	ForeignAsset(ForeignAssetId),
 	StableAssetPoolToken(StableAssetPoolId),
 }
@@ -289,7 +234,6 @@ pub enum CurrencyId {
 	DexShare(DexShare, DexShare),
 	Erc20(EvmAddress),
 	StableAssetPoolToken(StableAssetPoolId),
-	LiquidCrowdloan(Lease),
 	ForeignAsset(ForeignAssetId),
 }
 
@@ -306,10 +250,6 @@ impl CurrencyId {
 		matches!(self, CurrencyId::Erc20(_))
 	}
 
-	pub fn is_liquid_crowdloan_currency_id(&self) -> bool {
-		matches!(self, CurrencyId::LiquidCrowdloan(_))
-	}
-
 	pub fn is_foreign_asset_currency_id(&self) -> bool {
 		matches!(self, CurrencyId::ForeignAsset(_))
 	}
@@ -319,7 +259,6 @@ impl CurrencyId {
 			self,
 			CurrencyId::Token(_)
 				| CurrencyId::Erc20(_)
-				| CurrencyId::LiquidCrowdloan(_)
 				| CurrencyId::ForeignAsset(_)
 				| CurrencyId::StableAssetPoolToken(_)
 		)
@@ -340,7 +279,6 @@ impl CurrencyId {
 		let dex_share_0 = match currency_id_0 {
 			CurrencyId::Token(symbol) => DexShare::Token(symbol),
 			CurrencyId::Erc20(address) => DexShare::Erc20(address),
-			CurrencyId::LiquidCrowdloan(lease) => DexShare::LiquidCrowdloan(lease),
 			CurrencyId::ForeignAsset(foreign_asset_id) => DexShare::ForeignAsset(foreign_asset_id),
 			CurrencyId::StableAssetPoolToken(stable_asset_pool_id) => {
 				DexShare::StableAssetPoolToken(stable_asset_pool_id)
@@ -351,7 +289,6 @@ impl CurrencyId {
 		let dex_share_1 = match currency_id_1 {
 			CurrencyId::Token(symbol) => DexShare::Token(symbol),
 			CurrencyId::Erc20(address) => DexShare::Erc20(address),
-			CurrencyId::LiquidCrowdloan(lease) => DexShare::LiquidCrowdloan(lease),
 			CurrencyId::ForeignAsset(foreign_asset_id) => DexShare::ForeignAsset(foreign_asset_id),
 			CurrencyId::StableAssetPoolToken(stable_asset_pool_id) => {
 				DexShare::StableAssetPoolToken(stable_asset_pool_id)
@@ -378,9 +315,6 @@ impl From<DexShare> for u32 {
 				let index = if leading_zeros > 16 { 16 } else { leading_zeros };
 				bytes[..].copy_from_slice(&address[index..index + 4][..]);
 			}
-			DexShare::LiquidCrowdloan(lease) => {
-				bytes[..].copy_from_slice(&lease.to_be_bytes());
-			}
 			DexShare::ForeignAsset(foreign_asset_id) => {
 				bytes[2..].copy_from_slice(&foreign_asset_id.to_be_bytes());
 			}
@@ -397,7 +331,6 @@ impl Into<CurrencyId> for DexShare {
 		match self {
 			DexShare::Token(token) => CurrencyId::Token(token),
 			DexShare::Erc20(address) => CurrencyId::Erc20(address),
-			DexShare::LiquidCrowdloan(lease) => CurrencyId::LiquidCrowdloan(lease),
 			DexShare::ForeignAsset(foreign_asset_id) => CurrencyId::ForeignAsset(foreign_asset_id),
 			DexShare::StableAssetPoolToken(stable_asset_pool_id) => {
 				CurrencyId::StableAssetPoolToken(stable_asset_pool_id)
@@ -415,7 +348,6 @@ pub enum CurrencyIdType {
 	Token = 1, // 0 is prefix of precompile and predeploy
 	DexShare,
 	StableAsset,
-	LiquidCrowdloan,
 	ForeignAsset,
 }
 
@@ -426,7 +358,6 @@ pub enum CurrencyIdType {
 pub enum DexShareType {
 	Token,
 	Erc20,
-	LiquidCrowdloan,
 	ForeignAsset,
 	StableAssetPoolToken,
 }
@@ -436,15 +367,11 @@ impl Into<DexShareType> for DexShare {
 		match self {
 			DexShare::Token(_) => DexShareType::Token,
 			DexShare::Erc20(_) => DexShareType::Erc20,
-			DexShare::LiquidCrowdloan(_) => DexShareType::LiquidCrowdloan,
 			DexShare::ForeignAsset(_) => DexShareType::ForeignAsset,
 			DexShare::StableAssetPoolToken(_) => DexShareType::StableAssetPoolToken,
 		}
 	}
 }
-
-/// The first batch of lcDOT that expires at end of least 13
-pub const LCDOT: CurrencyId = CurrencyId::LiquidCrowdloan(13);
 
 #[derive(Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, TypeInfo)]
 pub enum AssetIds {

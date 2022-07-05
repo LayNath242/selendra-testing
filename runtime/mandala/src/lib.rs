@@ -31,7 +31,6 @@
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 use codec::{Decode, DecodeLimit, Encode};
-use cumulus_pallet_parachain_system::RelaychainBlockNumberProvider;
 use frame_support::pallet_prelude::InvalidTransaction;
 pub use frame_support::{
 	construct_runtime, log, parameter_types,
@@ -53,7 +52,7 @@ use module_cdp_engine::CollateralCurrencyIds;
 use module_currencies::BasicCurrencyAdapter;
 use module_evm::{runner::RunnerExtended, CallInfo, CreateInfo, EvmChainId, EvmTask};
 use module_evm_accounts::EvmAddressMapping;
-use module_support::{AssetIdMapping, DispatchableTask, ExchangeRateProvider, PoolId};
+use module_support::{AssetIdMapping, DispatchableTask, PoolId};
 use module_transaction_payment::TargetedFeeAdjustment;
 use scale_info::TypeInfo;
 
@@ -75,7 +74,7 @@ use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
 	traits::{
 		AccountIdConversion, BadOrigin, BlakeTwo256, Block as BlockT, Convert, SaturatedConversion, StaticLookup,
-		Verify,
+		Verify, Bounded
 	},
 	transaction_validity::{TransactionSource, TransactionValidity},
 	ApplyExtrinsicResult, DispatchResult, FixedPointNumber,
@@ -110,7 +109,7 @@ pub use runtime_common::{
 	GeneralCouncilMembershipInstance, MaxTipsOfPriority,
 	OffchainSolutionWeightLimit, OperationalFeeMultiplier, OperatorMembershipInstanceAcala, Price, ProxyType, Rate,
 	Ratio, RuntimeBlockLength, RuntimeBlockWeights, SystemContractsFilter, TechnicalCommitteeInstance,
-	TechnicalCommitteeMembershipInstance, TimeStampedPrice, TipPerWeightStep, ACA, AUSD, DOT, KSM, LDOT, RENBTC,
+	TechnicalCommitteeMembershipInstance, TimeStampedPrice, TipPerWeightStep, ACA, AUSD, DOT, LACA, KSM, RENBTC,
 };
 pub use xcm::latest::prelude::*;
 
@@ -715,10 +714,10 @@ parameter_type_with_key! {
 			CurrencyId::Token(symbol) => match symbol {
 				TokenSymbol::AUSD => cent(*currency_id),
 				TokenSymbol::DOT => 10 * millicent(*currency_id),
-				TokenSymbol::LDOT => 50 * millicent(*currency_id),
 				TokenSymbol::BNC => 800 * millicent(*currency_id), // 80BNC = 1KSM
 				TokenSymbol::VSKSM => 10 * millicent(*currency_id), // 1VSKSM = 1KSM
 				TokenSymbol::PHA => 4000 * millicent(*currency_id), // 400PHA = 1KSM
+				TokenSymbol::LACA |
 				TokenSymbol::KUSD |
 				TokenSymbol::KSM |
 				TokenSymbol::LKSM |
@@ -751,7 +750,6 @@ parameter_type_with_key! {
 				AssetIdMaps::<Runtime>::get_asset_metadata(AssetIds::StableAssetId(*stable_asset_id)).
 					map_or(Balance::max_value(), |metatata| metatata.minimal_balance)
 			},
-			CurrencyId::LiquidCrowdloan(_) => ExistentialDeposits::get(&CurrencyId::Token(TokenSymbol::DOT)), // the same as DOT
 			CurrencyId::ForeignAsset(foreign_asset_id) => {
 				AssetIdMaps::<Runtime>::get_asset_metadata(AssetIds::ForeignAssetId(*foreign_asset_id)).
 					map_or(Balance::max_value(), |metatata| metatata.minimal_balance)
@@ -780,50 +778,27 @@ impl orml_tokens::Config for Runtime {
 	type OnKilledTokenAccount = ();
 }
 
-parameter_type_with_key! {
-	pub LiquidCrowdloanLeaseBlockNumber: |_lease: Lease| -> Option<BlockNumber> {
-		None
-	};
-}
-
-parameter_type_with_key! {
-	pub PricingPegged: |currency_id: CurrencyId| -> Option<CurrencyId> {
-		match currency_id {
-			// taiKSM
-			CurrencyId::StableAssetPoolToken(0) => Some(KSM),
-			_ => None,
-		}
-	};
-}
-
 parameter_types! {
 	pub StableCurrencyFixedPrice: Price = Price::saturating_from_rational(1, 1);
 	pub RewardRatePerRelaychainBlock: Rate = Rate::saturating_from_rational(2_492, 100_000_000_000u128);	// 14% annual staking reward rate of Polkadot
 }
 
-
-pub struct MockLiquidStakingExchangeProvider;
-impl ExchangeRateProvider for MockLiquidStakingExchangeProvider {
-	fn get_exchange_rate() -> ExchangeRate {
-		ExchangeRate::saturating_from_rational(1, 2)
-	}
+parameter_type_with_key! {
+	pub PricingPegged: |_currency_id: CurrencyId| -> Option<CurrencyId> {
+		None
+	};
 }
+
 
 impl module_prices::Config for Runtime {
 	type Event = Event;
 	type Source = AggregatedDataProvider;
 	type GetStableCurrencyId = GetStableCurrencyId;
 	type StableCurrencyFixedPrice = StableCurrencyFixedPrice;
-	type GetStakingCurrencyId = GetStakingCurrencyId;
-	type GetLiquidCurrencyId = GetLiquidCurrencyId;
 	type LockOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
-	type LiquidStakingExchangeRateProvider = MockLiquidStakingExchangeProvider;
 	type DEX = Dex;
 	type Currency = Currencies;
 	type Erc20InfoMapping = EvmErc20InfoMapping<Runtime>;
-	type LiquidCrowdloanLeaseBlockNumber = LiquidCrowdloanLeaseBlockNumber;
-	type RelayChainBlockNumber = RelaychainBlockNumberProvider<Runtime>;
-	type RewardRatePerRelaychainBlock = RewardRatePerRelaychainBlock;
 	type PricingPegged = PricingPegged;
 	type WeightInfo = weights::module_prices::WeightInfo<Runtime>;
 }
@@ -1054,16 +1029,9 @@ impl module_emergency_shutdown::Config for Runtime {
 
 parameter_types! {
 	pub const GetExchangeFee: (u32, u32) = (1, 1000);	// 0.1%
-	pub EnabledTradingPairs: Vec<TradingPair> = vec![
-		TradingPair::from_currency_ids(AUSD, ACA).unwrap(),
-		TradingPair::from_currency_ids(AUSD, DOT).unwrap(),
-		TradingPair::from_currency_ids(DOT, LDOT).unwrap(),
-		TradingPair::from_currency_ids(AUSD, RENBTC).unwrap(),
-		TradingPair::from_currency_ids(DOT, ACA).unwrap(),
-	];
 	pub const ExtendedProvisioningBlocks: BlockNumber = 2 * DAYS;
 	pub const TradingPathLimit: u32 = 4;
-	pub AlternativeSwapPathJointList: Vec<Vec<CurrencyId>> = vec![vec![GetStakingCurrencyId::get()]];
+	pub AlternativeSwapPathJointList: Vec<Vec<CurrencyId>> = vec![vec![]];
 }
 
 impl module_dex::Config for Runtime {
@@ -1091,7 +1059,7 @@ impl module_aggregated_dex::Config for Runtime {
 
 pub type RebasedStableAsset = module_support::RebasedStableAsset<
 	StableAsset,
-	MockConvertBalance,
+	ConvertBalanceSelendra,
 	module_aggregated_dex::RebasedStableAssetErrorConvertor<Runtime>,
 >;
 
@@ -1130,7 +1098,7 @@ impl module_transaction_pause::Config for Runtime {
 }
 
 parameter_types! {
-	pub DefaultFeeTokens: Vec<CurrencyId> = vec![AUSD, DOT, LDOT, RENBTC];
+	pub DefaultFeeTokens: Vec<CurrencyId> = vec![AUSD, DOT, RENBTC];
 	pub const CustomFeeSurplus: Percent = Percent::from_percent(50);
 	pub const AlternativeFeeSurplus: Percent = Percent::from_percent(25);
 }
@@ -1148,10 +1116,6 @@ impl OnUnbalanced<NegativeImbalance> for DealWithFees {
 			Treasury::on_unbalanced(split.0);
 
 			Balances::resolve_creating(&CollatorSelection::account_id(), split.1);
-			// Due to performance consideration remove the event.
-			// let numeric_amount = split.1.peek();
-			// let staking_pot = CollatorSelection::account_id();
-			// System::deposit_event(pallet_balances::Event::Deposit(staking_pot, numeric_amount));
 		}
 	}
 }
@@ -1231,7 +1195,7 @@ impl module_incentives::Config for Runtime {
 }
 
 parameter_types! {
-	pub const GetLiquidCurrencyId: CurrencyId = LDOT;
+	pub const GetLiquidCurrencyId: CurrencyId = LACA;
 	pub const GetStakingCurrencyId: CurrencyId = DOT;
 }
 
@@ -1475,36 +1439,43 @@ impl nutsfinance_stable_asset::traits::ValidateAssetId<CurrencyId> for EnsurePoo
 	}
 }
 
-pub struct MockConvertBalance;
-impl orml_tokens::ConvertBalance<Balance, Balance> for MockConvertBalance {
+
+pub struct ConvertBalanceSelendra;
+impl orml_tokens::ConvertBalance<Balance, Balance> for ConvertBalanceSelendra {
 	type AssetId = CurrencyId;
 
-	fn convert_balance(balance: Balance, _asset_id: CurrencyId) -> Balance {
-		balance * 100
+	fn convert_balance(balance: Balance, asset_id: CurrencyId) -> Balance {
+		match asset_id {
+			ACA => ExchangeRate::saturating_from_rational(1, 10)
+				.checked_mul_int(balance)
+				.unwrap_or(Bounded::max_value()),
+			_ => balance,
+		}
 	}
 
-	fn convert_balance_back(balance: Balance, _asset_id: CurrencyId) -> Balance {
-		balance / 100
+	fn convert_balance_back(balance: Balance, asset_id: CurrencyId) -> Balance {
+		match asset_id {
+			ACA => ExchangeRate::saturating_from_rational(10, 1)
+				.checked_mul_int(balance)
+				.unwrap_or(Bounded::max_value()),
+			_ => balance,
+		}
 	}
 }
 
 pub struct IsLiquidToken;
 impl Contains<CurrencyId> for IsLiquidToken {
 	fn contains(currency_id: &CurrencyId) -> bool {
-		matches!(currency_id, CurrencyId::Token(TokenSymbol::LKSM))
+		matches!(currency_id, CurrencyId::Token(TokenSymbol::LACA))
 	}
 }
 
 type RebaseTokens = orml_tokens::Combiner<
 	AccountId,
 	IsLiquidToken,
-	orml_tokens::Mapper<AccountId, Currencies, MockConvertBalance, Balance, GetStableAssetStakingCurrencyId>,
+	orml_tokens::Mapper<AccountId, Currencies, ConvertBalanceSelendra, Balance, GetNativeCurrencyId>,
 	Currencies,
 >;
-
-parameter_types! {
-	pub const GetStableAssetStakingCurrencyId: CurrencyId = CurrencyId::Token(TokenSymbol::LKSM);
-}
 
 impl nutsfinance_stable_asset::Config for Runtime {
 	type Event = Event;

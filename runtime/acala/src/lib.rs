@@ -107,7 +107,7 @@ pub use runtime_common::{
 	GeneralCouncilMembershipInstance, HomaCouncilInstance, HomaCouncilMembershipInstance, MaxTipsOfPriority,
 	OffchainSolutionWeightLimit, OperationalFeeMultiplier, OperatorMembershipInstanceAcala, Price, ProxyType, Rate,
 	Ratio, RuntimeBlockLength, RuntimeBlockWeights, SystemContractsFilter, TechnicalCommitteeInstance,
-	TechnicalCommitteeMembershipInstance, TimeStampedPrice, TipPerWeightStep, ACA, AUSD, DOT, LCDOT, LDOT, RENBTC,
+	TechnicalCommitteeMembershipInstance, TimeStampedPrice, TipPerWeightStep, ACA, AUSD, DOT, RENBTC,
 };
 pub use xcm::latest::prelude::*;
 
@@ -720,13 +720,13 @@ parameter_type_with_key! {
 			CurrencyId::Token(symbol) => match symbol {
 				TokenSymbol::AUSD => 10 * cent(*currency_id),
 				TokenSymbol::DOT => cent(*currency_id),
-				TokenSymbol::LDOT => 5 * cent(*currency_id),
 				TokenSymbol::TAP => dollar(*currency_id),
 
 				TokenSymbol::KAR |
 				TokenSymbol::KUSD |
 				TokenSymbol::KSM |
 				TokenSymbol::LKSM |
+				TokenSymbol::LACA |
 				TokenSymbol::RENBTC |
 				TokenSymbol::BNC |
 				TokenSymbol::PHA |
@@ -757,7 +757,6 @@ parameter_type_with_key! {
 				AssetIdMaps::<Runtime>::get_asset_metadata(AssetIds::StableAssetId(*stable_asset_id)).
 					map_or(Balance::max_value(), |metatata| metatata.minimal_balance)
 			},
-			CurrencyId::LiquidCrowdloan(_) => ExistentialDeposits::get(&CurrencyId::Token(TokenSymbol::DOT)), // the same as DOT
 			CurrencyId::ForeignAsset(foreign_asset_id) => {
 				AssetIdMaps::<Runtime>::get_asset_metadata(AssetIds::ForeignAssetId(*foreign_asset_id)).
 					map_or(Balance::max_value(), |metatata| metatata.minimal_balance)
@@ -822,16 +821,10 @@ impl module_prices::Config for Runtime {
 	type Source = AggregatedDataProvider;
 	type GetStableCurrencyId = GetStableCurrencyId;
 	type StableCurrencyFixedPrice = StableCurrencyFixedPrice;
-	type GetStakingCurrencyId = GetStakingCurrencyId;
-	type GetLiquidCurrencyId = GetLiquidCurrencyId;
 	type LockOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
-	type LiquidStakingExchangeRateProvider = Homa;
 	type DEX = Dex;
 	type Currency = Currencies;
 	type Erc20InfoMapping = EvmErc20InfoMapping<Runtime>;
-	type LiquidCrowdloanLeaseBlockNumber = LiquidCrowdloanLeaseBlockNumber;
-	type RelayChainBlockNumber = RelaychainBlockNumberProvider<Runtime>;
-	type RewardRatePerRelaychainBlock = RewardRatePerRelaychainBlock;
 	type PricingPegged = PricingPegged;
 	type WeightInfo = weights::module_prices::WeightInfo<Runtime>;
 }
@@ -839,7 +832,7 @@ impl module_prices::Config for Runtime {
 parameter_types! {
 	pub const GetNativeCurrencyId: CurrencyId = ACA;
 	pub const GetStableCurrencyId: CurrencyId = AUSD;
-	pub const GetLiquidCurrencyId: CurrencyId = LDOT;
+	pub const GetLiquidCurrencyId: CurrencyId = DOT;
 	pub const GetStakingCurrencyId: CurrencyId = DOT;
 	pub Erc20HoldingAccount: H160 = primitives::evm::ERC20_HOLDING_ACCOUNT;
 }
@@ -1127,9 +1120,7 @@ impl module_dex_oracle::Config for Runtime {
 parameter_types! {
 	pub HonzonTreasuryAccount: AccountId = HonzonTreasuryPalletId::get().into_account_truncating();
 	pub AlternativeSwapPathJointList: Vec<Vec<CurrencyId>> = vec![
-		vec![LCDOT],
 		vec![DOT],
-		vec![LDOT],
 	];
 }
 
@@ -1157,7 +1148,7 @@ impl module_transaction_pause::Config for Runtime {
 parameter_types! {
 	pub const CustomFeeSurplus: Percent = Percent::from_percent(50);
 	pub const AlternativeFeeSurplus: Percent = Percent::from_percent(25);
-	pub DefaultFeeTokens: Vec<CurrencyId> = vec![AUSD, LCDOT, DOT, LDOT];
+	pub DefaultFeeTokens: Vec<CurrencyId> = vec![AUSD, DOT];
 }
 
 type NegativeImbalance = <Balances as PalletCurrency<AccountId>>::NegativeImbalance;
@@ -1452,7 +1443,7 @@ parameter_types! {
 		0,  // 15sr8Dvq3AT3Z2Z1y8FnQ4VipekAHhmQnrkgzegUr1tNgbcn
 	];
 	pub MintThreshold: Balance = 5 * dollar(DOT);
-	pub RedeemThreshold: Balance = 50 * dollar(LDOT);
+	pub RedeemThreshold: Balance = 50 * dollar(DOT);
 }
 
 impl module_homa::Config for Runtime {
@@ -1550,7 +1541,7 @@ impl orml_tokens::ConvertBalance<Balance, Balance> for ConvertBalanceHoma {
 
 	fn convert_balance(balance: Balance, asset_id: CurrencyId) -> Balance {
 		match asset_id {
-			CurrencyId::Token(TokenSymbol::LDOT) => {
+			CurrencyId::Token(TokenSymbol::DOT) => {
 				Homa::get_exchange_rate().checked_mul_int(balance).unwrap_or_default()
 			}
 			_ => balance,
@@ -1559,7 +1550,7 @@ impl orml_tokens::ConvertBalance<Balance, Balance> for ConvertBalanceHoma {
 
 	fn convert_balance_back(balance: Balance, asset_id: CurrencyId) -> Balance {
 		match asset_id {
-			CurrencyId::Token(TokenSymbol::LDOT) => Homa::get_exchange_rate()
+			CurrencyId::Token(TokenSymbol::DOT) => Homa::get_exchange_rate()
 				.reciprocal()
 				.and_then(|x| x.checked_mul_int(balance))
 				.unwrap_or_default(),
@@ -1571,7 +1562,7 @@ impl orml_tokens::ConvertBalance<Balance, Balance> for ConvertBalanceHoma {
 pub struct IsLiquidToken;
 impl Contains<CurrencyId> for IsLiquidToken {
 	fn contains(currency_id: &CurrencyId) -> bool {
-		matches!(currency_id, CurrencyId::Token(TokenSymbol::LDOT))
+		matches!(currency_id, CurrencyId::Token(TokenSymbol::DOT))
 	}
 }
 

@@ -119,14 +119,6 @@ fn currency_id_try_into_evm_address_works() {
 
 	assert_eq!(
 		EvmAddress::try_from(CurrencyId::DexShare(
-			DexShare::LiquidCrowdloan(Default::default()),
-			DexShare::LiquidCrowdloan(Default::default())
-		)),
-		Ok(EvmAddress::from_str("0x0000000000000000000202000000000200000000").unwrap())
-	);
-
-	assert_eq!(
-		EvmAddress::try_from(CurrencyId::DexShare(
 			DexShare::ForeignAsset(Default::default()),
 			DexShare::ForeignAsset(Default::default())
 		)),

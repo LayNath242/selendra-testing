@@ -35,7 +35,7 @@ use sp_runtime::{
 	DispatchError, FixedPointNumber,
 };
 use sp_std::cell::RefCell;
-use support::{mocks::MockErc20InfoMapping, ExchangeRate, SwapLimit};
+use support::{mocks::MockErc20InfoMapping, SwapLimit};
 
 pub type AccountId = u128;
 pub type BlockNumber = u64;
@@ -123,17 +123,6 @@ impl DataFeeder<CurrencyId, Price, AccountId> for MockDataProvider {
 	}
 }
 
-pub struct MockLiquidStakingExchangeProvider;
-impl ExchangeRateProvider for MockLiquidStakingExchangeProvider {
-	fn get_exchange_rate() -> ExchangeRate {
-		if CHANGED.with(|v| *v.borrow_mut()) {
-			ExchangeRate::saturating_from_rational(3, 5)
-		} else {
-			ExchangeRate::saturating_from_rational(1, 2)
-		}
-	}
-}
-
 pub struct MockDEX;
 impl DEXManager<AccountId, Balance, CurrencyId> for MockDEX {
 	fn get_liquidity_pool(currency_id_a: CurrencyId, currency_id_b: CurrencyId) -> (Balance, Balance) {
@@ -215,25 +204,6 @@ impl orml_tokens::Config for Runtime {
 	type OnKilledTokenAccount = ();
 }
 
-impl BlockNumberProvider for MockRelayBlockNumberProvider {
-	type BlockNumber = BlockNumber;
-
-	fn current_block_number() -> Self::BlockNumber {
-		Self::get()
-	}
-}
-
-parameter_type_with_key! {
-	pub LiquidCrowdloanLeaseBlockNumber: |lease: Lease| -> Option<BlockNumber> {
-		#[allow(clippy::match_ref_pats)] // false positive
-		match lease {
-			&1 => Some(100),
-			&2 => Some(200),
-			_ => None,
-		}
-	};
-}
-
 parameter_type_with_key! {
 	pub PricingPegged: |currency_id: CurrencyId| -> Option<CurrencyId> {
 		#[allow(clippy::match_ref_pats)] // false positive
@@ -254,7 +224,6 @@ parameter_types! {
 	pub const GetLiquidCurrencyId: CurrencyId = LDOT;
 	pub StableCurrencyFixedPrice: Price = Price::one();
 	pub static MockRelayBlockNumberProvider: BlockNumber = 0;
-	pub RewardRatePerRelaychainBlock: Rate = Rate::saturating_from_rational(1, 1000);
 }
 
 impl Config for Runtime {
@@ -262,16 +231,10 @@ impl Config for Runtime {
 	type Source = MockDataProvider;
 	type GetStableCurrencyId = GetStableCurrencyId;
 	type StableCurrencyFixedPrice = StableCurrencyFixedPrice;
-	type GetStakingCurrencyId = GetStakingCurrencyId;
-	type GetLiquidCurrencyId = GetLiquidCurrencyId;
 	type LockOrigin = EnsureSignedBy<One, AccountId>;
-	type LiquidStakingExchangeRateProvider = MockLiquidStakingExchangeProvider;
 	type DEX = MockDEX;
 	type Currency = Tokens;
 	type Erc20InfoMapping = MockErc20InfoMapping;
-	type LiquidCrowdloanLeaseBlockNumber = LiquidCrowdloanLeaseBlockNumber;
-	type RelayChainBlockNumber = MockRelayBlockNumberProvider;
-	type RewardRatePerRelaychainBlock = RewardRatePerRelaychainBlock;
 	type PricingPegged = PricingPegged;
 	type WeightInfo = ();
 }

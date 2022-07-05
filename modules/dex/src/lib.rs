@@ -544,7 +544,7 @@ pub mod module {
 						.map(|_| ())
 						.ok_or(Error::<T>::AssetUnregistered)
 				}
-				CurrencyId::Token(_) | CurrencyId::DexShare(_, _) | CurrencyId::LiquidCrowdloan(_) => Ok(()), /* No registration required */
+				CurrencyId::Token(_) | CurrencyId::DexShare(_, _) => Ok(()), /* No registration required */
 			};
 			check_asset_registry(currency_id_a)?;
 			check_asset_registry(currency_id_b)?;
