@@ -1031,7 +1031,10 @@ parameter_types! {
 	pub const GetExchangeFee: (u32, u32) = (1, 1000);	// 0.1%
 	pub const ExtendedProvisioningBlocks: BlockNumber = 2 * DAYS;
 	pub const TradingPathLimit: u32 = 4;
-	pub AlternativeSwapPathJointList: Vec<Vec<CurrencyId>> = vec![vec![]];
+	pub AlternativeSwapPathJointList: Vec<Vec<CurrencyId>> = vec![
+		vec![ACA],
+		vec![LACA],
+	];
 }
 
 impl module_dex::Config for Runtime {
@@ -1098,7 +1101,7 @@ impl module_transaction_pause::Config for Runtime {
 }
 
 parameter_types! {
-	pub DefaultFeeTokens: Vec<CurrencyId> = vec![AUSD, DOT, RENBTC];
+	pub DefaultFeeTokens: Vec<CurrencyId> = vec![AUSD, DOT, LACA];
 	pub const CustomFeeSurplus: Percent = Percent::from_percent(50);
 	pub const AlternativeFeeSurplus: Percent = Percent::from_percent(25);
 }
@@ -1159,7 +1162,6 @@ impl module_evm_accounts::Config for Runtime {
 impl module_asset_registry::Config for Runtime {
 	type Event = Event;
 	type Currency = Balances;
-	type StakingCurrencyId = GetStakingCurrencyId;
 	type EVMBridge = module_evm_bridge::EVMBridge<Runtime>;
 	type RegisterOrigin = EnsureRootOrHalfGeneralCouncil;
 	type WeightInfo = weights::module_asset_registry::WeightInfo<Runtime>;
@@ -1446,7 +1448,7 @@ impl orml_tokens::ConvertBalance<Balance, Balance> for ConvertBalanceSelendra {
 
 	fn convert_balance(balance: Balance, asset_id: CurrencyId) -> Balance {
 		match asset_id {
-			ACA => ExchangeRate::saturating_from_rational(1, 10)
+			LACA => ExchangeRate::saturating_from_rational(1, 10)
 				.checked_mul_int(balance)
 				.unwrap_or(Bounded::max_value()),
 			_ => balance,
@@ -1455,7 +1457,7 @@ impl orml_tokens::ConvertBalance<Balance, Balance> for ConvertBalanceSelendra {
 
 	fn convert_balance_back(balance: Balance, asset_id: CurrencyId) -> Balance {
 		match asset_id {
-			ACA => ExchangeRate::saturating_from_rational(10, 1)
+			LACA => ExchangeRate::saturating_from_rational(10, 1)
 				.checked_mul_int(balance)
 				.unwrap_or(Bounded::max_value()),
 			_ => balance,

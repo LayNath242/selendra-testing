@@ -136,20 +136,18 @@ pub const SYSTEM_CONTRACT_ADDRESS_PREFIX: [u8; 9] = [0u8; 9];
 ///    0 1 2 3 4 5 6 7 8 910111213141516171819 index
 ///   ^^^^^^^^^^^^^^^^^^                       System contract address prefix
 ///                     ^^                     CurrencyId Type: 1-Token 2-DexShare 3-StableAsset
-///                                                             4-LiquidCrowdloan
-///                                                             5-ForeignAsset(ignore Erc20, without the prefix of system contracts)
+///                                                             4-ForeignAsset(ignore Erc20, without the prefix of system contracts)
 ///                                                             FF-Erc20 Holding Account
 ///                                         ^^ CurrencyId Type is 1-Token, Token
 ///                                   ^^^^^^^^ CurrencyId Type is 1-Token, NFT
 ///                       ^^                   CurrencyId Type is 2-DexShare, DexShare Left Type:
-///                                                             0-Token 1-Erc20 2-LiquidCrowdloan 3-ForeignAsset 4-StableAsset
+///                                                             0-Token 1-Erc20 2-ForeignAsset 3-StableAsset
 ///                         ^^^^^^^^           CurrencyId Type is 2-DexShare, DexShare left field
 ///                                 ^^         CurrencyId Type is 2-DexShare, DexShare Right Type:
 ///                                                             the same as DexShare Left Type
 ///                                   ^^^^^^^^ CurrencyId Type is 2-DexShare, DexShare right field
 ///                                   ^^^^^^^^ CurrencyId Type is 3-StableAsset, StableAssetPoolId
-///                                   ^^^^^^^^ CurrencyId Type is 4-LiquidCrowdloan, Lease
-///                                       ^^^^ CurrencyId Type is 5-ForeignAsset, ForeignAssetId
+///                                       ^^^^ CurrencyId Type is 4-ForeignAsset, ForeignAssetId
 
 /// Check if the given `address` is a system contract.
 ///
