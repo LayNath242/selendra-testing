@@ -4000,7 +4000,6 @@ dependencies = [
  "orml-tokens",
  "orml-tokens-rpc-runtime-api",
  "orml-traits",
- "orml-vesting",
  "pallet-authority-discovery",
  "pallet-authorship",
  "pallet-babe",
@@ -4512,7 +4511,6 @@ dependencies = [
  "sp-std",
  "substrate-bn",
  "tiny-keccak",
- "xcm-builder",
 ]
 
 [[package]]
@@ -5496,22 +5494,6 @@ dependencies = [
  "scale-info",
  "serde",
  "serde_json",
- "sp-io",
- "sp-runtime",
- "sp-std",
-]
-
-[[package]]
-name = "orml-vesting"
-version = "0.4.1-dev"
-dependencies = [
- "frame-support",
- "frame-system",
- "pallet-balances",
- "parity-scale-codec",
- "scale-info",
- "serde",
- "sp-core",
  "sp-io",
  "sp-runtime",
  "sp-std",
@@ -8358,7 +8340,6 @@ dependencies = [
  "pallet-staking",
  "pallet-timestamp",
  "pallet-utility",
- "pallet-xcm",
  "parity-scale-codec",
  "scale-info",
  "serde",
@@ -8368,9 +8349,6 @@ dependencies = [
  "sp-runtime",
  "sp-std",
  "static_assertions",
- "xcm",
- "xcm-builder",
- "xcm-executor",
 ]
 
 [[package]]

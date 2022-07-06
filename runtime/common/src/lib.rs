@@ -51,7 +51,6 @@ pub use primitives::{
 	currency::{TokenInfo, ACA, AUSD, BNC, DOT, KAR, KBTC, KINT, KSM, KUSD, LACA, LKSM, PHA, RENBTC, VSKSM},
 	AccountId,
 };
-pub use xcm_impl::{native_currency_location, AcalaDropAssets, FixedRateOfAsset};
 
 #[cfg(feature = "std")]
 use sp_core::bytes::from_hex;
@@ -61,7 +60,6 @@ use std::str::FromStr;
 pub mod bench;
 pub mod check_nonce;
 pub mod precompile;
-pub mod xcm_impl;
 
 mod gas_to_weight_ratio;
 #[cfg(test)]

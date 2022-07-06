@@ -45,8 +45,6 @@ module-idle-scheduler = { path = "../idle-scheduler", default-features = false, 
 module-transaction-payment = { path = "../../modules/transaction-payment", default-features = false }
 module-dex = { path = "../dex", default-features = false, optional = true }
 
-xcm-builder = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", default-features = false }
-
 [dev-dependencies]
 hex = "0.4"
 env_logger = "0.9.0"
@@ -81,7 +79,6 @@ std = [
 	"module-idle-scheduler/std",
 	"module-transaction-payment/std",
 	"module-dex/std",
-	"xcm-builder/std"
 ]
 with-ethereum-compatibility = []
 try-runtime = ["frame-support/try-runtime"]
@@ -98,7 +95,6 @@ bench = [
 	"hex",
 	"module-idle-scheduler",
 	"module-dex",
-	"xcm-builder/runtime-benchmarks"
 ]
 evm-tests = [
 	"primitives/evm-tests"
