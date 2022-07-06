@@ -48,7 +48,7 @@ pub use precompile::{
 	SchedulePrecompile, StableAssetPrecompile,
 };
 pub use primitives::{
-	currency::{TokenInfo, ACA, AUSD, BNC, DOT, KAR, KBTC, KINT, KSM, KUSD, LACA, LKSM, PHA, RENBTC, VSKSM},
+	currency::{TokenInfo, ACA, AUSD, DOT, KSM, KUSD, LACA, LKSM, RENBTC},
 	AccountId,
 };
 
@@ -75,8 +75,8 @@ parameter_types! {
 	//              = final_fee_min * OperationalFeeMultiplier / TipPerWeightStep
 	// Ensure Inherent -> Operational tx -> Unsigned tx -> Signed normal tx
 	// Ensure `max_normal_priority < MinOperationalPriority / 2`
-	pub TipPerWeightStep: Balance = cent(KAR); // 0.01 KAR/ACA
-	pub MaxTipsOfPriority: Balance = 10_000 * dollar(KAR); // 10_000 KAR/ACA
+	pub TipPerWeightStep: Balance = cent(ACA); // 0.01 ACA
+	pub MaxTipsOfPriority: Balance = 10_000 * dollar(ACA); // 10_000 ACA
 	pub const OperationalFeeMultiplier: u64 = 100_000_000_000_000u64;
 	// MinOperationalPriority = final_fee_min * OperationalFeeMultiplier / TipPerWeightStep
 	// 1_500_000_000u128 from https://github.com/AcalaNetwork/Acala/blob/bda4d430cbecebf8720d700b976875d0d805ceca/runtime/integration-tests/src/runtime.rs#L275
@@ -199,45 +199,45 @@ pub fn microcent(currency_id: CurrencyId) -> Balance {
 	millicent(currency_id) / 1000
 }
 
-pub type GeneralCouncilInstance = pallet_collective::Instance1;
+pub type CouncilInstance = pallet_collective::Instance1;
 pub type FinancialCouncilInstance = pallet_collective::Instance2;
 pub type HomaCouncilInstance = pallet_collective::Instance3;
 pub type TechnicalCommitteeInstance = pallet_collective::Instance4;
 
-pub type GeneralCouncilMembershipInstance = pallet_membership::Instance1;
+pub type CouncilMembershipInstance = pallet_membership::Instance1;
 pub type FinancialCouncilMembershipInstance = pallet_membership::Instance2;
 pub type HomaCouncilMembershipInstance = pallet_membership::Instance3;
 pub type TechnicalCommitteeMembershipInstance = pallet_membership::Instance4;
 pub type OperatorMembershipInstanceAcala = pallet_membership::Instance5;
 
 // General Council
-pub type EnsureRootOrAllGeneralCouncil = EnsureOneOf<
+pub type EnsureRootOrAllCouncil = EnsureOneOf<
 	EnsureRoot<AccountId>,
-	pallet_collective::EnsureProportionAtLeast<AccountId, GeneralCouncilInstance, 1, 1>,
+	pallet_collective::EnsureProportionAtLeast<AccountId, CouncilInstance, 1, 1>,
 >;
 
-pub type EnsureRootOrHalfGeneralCouncil = EnsureOneOf<
+pub type EnsureRootOrHalfCouncil = EnsureOneOf<
 	EnsureRoot<AccountId>,
-	pallet_collective::EnsureProportionAtLeast<AccountId, GeneralCouncilInstance, 1, 2>,
+	pallet_collective::EnsureProportionAtLeast<AccountId, CouncilInstance, 1, 2>,
 >;
 
-pub type EnsureRootOrOneThirdsGeneralCouncil = EnsureOneOf<
+pub type EnsureRootOrOneThirdsCouncil = EnsureOneOf<
 	EnsureRoot<AccountId>,
-	pallet_collective::EnsureProportionAtLeast<AccountId, GeneralCouncilInstance, 1, 3>,
+	pallet_collective::EnsureProportionAtLeast<AccountId, CouncilInstance, 1, 3>,
 >;
 
-pub type EnsureRootOrTwoThirdsGeneralCouncil = EnsureOneOf<
+pub type EnsureRootOrTwoThirdsCouncil = EnsureOneOf<
 	EnsureRoot<AccountId>,
-	pallet_collective::EnsureProportionAtLeast<AccountId, GeneralCouncilInstance, 2, 3>,
+	pallet_collective::EnsureProportionAtLeast<AccountId, CouncilInstance, 2, 3>,
 >;
 
-pub type EnsureRootOrThreeFourthsGeneralCouncil = EnsureOneOf<
+pub type EnsureRootOrThreeFourthsCouncil = EnsureOneOf<
 	EnsureRoot<AccountId>,
-	pallet_collective::EnsureProportionAtLeast<AccountId, GeneralCouncilInstance, 3, 4>,
+	pallet_collective::EnsureProportionAtLeast<AccountId, CouncilInstance, 3, 4>,
 >;
 
-pub type EnsureRootOrOneGeneralCouncil =
-	EnsureOneOf<EnsureRoot<AccountId>, pallet_collective::EnsureMember<AccountId, GeneralCouncilInstance>>;
+pub type EnsureRootOrOneCouncil =
+	EnsureOneOf<EnsureRoot<AccountId>, pallet_collective::EnsureMember<AccountId, CouncilInstance>>;
 
 // Financial Council
 pub type EnsureRootOrAllFinancialCouncil = EnsureOneOf<

@@ -22,7 +22,7 @@ use crate::{evm::EvmAddress, *};
 use bstringify::bstringify;
 use codec::{Decode, Encode, MaxEncodedLen};
 use num_enum::{IntoPrimitive, TryFromPrimitive};
-pub use nutsfinance_stable_asset::StableAssetPoolId;
+pub use module_stable_asset::StableAssetPoolId;
 use scale_info::TypeInfo;
 use sp_runtime::RuntimeDebug;
 use sp_std::prelude::*;
@@ -181,27 +181,18 @@ create_currency_id! {
 		AUSD("Acala Dollar", 12) = 1,
 		DOT("Polkadot", 10) = 2,
 		LACA("Liquid Acala", 10) = 3,
-		TAP("Tapio", 12) = 4,
 		// 20 - 39: External tokens (e.g. bridged)
 		RENBTC("Ren Protocol BTC", 8) = 20,
 		CASH("Compound CASH", 8) = 21,
 		// 40 - 127: Polkadot parachain tokens
 
 		// 128 - 147: Karura & Kusama native tokens
-		KAR("Karura", 12) = 128,
 		KUSD("Karura Dollar", 12) = 129,
 		KSM("Kusama", 12) = 130,
 		LKSM("Liquid KSM", 12) = 131,
-		TAI("Taiga", 12) = 132,
 		// 148 - 167: External tokens (e.g. bridged)
 		// 149: Reserved for renBTC
 		// 150: Reserved for CASH
-		// 168 - 255: Kusama parachain tokens
-		BNC("Bifrost Native Token", 12) = 168,
-		VSKSM("Bifrost Voucher Slot KSM", 12) = 169,
-		PHA("Phala Native Token", 12) = 170,
-		KINT("Kintsugi Native Token", 12) = 171,
-		KBTC("Kintsugi Wrapped BTC", 8) = 172,
 	}
 }
 

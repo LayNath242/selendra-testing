@@ -913,7 +913,7 @@ pub mod module {
 			let source_account = T::AddressMapping::get_account_id(&source);
 			let address = MIRRORED_TOKENS_ADDRESS_START | EvmAddress::from_low_u64_be(Self::network_contract_index());
 
-			// ensure source have more than 10 KAR/ACA to deploy the contract.
+			// ensure source have more than 10 ACA to deploy the contract.
 			let amount = T::Currency::minimum_balance().saturating_mul(100u32.into());
 			if T::Currency::free_balance(&source_account) < amount {
 				T::Currency::transfer(
@@ -1003,7 +1003,7 @@ pub mod module {
 
 			let source = T::NetworkContractSource::get();
 			let source_account = T::AddressMapping::get_account_id(&source);
-			// ensure source have more than 10 KAR/ACA to deploy the contract.
+			// ensure source have more than 10 ACA to deploy the contract.
 			let amount = T::Currency::minimum_balance().saturating_mul(100u32.into());
 			if T::Currency::free_balance(&source_account) < amount {
 				T::Currency::transfer(
@@ -1181,7 +1181,7 @@ pub mod module {
 impl<T: Config> Pallet<T> {
 	/// Get StorageDepositPerByte of actual decimals
 	pub fn get_storage_deposit_per_byte() -> BalanceOf<T> {
-		// StorageDepositPerByte decimals is 18, KAR/ACA decimals is 12, convert to 12 here.
+		// StorageDepositPerByte decimals is 18, ACA decimals is 12, convert to 12 here.
 		convert_decimals_from_evm(T::StorageDepositPerByte::get()).expect("checked in integrity_test; qed")
 	}
 

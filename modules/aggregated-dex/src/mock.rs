@@ -125,7 +125,7 @@ impl module_dex::Config for Runtime {
 }
 
 pub struct EnsurePoolAssetId;
-impl nutsfinance_stable_asset::traits::ValidateAssetId<CurrencyId> for EnsurePoolAssetId {
+impl module_stable_asset::traits::ValidateAssetId<CurrencyId> for EnsurePoolAssetId {
 	fn validate(currency_id: CurrencyId) -> bool {
 		matches!(currency_id, CurrencyId::StableAssetPoolToken(_))
 	}
@@ -171,7 +171,7 @@ parameter_types! {
 	pub const StableAssetPalletId: PalletId = PalletId(*b"nuts/sta");
 }
 
-impl nutsfinance_stable_asset::Config for Runtime {
+impl module_stable_asset::Config for Runtime {
 	type Event = Event;
 	type AssetId = CurrencyId;
 	type Balance = Balance;
@@ -218,7 +218,7 @@ frame_support::construct_runtime!(
 		AggregatedDex: aggregated_dex::{Pallet, Call, Storage},
 		Dex: module_dex::{Pallet, Call, Storage, Config<T>, Event<T>},
 		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>},
-		StableAsset: nutsfinance_stable_asset::{Pallet, Call, Storage, Event<T>},
+		StableAsset: module_stable_asset::{Pallet, Call, Storage, Event<T>},
 	}
 );
 

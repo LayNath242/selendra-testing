@@ -74,7 +74,7 @@ fn create_pools(assets: Vec<CurrencyId>, precisions: Vec<u128>) -> DispatchResul
 }
 
 runtime_benchmarks! {
-	{ Runtime, nutsfinance_stable_asset }
+	{ Runtime, module_stable_asset }
 
 	create_pool {
 		let pool_asset = CurrencyId::StableAssetPoolToken(0);
@@ -98,7 +98,7 @@ runtime_benchmarks! {
 
 	mint {
 		let tester: AccountId = whitelisted_caller();
-		let u in 2u32 .. <Runtime as nutsfinance_stable_asset::Config>::PoolAssetLimit::get();
+		let u in 2u32 .. <Runtime as module_stable_asset::Config>::PoolAssetLimit::get();
 		let mut assets = vec![];
 		let mut precisions = vec![];
 		let mut mint_args = vec![];
@@ -118,7 +118,7 @@ runtime_benchmarks! {
 
 	swap {
 		let tester: AccountId = whitelisted_caller();
-		let u in 2u32 .. <Runtime as nutsfinance_stable_asset::Config>::PoolAssetLimit::get();
+		let u in 2u32 .. <Runtime as module_stable_asset::Config>::PoolAssetLimit::get();
 		let mut assets = vec![];
 		let mut precisions = vec![];
 		let mut mint_args = vec![];
@@ -139,7 +139,7 @@ runtime_benchmarks! {
 
 	redeem_proportion {
 		let tester: AccountId = whitelisted_caller();
-		let u in 2u32 .. <Runtime as nutsfinance_stable_asset::Config>::PoolAssetLimit::get();
+		let u in 2u32 .. <Runtime as module_stable_asset::Config>::PoolAssetLimit::get();
 		let mut assets = vec![];
 		let mut precisions = vec![];
 		let mut mint_args = vec![];
@@ -163,7 +163,7 @@ runtime_benchmarks! {
 	redeem_single {
 		let tester: AccountId = whitelisted_caller();
 		let pool_asset = CurrencyId::StableAssetPoolToken(0);
-		let u in 2u32 .. <Runtime as nutsfinance_stable_asset::Config>::PoolAssetLimit::get();
+		let u in 2u32 .. <Runtime as module_stable_asset::Config>::PoolAssetLimit::get();
 		let mut assets = vec![];
 		let mut precisions = vec![];
 		let mut mint_args = vec![];
@@ -184,7 +184,7 @@ runtime_benchmarks! {
 
 	redeem_multi {
 		let tester: AccountId = whitelisted_caller();
-		let u in 2u32 .. <Runtime as nutsfinance_stable_asset::Config>::PoolAssetLimit::get();
+		let u in 2u32 .. <Runtime as module_stable_asset::Config>::PoolAssetLimit::get();
 		let mut assets = vec![];
 		let mut precisions = vec![];
 		let mut mint_args = vec![];

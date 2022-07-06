@@ -40,7 +40,7 @@ pub mod evm_accounts;
 pub mod honzon;
 pub mod idle_scheduler;
 pub mod incentives;
-pub mod nutsfinance_stable_asset;
+pub mod module_stable_asset;
 pub mod prices;
 pub mod transaction_pause;
 pub mod transaction_payment;

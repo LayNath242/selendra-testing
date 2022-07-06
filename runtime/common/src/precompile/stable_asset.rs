@@ -29,8 +29,8 @@ use module_evm::{
 };
 use module_support::Erc20InfoMapping;
 use num_enum::{IntoPrimitive, TryFromPrimitive};
-use nutsfinance_stable_asset::traits::StableAsset;
-use nutsfinance_stable_asset::WeightInfo;
+use module_stable_asset::traits::StableAsset;
+use module_stable_asset::WeightInfo;
 use primitives::{Balance, CurrencyId};
 use sp_core::H160;
 use sp_runtime::{traits::Convert, RuntimeDebug};
@@ -55,8 +55,8 @@ pub enum Action {
 
 impl<Runtime> Precompile for StableAssetPrecompile<Runtime>
 where
-	Runtime: module_evm::Config + nutsfinance_stable_asset::Config + module_prices::Config,
-	nutsfinance_stable_asset::Pallet<Runtime>: StableAsset<
+	Runtime: module_evm::Config + module_stable_asset::Config + module_prices::Config,
+	module_stable_asset::Pallet<Runtime>: StableAsset<
 		AssetId = CurrencyId,
 		AtLeast64BitUnsigned = Balance,
 		Balance = Balance,
@@ -86,7 +86,7 @@ where
 			Action::GetStableAssetPoolTokens => {
 				let pool_id = input.u32_at(1)?;
 
-				if let Some(pool_info) = <nutsfinance_stable_asset::Pallet<Runtime> as StableAsset>::pool(pool_id) {
+				if let Some(pool_info) = <module_stable_asset::Pallet<Runtime> as StableAsset>::pool(pool_id) {
 					// dynamic gas cost calculation
 					// cost of reading asset currencies
 					gas_cost = gas_cost.saturating_add(
@@ -129,7 +129,7 @@ where
 			Action::GetStableAssetPoolTotalSupply => {
 				let pool_id = input.u32_at(1)?;
 
-				if let Some(pool_info) = <nutsfinance_stable_asset::Pallet<Runtime> as StableAsset>::pool(pool_id) {
+				if let Some(pool_info) = <module_stable_asset::Pallet<Runtime> as StableAsset>::pool(pool_id) {
 					Ok(PrecompileOutput {
 						exit_status: ExitSucceed::Returned,
 						cost: gas_cost,
@@ -148,7 +148,7 @@ where
 			Action::GetStableAssetPoolPrecision => {
 				let pool_id = input.u32_at(1)?;
 
-				if let Some(pool_info) = <nutsfinance_stable_asset::Pallet<Runtime> as StableAsset>::pool(pool_id) {
+				if let Some(pool_info) = <module_stable_asset::Pallet<Runtime> as StableAsset>::pool(pool_id) {
 					Ok(PrecompileOutput {
 						exit_status: ExitSucceed::Returned,
 						cost: gas_cost,
@@ -167,7 +167,7 @@ where
 			Action::GetStableAssetPoolMintFee => {
 				let pool_id = input.u32_at(1)?;
 
-				if let Some(pool_info) = <nutsfinance_stable_asset::Pallet<Runtime> as StableAsset>::pool(pool_id) {
+				if let Some(pool_info) = <module_stable_asset::Pallet<Runtime> as StableAsset>::pool(pool_id) {
 					Ok(PrecompileOutput {
 						exit_status: ExitSucceed::Returned,
 						cost: gas_cost,
@@ -186,7 +186,7 @@ where
 			Action::GetStableAssetPoolSwapFee => {
 				let pool_id = input.u32_at(1)?;
 
-				if let Some(pool_info) = <nutsfinance_stable_asset::Pallet<Runtime> as StableAsset>::pool(pool_id) {
+				if let Some(pool_info) = <module_stable_asset::Pallet<Runtime> as StableAsset>::pool(pool_id) {
 					Ok(PrecompileOutput {
 						exit_status: ExitSucceed::Returned,
 						cost: gas_cost,
@@ -205,7 +205,7 @@ where
 			Action::GetStableAssetPoolRedeemFee => {
 				let pool_id = input.u32_at(1)?;
 
-				if let Some(pool_info) = <nutsfinance_stable_asset::Pallet<Runtime> as StableAsset>::pool(pool_id) {
+				if let Some(pool_info) = <module_stable_asset::Pallet<Runtime> as StableAsset>::pool(pool_id) {
 					Ok(PrecompileOutput {
 						exit_status: ExitSucceed::Returned,
 						cost: gas_cost,
@@ -230,7 +230,7 @@ where
 				let min_dy = input.balance_at(6)?;
 				let asset_length = input.u32_at(7)?;
 
-				let (input, output) = <nutsfinance_stable_asset::Pallet<Runtime> as StableAsset>::swap(
+				let (input, output) = <module_stable_asset::Pallet<Runtime> as StableAsset>::swap(
 					&who,
 					pool_id,
 					i,
@@ -262,7 +262,7 @@ where
 					amounts.push(input.balance_at((6 + i) as usize)?);
 				}
 
-				<nutsfinance_stable_asset::Pallet<Runtime> as StableAsset>::mint(
+				<module_stable_asset::Pallet<Runtime> as StableAsset>::mint(
 					&who,
 					pool_id,
 					amounts,
@@ -291,7 +291,7 @@ where
 					amounts.push(input.balance_at((6 + i) as usize)?);
 				}
 
-				<nutsfinance_stable_asset::Pallet<Runtime> as StableAsset>::redeem_proportion(
+				<module_stable_asset::Pallet<Runtime> as StableAsset>::redeem_proportion(
 					&who,
 					pool_id,
 					redeem_amount,
@@ -317,7 +317,7 @@ struct Pricer<R>(PhantomData<R>);
 
 impl<Runtime> Pricer<Runtime>
 where
-	Runtime: module_evm::Config + nutsfinance_stable_asset::Config + module_prices::Config,
+	Runtime: module_evm::Config + module_stable_asset::Config + module_prices::Config,
 {
 	const BASE_COST: u64 = 200;
 
@@ -350,7 +350,7 @@ where
 			Action::StableAssetSwap => {
 				let account_read = InputPricer::<Runtime>::read_accounts(1);
 				let path_len = input.u32_at(7)?;
-				let weight = <Runtime as nutsfinance_stable_asset::Config>::WeightInfo::swap(path_len);
+				let weight = <Runtime as module_stable_asset::Config>::WeightInfo::swap(path_len);
 				Self::BASE_COST
 					.saturating_add(account_read)
 					.saturating_add(WeightToGas::convert(weight))
@@ -358,7 +358,7 @@ where
 			Action::StableAssetMint => {
 				let account_read = InputPricer::<Runtime>::read_accounts(1);
 				let path_len = input.u32_at(5)?;
-				let weight = <Runtime as nutsfinance_stable_asset::Config>::WeightInfo::mint(path_len);
+				let weight = <Runtime as module_stable_asset::Config>::WeightInfo::mint(path_len);
 				Self::BASE_COST
 					.saturating_add(account_read)
 					.saturating_add(WeightToGas::convert(weight))
@@ -366,7 +366,7 @@ where
 			Action::StableAssetRedeem => {
 				let account_read = InputPricer::<Runtime>::read_accounts(1);
 				let path_len = input.u32_at(5)?;
-				let weight = <Runtime as nutsfinance_stable_asset::Config>::WeightInfo::redeem_proportion(path_len);
+				let weight = <Runtime as module_stable_asset::Config>::WeightInfo::redeem_proportion(path_len);
 				Self::BASE_COST
 					.saturating_add(account_read)
 					.saturating_add(WeightToGas::convert(weight))

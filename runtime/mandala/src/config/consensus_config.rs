@@ -1,4 +1,4 @@
-use super::{
+use crate::{
 	constants::election::{ElectionBenchmarkConfig, MinerMaxLength, MinerMaxWeight},
 	voter_bags, Babe, Balances, Call, ElectionProviderMultiPhase, Event, Historical,
 	ImOnline, Offences, Runtime, Session, SessionKeys, Staking, Timestamp, TransactionPayment,
@@ -21,7 +21,7 @@ use pallet_election_provider_multi_phase::SolutionAccuracyOf;
 use pallet_grandpa::AuthorityId as GrandpaId;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use primitives::{AccountId, Balance, BlockNumber, Moment};
-use runtime_common::{dollar, CurrencyToVote, EnsureRootOrHalfGeneralCouncil, StakingBenchmarkingConfig, prod_or_fast};
+use runtime_common::{dollar, CurrencyToVote, EnsureRootOrHalfCouncil, StakingBenchmarkingConfig, prod_or_fast};
 use sp_core::crypto::KeyTypeId;
 use sp_runtime::{
 	curve::PiecewiseLinear,
@@ -138,7 +138,7 @@ impl pallet_staking::Config for Runtime {
 	type BondingDuration = BondingDuration;
 	type SlashDeferDuration = SlashDeferDuration;
 	/// A super-majority of the council can cancel the slash.
-	type SlashCancelOrigin = EnsureRootOrHalfGeneralCouncil;
+	type SlashCancelOrigin = EnsureRootOrHalfCouncil;
 	type SessionInterface = Self;
 	type EraPayout = pallet_staking::ConvertCurve<RewardCurve>;
 	type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
@@ -279,7 +279,7 @@ impl pallet_election_provider_multi_phase::Config for Runtime {
 	type Fallback = onchain::BoundedExecution<OnChainSeqPhragmen>;
 	type GovernanceFallback = onchain::BoundedExecution<OnChainSeqPhragmen>;
 	type Solver = SequentialPhragmen<AccountId, SolutionAccuracyOf<Self>, OffchainRandomBalancing>;
-	type ForceOrigin = EnsureRootOrHalfGeneralCouncil;
+	type ForceOrigin = EnsureRootOrHalfCouncil;
 	type MaxElectableTargets = MaxElectableTargets;
 	type MaxElectingVoters = MaxElectingVoters;
 	type BenchmarkingConfig = ElectionBenchmarkConfig;

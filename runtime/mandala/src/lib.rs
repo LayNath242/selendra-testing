@@ -50,11 +50,10 @@ use frame_system::{EnsureRoot, RawOrigin};
 use module_asset_registry::{AssetIdMaps, EvmErc20InfoMapping};
 use module_cdp_engine::CollateralCurrencyIds;
 use module_currencies::BasicCurrencyAdapter;
-use module_evm::{runner::RunnerExtended, CallInfo, CreateInfo, EvmChainId, EvmTask};
+use module_evm::{runner::RunnerExtended, CallInfo, CreateInfo};
 use module_evm_accounts::EvmAddressMapping;
 use module_support::{AssetIdMapping, DispatchableTask, PoolId};
 use module_transaction_payment::TargetedFeeAdjustment;
-use scale_info::TypeInfo;
 
 use orml_tokens::CurrencyAdapter;
 use orml_traits::{
@@ -62,9 +61,7 @@ use orml_traits::{
 };
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
 use primitives::{
-	define_combined_task,
 	evm::{AccessListItem, EthereumTransactionMessage},
-	task::TaskResult,
 	unchecked_extrinsic::AcalaUncheckedExtrinsic,
 };
 use sp_api::impl_runtime_apis;
@@ -104,20 +101,20 @@ pub use primitives::{
 	TradingPair,
 };
 pub use runtime_common::{
-	cent, dollar, microcent, millicent, AllPrecompiles, EnsureRootOrAllGeneralCouncil,
-	EnsureRootOrAllTechnicalCommittee, EnsureRootOrHalfFinancialCouncil, EnsureRootOrHalfGeneralCouncil,
-	EnsureRootOrOneGeneralCouncil, EnsureRootOrOneThirdsTechnicalCommittee,
-	EnsureRootOrThreeFourthsGeneralCouncil, EnsureRootOrTwoThirdsGeneralCouncil,
+	cent, dollar, microcent, millicent, AllPrecompiles, EnsureRootOrAllCouncil,
+	EnsureRootOrAllTechnicalCommittee, EnsureRootOrHalfFinancialCouncil, EnsureRootOrHalfCouncil,
+	EnsureRootOrOneCouncil, EnsureRootOrOneThirdsTechnicalCommittee,
+	EnsureRootOrThreeFourthsCouncil, EnsureRootOrTwoThirdsCouncil,
 	EnsureRootOrTwoThirdsTechnicalCommittee, ExchangeRate, ExistentialDepositsTimesOneHundred,
-	FinancialCouncilInstance, FinancialCouncilMembershipInstance, GasToWeight, GeneralCouncilInstance,
-	GeneralCouncilMembershipInstance, MaxTipsOfPriority,
+	FinancialCouncilInstance, FinancialCouncilMembershipInstance, GasToWeight, CouncilInstance,
+	CouncilMembershipInstance, MaxTipsOfPriority,
 	OffchainSolutionWeightLimit, OperationalFeeMultiplier, OperatorMembershipInstanceAcala, Price, ProxyType, Rate,
 	Ratio, RuntimeBlockLength, RuntimeBlockWeights, SystemContractsFilter, TechnicalCommitteeInstance,
 	TechnicalCommitteeMembershipInstance, TimeStampedPrice, TipPerWeightStep, ACA, AUSD, DOT, LACA, KSM, RENBTC,
 };
 
 /// Import the stable_asset pallet.
-pub use nutsfinance_stable_asset;
+pub use module_stable_asset;
 
 mod authority;
 mod benchmarking;
@@ -127,9 +124,12 @@ mod weights;
 mod voter_bags;
 
 // runtime config
-mod consensus_config;
+mod config;
 
-pub use consensus_config::{EpochDuration, MaxNominations};
+pub use config::consensus_config::{EpochDuration, MaxNominations};
+#[cfg(test)]
+use config::evm_config::NewContractExtraBytes;
+use config::evm_config::{StorageDepositPerByte, TxFeePerGas};
 
 /// This runtime version.
 #[sp_version::runtime_version]
@@ -321,31 +321,31 @@ impl pallet_sudo::Config for Runtime {
 }
 
 parameter_types! {
-	pub const GeneralCouncilMotionDuration: BlockNumber = 7 * DAYS;
+	pub const CouncilMotionDuration: BlockNumber = 7 * DAYS;
 	pub const CouncilDefaultMaxProposals: u32 = 100;
 	pub const CouncilDefaultMaxMembers: u32 = 100;
 }
 
-impl pallet_collective::Config<GeneralCouncilInstance> for Runtime {
+impl pallet_collective::Config<CouncilInstance> for Runtime {
 	type Origin = Origin;
 	type Proposal = Call;
 	type Event = Event;
-	type MotionDuration = GeneralCouncilMotionDuration;
+	type MotionDuration = CouncilMotionDuration;
 	type MaxProposals = CouncilDefaultMaxProposals;
 	type MaxMembers = CouncilDefaultMaxMembers;
 	type DefaultVote = pallet_collective::PrimeDefaultVote;
 	type WeightInfo = ();
 }
 
-impl pallet_membership::Config<GeneralCouncilMembershipInstance> for Runtime {
+impl pallet_membership::Config<CouncilMembershipInstance> for Runtime {
 	type Event = Event;
-	type AddOrigin = EnsureRootOrThreeFourthsGeneralCouncil;
-	type RemoveOrigin = EnsureRootOrThreeFourthsGeneralCouncil;
-	type SwapOrigin = EnsureRootOrThreeFourthsGeneralCouncil;
-	type ResetOrigin = EnsureRootOrThreeFourthsGeneralCouncil;
-	type PrimeOrigin = EnsureRootOrThreeFourthsGeneralCouncil;
-	type MembershipInitialized = GeneralCouncil;
-	type MembershipChanged = GeneralCouncil;
+	type AddOrigin = EnsureRootOrThreeFourthsCouncil;
+	type RemoveOrigin = EnsureRootOrThreeFourthsCouncil;
+	type SwapOrigin = EnsureRootOrThreeFourthsCouncil;
+	type ResetOrigin = EnsureRootOrThreeFourthsCouncil;
+	type PrimeOrigin = EnsureRootOrThreeFourthsCouncil;
+	type MembershipInitialized = Council;
+	type MembershipChanged = Council;
 	type MaxMembers = CouncilDefaultMaxMembers;
 	type WeightInfo = ();
 }
@@ -367,11 +367,11 @@ impl pallet_collective::Config<FinancialCouncilInstance> for Runtime {
 
 impl pallet_membership::Config<FinancialCouncilMembershipInstance> for Runtime {
 	type Event = Event;
-	type AddOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
-	type RemoveOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
-	type SwapOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
-	type ResetOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
-	type PrimeOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
+	type AddOrigin = EnsureRootOrTwoThirdsCouncil;
+	type RemoveOrigin = EnsureRootOrTwoThirdsCouncil;
+	type SwapOrigin = EnsureRootOrTwoThirdsCouncil;
+	type ResetOrigin = EnsureRootOrTwoThirdsCouncil;
+	type PrimeOrigin = EnsureRootOrTwoThirdsCouncil;
 	type MembershipInitialized = FinancialCouncil;
 	type MembershipChanged = FinancialCouncil;
 	type MaxMembers = CouncilDefaultMaxMembers;
@@ -395,11 +395,11 @@ impl pallet_collective::Config<TechnicalCommitteeInstance> for Runtime {
 
 impl pallet_membership::Config<TechnicalCommitteeMembershipInstance> for Runtime {
 	type Event = Event;
-	type AddOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
-	type RemoveOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
-	type SwapOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
-	type ResetOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
-	type PrimeOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
+	type AddOrigin = EnsureRootOrTwoThirdsCouncil;
+	type RemoveOrigin = EnsureRootOrTwoThirdsCouncil;
+	type SwapOrigin = EnsureRootOrTwoThirdsCouncil;
+	type ResetOrigin = EnsureRootOrTwoThirdsCouncil;
+	type PrimeOrigin = EnsureRootOrTwoThirdsCouncil;
 	type MembershipInitialized = TechnicalCommittee;
 	type MembershipChanged = TechnicalCommittee;
 	type MaxMembers = CouncilDefaultMaxMembers;
@@ -408,11 +408,11 @@ impl pallet_membership::Config<TechnicalCommitteeMembershipInstance> for Runtime
 
 impl pallet_membership::Config<OperatorMembershipInstanceAcala> for Runtime {
 	type Event = Event;
-	type AddOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
-	type RemoveOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
-	type SwapOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
-	type ResetOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
-	type PrimeOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
+	type AddOrigin = EnsureRootOrTwoThirdsCouncil;
+	type RemoveOrigin = EnsureRootOrTwoThirdsCouncil;
+	type SwapOrigin = EnsureRootOrTwoThirdsCouncil;
+	type ResetOrigin = EnsureRootOrTwoThirdsCouncil;
+	type PrimeOrigin = EnsureRootOrTwoThirdsCouncil;
 	type MembershipInitialized = ();
 	type MembershipChanged = AcalaOracle;
 	type MaxMembers = ConstU32<50>;
@@ -441,10 +441,10 @@ impl pallet_multisig::Config for Runtime {
 	type WeightInfo = ();
 }
 
-pub struct GeneralCouncilProvider;
-impl SortedMembers<AccountId> for GeneralCouncilProvider {
+pub struct CouncilProvider;
+impl SortedMembers<AccountId> for CouncilProvider {
 	fn sorted_members() -> Vec<AccountId> {
-		GeneralCouncil::members()
+		Council::members()
 	}
 
 	#[cfg(feature = "runtime-benchmarks")]
@@ -453,7 +453,7 @@ impl SortedMembers<AccountId> for GeneralCouncilProvider {
 	}
 }
 
-impl ContainsLengthBound for GeneralCouncilProvider {
+impl ContainsLengthBound for CouncilProvider {
 	fn max_len() -> usize {
 		100
 	}
@@ -489,8 +489,8 @@ parameter_types! {
 impl pallet_treasury::Config for Runtime {
 	type PalletId = TreasuryPalletId;
 	type Currency = Balances;
-	type ApproveOrigin = EnsureRootOrHalfGeneralCouncil;
-	type RejectOrigin = EnsureRootOrHalfGeneralCouncil;
+	type ApproveOrigin = EnsureRootOrHalfCouncil;
+	type RejectOrigin = EnsureRootOrHalfCouncil;
 	type Event = Event;
 	type OnSlash = ();
 	type ProposalBond = ProposalBond;
@@ -523,7 +523,7 @@ impl pallet_tips::Config for Runtime {
 	type Event = Event;
 	type DataDepositPerByte = DataDepositPerByte;
 	type MaximumReasonLength = MaximumReasonLength;
-	type Tippers = GeneralCouncilProvider;
+	type Tippers = CouncilProvider;
 	type TipCountdown = TipCountdown;
 	type TipFindersFee = TipFindersFee;
 	type TipReportDepositBase = TipReportDepositBase;
@@ -566,12 +566,12 @@ impl pallet_democracy::Config for Runtime {
 	type VoteLockingPeriod = EnactmentPeriod; // Same as EnactmentPeriod
 	type MinimumDeposit = MinimumDeposit;
 	/// A straight majority of the council can decide what their next motion is.
-	type ExternalOrigin = EnsureRootOrHalfGeneralCouncil;
+	type ExternalOrigin = EnsureRootOrHalfCouncil;
 	/// A majority can have the next scheduled referendum be a straight majority-carries vote.
-	type ExternalMajorityOrigin = EnsureRootOrHalfGeneralCouncil;
+	type ExternalMajorityOrigin = EnsureRootOrHalfCouncil;
 	/// A unanimous council can have the next scheduled referendum be a straight default-carries
 	/// (NTB) vote.
-	type ExternalDefaultOrigin = EnsureRootOrAllGeneralCouncil;
+	type ExternalDefaultOrigin = EnsureRootOrAllCouncil;
 	/// Two thirds of the technical committee can have an ExternalMajority/ExternalDefault vote
 	/// be tabled immediately and with a shorter voting/enactment period.
 	type FastTrackOrigin = EnsureRootOrTwoThirdsTechnicalCommittee;
@@ -579,7 +579,7 @@ impl pallet_democracy::Config for Runtime {
 	type InstantAllowed = ConstBool<true>;
 	type FastTrackVotingPeriod = FastTrackVotingPeriod;
 	// To cancel a proposal which has been passed, 2/3 of the council must agree to it.
-	type CancellationOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
+	type CancellationOrigin = EnsureRootOrTwoThirdsCouncil;
 	type BlacklistOrigin = EnsureRoot<AccountId>;
 	// To cancel a proposal before it has been passed, the technical committee must be unanimous or
 	// Root must agree.
@@ -589,7 +589,7 @@ impl pallet_democracy::Config for Runtime {
 	type VetoOrigin = pallet_collective::EnsureMember<AccountId, TechnicalCommitteeInstance>;
 	type CooloffPeriod = CooloffPeriod;
 	type PreimageByteDeposit = PreimageByteDeposit;
-	type OperationalPreimageOrigin = pallet_collective::EnsureMember<AccountId, GeneralCouncilInstance>;
+	type OperationalPreimageOrigin = pallet_collective::EnsureMember<AccountId, CouncilInstance>;
 	type Slash = Treasury;
 	type Scheduler = Scheduler;
 	type PalletsOrigin = OriginCaller;
@@ -630,8 +630,8 @@ impl pallet_elections_phragmen::Config for Runtime {
 	type Event = Event;
 	type Currency = CurrencyAdapter<Runtime, GetLiquidCurrencyId>;
 	type CurrencyToVote = U128CurrencyToVote;
-	type ChangeMembers = GeneralCouncil;
-	type InitializeMembers = GeneralCouncil;
+	type ChangeMembers = Council;
+	type InitializeMembers = Council;
 	type CandidacyBond = CandidacyBond;
 	type VotingBondBase = VotingBondBase;
 	type VotingBondFactor = VotingBondFactor;
@@ -688,22 +688,14 @@ parameter_type_with_key! {
 	pub ExistentialDeposits: |currency_id: CurrencyId| -> Balance {
 		match currency_id {
 			CurrencyId::Token(symbol) => match symbol {
+				TokenSymbol::ACA => cent(*currency_id),
 				TokenSymbol::AUSD => cent(*currency_id),
-				TokenSymbol::DOT => 10 * millicent(*currency_id),
-				TokenSymbol::BNC => 800 * millicent(*currency_id), // 80BNC = 1KSM
-				TokenSymbol::VSKSM => 10 * millicent(*currency_id), // 1VSKSM = 1KSM
-				TokenSymbol::PHA => 4000 * millicent(*currency_id), // 400PHA = 1KSM
+				TokenSymbol::DOT |
 				TokenSymbol::LACA |
 				TokenSymbol::KUSD |
 				TokenSymbol::KSM |
 				TokenSymbol::LKSM |
 				TokenSymbol::RENBTC |
-				TokenSymbol::KINT |
-				TokenSymbol::KBTC |
-				TokenSymbol::TAI => 10 * millicent(*currency_id),
-				TokenSymbol::TAP => 10 * millicent(*currency_id),
-				TokenSymbol::ACA |
-				TokenSymbol::KAR |
 				TokenSymbol::CASH => Balance::max_value() // unsupported
 			},
 			CurrencyId::DexShare(dex_share_0, _) => {
@@ -770,7 +762,7 @@ impl module_prices::Config for Runtime {
 	type Source = AggregatedDataProvider;
 	type GetStableCurrencyId = GetStableCurrencyId;
 	type StableCurrencyFixedPrice = StableCurrencyFixedPrice;
-	type LockOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
+	type LockOrigin = EnsureRootOrTwoThirdsCouncil;
 	type DEX = Dex;
 	type Currency = Currencies;
 	type Erc20InfoMapping = EvmErc20InfoMapping<Runtime>;
@@ -794,7 +786,7 @@ impl module_currencies::Config for Runtime {
 	type AddressMapping = EvmAddressMapping<Runtime>;
 	type EVMBridge = module_evm_bridge::EVMBridge<Runtime>;
 	type GasToWeight = GasToWeight;
-	type SweepOrigin = EnsureRootOrOneGeneralCouncil;
+	type SweepOrigin = EnsureRootOrOneCouncil;
 	type OnDust = module_currencies::TransferDust<Runtime, TreasuryAccount>;
 }
 
@@ -998,7 +990,7 @@ impl module_emergency_shutdown::Config for Runtime {
 	type PriceSource = Prices;
 	type CDPTreasury = CdpTreasury;
 	type AuctionManagerHandler = AuctionManager;
-	type ShutdownOrigin = EnsureRootOrHalfGeneralCouncil;
+	type ShutdownOrigin = EnsureRootOrHalfCouncil;
 	type WeightInfo = weights::module_emergency_shutdown::WeightInfo<Runtime>;
 }
 
@@ -1021,7 +1013,7 @@ impl module_dex::Config for Runtime {
 	type Erc20InfoMapping = EvmErc20InfoMapping<Runtime>;
 	type DEXIncentives = Incentives;
 	type WeightInfo = weights::module_dex::WeightInfo<Runtime>;
-	type ListingOrigin = EnsureRootOrHalfGeneralCouncil;
+	type ListingOrigin = EnsureRootOrHalfCouncil;
 	type ExtendedProvisioningBlocks = ExtendedProvisioningBlocks;
 	type OnLiquidityPoolUpdated = ();
 }
@@ -1029,7 +1021,7 @@ impl module_dex::Config for Runtime {
 impl module_aggregated_dex::Config for Runtime {
 	type DEX = Dex;
 	type StableAsset = RebasedStableAsset;
-	type GovernanceOrigin = EnsureRootOrHalfGeneralCouncil;
+	type GovernanceOrigin = EnsureRootOrHalfCouncil;
 	type DexSwapJointList = AlternativeSwapPathJointList;
 	type SwapPathLimit = ConstU32<3>;
 	type WeightInfo = ();
@@ -1046,7 +1038,7 @@ pub type AcalaSwap = module_aggregated_dex::AggregatedSwap<Runtime>;
 impl module_dex_oracle::Config for Runtime {
 	type DEX = Dex;
 	type Time = Timestamp;
-	type UpdateOrigin = EnsureRootOrHalfGeneralCouncil;
+	type UpdateOrigin = EnsureRootOrHalfCouncil;
 	type WeightInfo = weights::module_dex_oracle::WeightInfo<Runtime>;
 }
 
@@ -1071,7 +1063,7 @@ impl module_cdp_treasury::Config for Runtime {
 
 impl module_transaction_pause::Config for Runtime {
 	type Event = Event;
-	type UpdateOrigin = EnsureRootOrThreeFourthsGeneralCouncil;
+	type UpdateOrigin = EnsureRootOrThreeFourthsCouncil;
 	type WeightInfo = weights::module_transaction_pause::WeightInfo<Runtime>;
 }
 
@@ -1102,26 +1094,19 @@ impl module_transaction_payment::Config for Runtime {
 	type WeightInfo = weights::module_transaction_payment::WeightInfo<Runtime>;
 	type PalletId = TransactionPaymentPalletId;
 	type TreasuryAccount = TreasuryAccount;
-	type UpdateOrigin = EnsureRootOrHalfGeneralCouncil;
+	type UpdateOrigin = EnsureRootOrHalfCouncil;
 	type CustomFeeSurplus = CustomFeeSurplus;
 	type AlternativeFeeSurplus = AlternativeFeeSurplus;
 	type DefaultFeeTokens = DefaultFeeTokens;
 }
 
-impl module_evm_accounts::Config for Runtime {
-	type Event = Event;
-	type Currency = Balances;
-	type AddressMapping = EvmAddressMapping<Runtime>;
-	type TransferAll = Currencies;
-	type ChainId = EvmChainId<Runtime>;
-	type WeightInfo = weights::module_evm_accounts::WeightInfo<Runtime>;
-}
+
 
 impl module_asset_registry::Config for Runtime {
 	type Event = Event;
 	type Currency = Balances;
 	type EVMBridge = module_evm_bridge::EVMBridge<Runtime>;
-	type RegisterOrigin = EnsureRootOrHalfGeneralCouncil;
+	type RegisterOrigin = EnsureRootOrHalfCouncil;
 	type WeightInfo = weights::module_asset_registry::WeightInfo<Runtime>;
 }
 
@@ -1145,7 +1130,7 @@ impl module_incentives::Config for Runtime {
 	type NativeCurrencyId = GetNativeCurrencyId;
 	type EarnShareBooster = EarnShareBooster;
 	type AccumulatePeriod = AccumulatePeriod;
-	type UpdateOrigin = EnsureRootOrThreeFourthsGeneralCouncil;
+	type UpdateOrigin = EnsureRootOrThreeFourthsCouncil;
 	type CDPTreasury = CdpTreasury;
 	type Currency = Currencies;
 	type DEX = Dex;
@@ -1207,7 +1192,7 @@ impl InstanceFilter<Call> for ProxyType {
 					c,
 					Call::Authority(..)
 						| Call::Democracy(..) | Call::PhragmenElection(..)
-						| Call::GeneralCouncil(..)
+						| Call::Council(..)
 						| Call::FinancialCouncil(..)
 						| Call::TechnicalCommittee(..)
 						| Call::Treasury(..) | Call::Bounties(..)
@@ -1241,15 +1226,15 @@ impl InstanceFilter<Call> for ProxyType {
 				)
 			}
 			ProxyType::StableAssetSwap => {
-				matches!(c, Call::StableAsset(nutsfinance_stable_asset::Call::swap { .. }))
+				matches!(c, Call::StableAsset(module_stable_asset::Call::swap { .. }))
 			}
 			ProxyType::StableAssetLiquidity => {
 				matches!(
 					c,
-					Call::StableAsset(nutsfinance_stable_asset::Call::mint { .. })
-						| Call::StableAsset(nutsfinance_stable_asset::Call::redeem_proportion { .. })
-						| Call::StableAsset(nutsfinance_stable_asset::Call::redeem_single { .. })
-						| Call::StableAsset(nutsfinance_stable_asset::Call::redeem_multi { .. })
+					Call::StableAsset(module_stable_asset::Call::mint { .. })
+						| Call::StableAsset(module_stable_asset::Call::redeem_proportion { .. })
+						| Call::StableAsset(module_stable_asset::Call::redeem_single { .. })
+						| Call::StableAsset(module_stable_asset::Call::redeem_multi { .. })
 				)
 			}
 			ProxyType::Homa => todo!()
@@ -1280,87 +1265,8 @@ impl pallet_proxy::Config for Runtime {
 	type AnnouncementDepositFactor = AnnouncementDepositFactor;
 }
 
-parameter_types! {
-	pub NetworkContractSource: H160 = H160::from_low_u64_be(0);
-	pub PrecompilesValue: AllPrecompiles<Runtime> = AllPrecompiles::<_>::mandala();
-}
-
-#[cfg(feature = "with-ethereum-compatibility")]
-parameter_types! {
-	pub const NewContractExtraBytes: u32 = 0;
-	pub const DeveloperDeposit: Balance = 0;
-	pub const PublicationFee: Balance = 0;
-}
-
-#[cfg(not(feature = "with-ethereum-compatibility"))]
-parameter_types! {
-	pub const NewContractExtraBytes: u32 = 10_000;
-	pub DeveloperDeposit: Balance = dollar(ACA);
-	pub PublicationFee: Balance = dollar(ACA);
-}
-
-#[derive(Clone, Encode, Decode, PartialEq, Eq, RuntimeDebug, TypeInfo)]
-pub struct StorageDepositPerByte;
-impl<I: From<Balance>> frame_support::traits::Get<I> for StorageDepositPerByte {
-	fn get() -> I {
-		#[cfg(not(feature = "with-ethereum-compatibility"))]
-		// NOTE: ACA decimals is 12, convert to 18.
-		// 10 * millicent(ACA) * 10^6
-		return I::from(100_000_000_000_000);
-		#[cfg(feature = "with-ethereum-compatibility")]
-		return I::from(0);
-	}
-}
-
-#[derive(Clone, Encode, Decode, PartialEq, Eq, RuntimeDebug, TypeInfo)]
-pub struct TxFeePerGas;
-impl<I: From<Balance>> frame_support::traits::Get<I> for TxFeePerGas {
-	fn get() -> I {
-		// NOTE: 200 GWei
-		// ensure suffix is 0x0000
-		I::from(200u128.saturating_mul(10u128.saturating_pow(9)) & !0xffff)
-	}
-}
-
-#[cfg(feature = "with-ethereum-compatibility")]
-static LONDON_CONFIG: module_evm_utility::evm::Config = module_evm_utility::evm::Config::london();
-
-impl module_evm::Config for Runtime {
-	type AddressMapping = EvmAddressMapping<Runtime>;
-	type Currency = Balances;
-	type TransferAll = Currencies;
-	type NewContractExtraBytes = NewContractExtraBytes;
-	type StorageDepositPerByte = StorageDepositPerByte;
-	type TxFeePerGas = TxFeePerGas;
-	type Event = Event;
-	type PrecompilesType = AllPrecompiles<Self>;
-	type PrecompilesValue = PrecompilesValue;
-	type GasToWeight = GasToWeight;
-	type ChargeTransactionPayment = module_transaction_payment::ChargeTransactionPayment<Runtime>;
-	type NetworkContractOrigin = EnsureRootOrTwoThirdsTechnicalCommittee;
-	type NetworkContractSource = NetworkContractSource;
-	type DeveloperDeposit = DeveloperDeposit;
-	type PublicationFee = PublicationFee;
-	type TreasuryAccount = TreasuryAccount;
-	type FreePublicationOrigin = EnsureRootOrHalfGeneralCouncil;
-	type Runner = module_evm::runner::stack::Runner<Self>;
-	type FindAuthor = pallet_session::FindAccountFromAuthorIndex<Self, Babe>;
-	type Task = ScheduledTasks;
-	type IdleScheduler = IdleScheduler;
-	type WeightInfo = weights::module_evm::WeightInfo<Runtime>;
-
-	#[cfg(feature = "with-ethereum-compatibility")]
-	fn config() -> &'static module_evm_utility::evm::Config {
-		&LONDON_CONFIG
-	}
-}
-
-impl module_evm_bridge::Config for Runtime {
-	type EVM = EVM;
-}
-
 pub struct EnsurePoolAssetId;
-impl nutsfinance_stable_asset::traits::ValidateAssetId<CurrencyId> for EnsurePoolAssetId {
+impl module_stable_asset::traits::ValidateAssetId<CurrencyId> for EnsurePoolAssetId {
 	fn validate(currency_id: CurrencyId) -> bool {
 		matches!(currency_id, CurrencyId::StableAssetPoolToken(_))
 	}
@@ -1404,7 +1310,7 @@ type RebaseTokens = orml_tokens::Combiner<
 	Currencies,
 >;
 
-impl nutsfinance_stable_asset::Config for Runtime {
+impl module_stable_asset::Config for Runtime {
 	type Event = Event;
 	type AssetId = CurrencyId;
 	type Balance = Balance;
@@ -1416,28 +1322,9 @@ impl nutsfinance_stable_asset::Config for Runtime {
 	type APrecision = ConstU128<100>; // 2 decimals
 	type PoolAssetLimit = ConstU32<5>;
 	type SwapExactOverAmount = ConstU128<100>;
-	type WeightInfo = weights::nutsfinance_stable_asset::WeightInfo<Runtime>;
-	type ListingOrigin = EnsureRootOrHalfGeneralCouncil;
+	type WeightInfo = weights::module_stable_asset::WeightInfo<Runtime>;
+	type ListingOrigin = EnsureRootOrHalfCouncil;
 	type EnsurePoolAssetId = EnsurePoolAssetId;
-}
-
-define_combined_task! {
-	#[derive(Clone, Encode, Decode, PartialEq, RuntimeDebug, TypeInfo)]
-	pub enum ScheduledTasks {
-		EvmTask(EvmTask<Runtime>),
-	}
-}
-
-parameter_types!(
-	// At least 2% of max block weight should remain before idle tasks are dispatched.
-	pub MinimumWeightRemainInBlock: Weight = RuntimeBlockWeights::get().max_block / 50;
-);
-
-impl module_idle_scheduler::Config for Runtime {
-	type Event = Event;
-	type WeightInfo = ();
-	type Task = ScheduledTasks;
-	type MinimumWeightRemainInBlock = MinimumWeightRemainInBlock;
 }
 
 #[derive(Clone, Encode, Decode, PartialEq, Eq, RuntimeDebug)]
@@ -1609,8 +1496,8 @@ construct_runtime!(
 		ElectionProviderMultiPhase: pallet_election_provider_multi_phase = 49,
 
 		// Governance
-		GeneralCouncil: pallet_collective::<Instance1> = 50,
-		GeneralCouncilMembership: pallet_membership::<Instance1> = 51,
+		Council: pallet_collective::<Instance1> = 50,
+		CouncilMembership: pallet_membership::<Instance1> = 51,
 		FinancialCouncil: pallet_collective::<Instance2> = 52,
 		FinancialCouncilMembership: pallet_membership::<Instance2> = 53,
 		TechnicalCommittee: pallet_collective::<Instance4> = 56,
@@ -1660,7 +1547,7 @@ construct_runtime!(
 		EvmAccounts: module_evm_accounts = 182,
 
 		// Stable asset
-		StableAsset: nutsfinance_stable_asset = 200,
+		StableAsset: module_stable_asset = 200,
 
 		// Dev
 		Sudo: pallet_sudo = 255,
@@ -1695,7 +1582,7 @@ mod benches {
 		[orml_auction, benchmarking::auction]
 		[orml_authority, benchmarking::authority]
 		[orml_oracle, benchmarking::oracle]
-		[nutsfinance_stable_asset, benchmarking::nutsfinance_stable_asset]
+		[module_stable_asset, benchmarking::module_stable_asset]
 		[module_idle_scheduler, benchmarking::idle_scheduler]
 	);
 }

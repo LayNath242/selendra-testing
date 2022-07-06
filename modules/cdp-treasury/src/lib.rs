@@ -31,8 +31,8 @@
 
 use frame_support::{log, pallet_prelude::*, transactional, PalletId};
 use frame_system::pallet_prelude::*;
-use nutsfinance_stable_asset::traits::StableAsset;
-use nutsfinance_stable_asset::RedeemProportionResult;
+use module_stable_asset::traits::StableAsset;
+use module_stable_asset::RedeemProportionResult;
 use orml_traits::{MultiCurrency, MultiCurrencyExtended};
 use primitives::{Balance, CurrencyId};
 use sp_runtime::{

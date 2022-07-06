@@ -20,8 +20,8 @@
 
 use crate::{
 	AccountId, AccountIdConversion, AuthoritysOriginIdMadala, BadOrigin, BlockNumber, DispatchResult, EnsureRoot,
-	EnsureRootOrHalfFinancialCouncil, EnsureRootOrHalfGeneralCouncil,
-	EnsureRootOrOneThirdsTechnicalCommittee, EnsureRootOrThreeFourthsGeneralCouncil,
+	EnsureRootOrHalfFinancialCouncil, EnsureRootOrHalfCouncil,
+	EnsureRootOrOneThirdsTechnicalCommittee, EnsureRootOrThreeFourthsCouncil,
 	EnsureRootOrTwoThirdsTechnicalCommittee, HonzonTreasuryPalletId, OneDay, Origin,
 	OriginCaller, SevenDays, TreasuryPalletId, TreasuryReservePalletId, ZeroDay, HOURS,
 };
@@ -34,7 +34,7 @@ pub struct AuthorityConfigImpl;
 impl orml_authority::AuthorityConfig<Origin, OriginCaller, BlockNumber> for AuthorityConfigImpl {
 	fn check_schedule_dispatch(origin: Origin, _priority: Priority) -> DispatchResult {
 		EnsureRoot::<AccountId>::try_origin(origin)
-			.or_else(|o| EnsureRootOrHalfGeneralCouncil::try_origin(o).map(|_| ()))
+			.or_else(|o| EnsureRootOrHalfCouncil::try_origin(o).map(|_| ()))
 			.or_else(|o| EnsureRootOrHalfFinancialCouncil::try_origin(o).map(|_| ()))
 			.map_or_else(|_| Err(BadOrigin.into()), |_| Ok(()))
 	}
@@ -65,7 +65,7 @@ impl orml_authority::AuthorityConfig<Origin, OriginCaller, BlockNumber> for Auth
 		if matches!(
 			cmp_privilege(origin.caller(), initial_origin),
 			Some(Ordering::Greater) | Some(Ordering::Equal)
-		) || EnsureRootOrThreeFourthsGeneralCouncil::ensure_origin(origin).is_ok()
+		) || EnsureRootOrThreeFourthsCouncil::ensure_origin(origin).is_ok()
 		{
 			Ok(())
 		} else {
@@ -98,13 +98,13 @@ impl orml_authority::AsOriginId<Origin, OriginCaller> for AuthoritysOriginIdMada
 		ensure_root(origin.clone()).or_else(|_| match self {
 			AuthoritysOriginIdMadala::Root => <EnsureDelayed<
 				SevenDays,
-				EnsureRootOrThreeFourthsGeneralCouncil,
+				EnsureRootOrThreeFourthsCouncil,
 				BlockNumber,
 				OriginCaller,
 			> as EnsureOrigin<Origin>>::ensure_origin(origin)
 			.map_or_else(|_| Err(BadOrigin.into()), |_| Ok(())),
 			AuthoritysOriginIdMadala::Treasury => {
-				<EnsureDelayed<OneDay, EnsureRootOrHalfGeneralCouncil, BlockNumber, OriginCaller> as EnsureOrigin<
+				<EnsureDelayed<OneDay, EnsureRootOrHalfCouncil, BlockNumber, OriginCaller> as EnsureOrigin<
 					Origin,
 				>>::ensure_origin(origin)
 				.map_or_else(|_| Err(BadOrigin.into()), |_| Ok(()))
@@ -138,8 +138,8 @@ fn cmp_privilege(left: &OriginCaller, right: &OriginCaller) -> Option<Ordering> 
 
 		// Checks which one has more yes votes.
 		(
-			OriginCaller::GeneralCouncil(pallet_collective::RawOrigin::Members(l_yes_votes, l_count)),
-			OriginCaller::GeneralCouncil(pallet_collective::RawOrigin::Members(r_yes_votes, r_count)),
+			OriginCaller::Council(pallet_collective::RawOrigin::Members(l_yes_votes, l_count)),
+			OriginCaller::Council(pallet_collective::RawOrigin::Members(r_yes_votes, r_count)),
 		) => Some((l_yes_votes * r_count).cmp(&(r_yes_votes * l_count))),
 		(
 			OriginCaller::FinancialCouncil(pallet_collective::RawOrigin::Members(l_yes_votes, l_count)),

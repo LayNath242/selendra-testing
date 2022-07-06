@@ -510,13 +510,13 @@ parameter_types! {
 }
 
 pub struct EnsurePoolAssetId;
-impl nutsfinance_stable_asset::traits::ValidateAssetId<CurrencyId> for EnsurePoolAssetId {
+impl module_stable_asset::traits::ValidateAssetId<CurrencyId> for EnsurePoolAssetId {
 	fn validate(_currency_id: CurrencyId) -> bool {
 		true
 	}
 }
 
-impl nutsfinance_stable_asset::Config for Test {
+impl module_stable_asset::Config for Test {
 	type Event = Event;
 	type AssetId = CurrencyId;
 	type Balance = Balance;
@@ -758,7 +758,7 @@ frame_support::construct_runtime!(
 		IdleScheduler: module_idle_scheduler,
 		Incentives: module_incentives,
 		Rewards: orml_rewards,
-		StableAsset: nutsfinance_stable_asset,
+		StableAsset: module_stable_asset,
 	}
 );
 

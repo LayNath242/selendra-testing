@@ -26,8 +26,8 @@ use frame_support::{
 	traits::{ConstU128, ConstU32, ConstU64, EnsureOneOf, Everything, Nothing},
 };
 use frame_system::{EnsureRoot, EnsureSignedBy};
-use nutsfinance_stable_asset::traits::StableAsset;
-use nutsfinance_stable_asset::{
+use module_stable_asset::traits::StableAsset;
+use module_stable_asset::{
 	PoolTokenIndex, RedeemProportionResult, StableAssetPoolId, StableAssetPoolInfo, SwapResult,
 };
 use orml_traits::parameter_type_with_key;

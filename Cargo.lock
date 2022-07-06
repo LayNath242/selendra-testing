@@ -22,8 +22,8 @@ dependencies = [
  "hex-literal",
  "module-evm-utility",
  "module-evm-utility-macro",
+ "module-stable-asset",
  "num_enum",
- "nutsfinance-stable-asset",
  "orml-traits",
  "parity-scale-codec",
  "parity-util-mem",
@@ -3984,10 +3984,10 @@ dependencies = [
  "module-loans",
  "module-nft",
  "module-prices",
+ "module-stable-asset",
  "module-support",
  "module-transaction-pause",
  "module-transaction-payment",
- "nutsfinance-stable-asset",
  "orml-auction",
  "orml-authority",
  "orml-benchmarking",
@@ -4220,8 +4220,8 @@ dependencies = [
  "frame-support",
  "frame-system",
  "module-dex",
+ "module-stable-asset",
  "module-support",
- "nutsfinance-stable-asset",
  "orml-tokens",
  "orml-traits",
  "pallet-balances",
@@ -4293,8 +4293,8 @@ dependencies = [
  "module-cdp-treasury",
  "module-dex",
  "module-loans",
+ "module-stable-asset",
  "module-support",
- "nutsfinance-stable-asset",
  "orml-currencies",
  "orml-tokens",
  "orml-traits",
@@ -4320,8 +4320,8 @@ dependencies = [
  "frame-support",
  "frame-system",
  "module-dex",
+ "module-stable-asset",
  "module-support",
- "nutsfinance-stable-asset",
  "orml-auction",
  "orml-currencies",
  "orml-tokens",
@@ -4703,13 +4703,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "module-stable-asset"
+version = "0.1.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "pallet-balances",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "module-support"
 version = "2.8.2"
 dependencies = [
  "acala-primitives",
  "frame-support",
  "impl-trait-for-tuples",
- "nutsfinance-stable-asset",
+ "module-stable-asset",
  "orml-tokens",
  "parity-scale-codec",
  "scale-info",
@@ -5131,22 +5147,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "nutsfinance-stable-asset"
-version = "0.1.0"
-dependencies = [
- "frame-support",
- "frame-system",
- "pallet-balances",
- "parity-scale-codec",
- "scale-info",
- "serde",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std",
 ]
 
 [[package]]
@@ -8278,10 +8278,10 @@ dependencies = [
  "module-loans",
  "module-nft",
  "module-prices",
+ "module-stable-asset",
  "module-support",
  "module-transaction-payment",
  "num_enum",
- "nutsfinance-stable-asset",
  "orml-bencher",
  "orml-currencies",
  "orml-nft",

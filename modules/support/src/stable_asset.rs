@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-use nutsfinance_stable_asset::{
+use module_stable_asset::{
 	traits::StableAsset as StableAssetT, PoolTokenIndex, RedeemProportionResult, StableAssetPoolId,
 	StableAssetPoolInfo, SwapResult,
 };

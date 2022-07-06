@@ -23,7 +23,7 @@
 use super::*;
 use frame_support::{assert_noop, assert_ok};
 use mock::*;
-use nutsfinance_stable_asset::traits::StableAsset as StableAssetT;
+use module_stable_asset::traits::StableAsset as StableAssetT;
 use sp_runtime::traits::BadOrigin;
 
 fn set_dex_swap_joint_list(joints: Vec<Vec<CurrencyId>>) {
@@ -324,7 +324,7 @@ fn taiga_swap_swap_work() {
 				LACA,
 				SwapLimit::ExactSupply(1_000_000_000u128, 10_000_000_000u128)
 			),
-			nutsfinance_stable_asset::Error::<Runtime>::SwapUnderMin
+			module_stable_asset::Error::<Runtime>::SwapUnderMin
 		);
 
 		assert_eq!(

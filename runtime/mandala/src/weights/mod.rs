@@ -42,4 +42,4 @@ pub mod orml_authority;
 pub mod orml_oracle;
 pub mod orml_tokens;
 
-pub mod nutsfinance_stable_asset;
+pub mod module_stable_asset;

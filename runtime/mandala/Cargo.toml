@@ -117,7 +117,7 @@ primitives = { package = "acala-primitives", path = "../../primitives", default-
 runtime-common = { path = "../common", default-features = false }
 
 # ecosystem
-nutsfinance-stable-asset = { version = "0.1.0", default-features = false, path = "../../modules/stable-asset" }
+module-stable-asset = { version = "0.1.0", default-features = false, path = "../../modules/stable-asset" }
 
 [build-dependencies]
 substrate-wasm-builder = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }
