@@ -3973,7 +3973,6 @@ dependencies = [
  "module-currencies",
  "module-dex",
  "module-dex-oracle",
- "module-earning",
  "module-emergency-shutdown",
  "module-evm",
  "module-evm-accounts",
@@ -4423,26 +4422,6 @@ dependencies = [
  "orml-traits",
  "pallet-timestamp",
  "parity-scale-codec",
- "scale-info",
- "serde",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std",
-]
-
-[[package]]
-name = "module-earning"
-version = "2.8.2"
-dependencies = [
- "acala-primitives",
- "frame-support",
- "frame-system",
- "module-support",
- "orml-traits",
- "pallet-balances",
- "parity-scale-codec",
- "paste",
  "scale-info",
  "serde",
  "sp-core",
