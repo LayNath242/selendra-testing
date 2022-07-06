@@ -34,18 +34,14 @@ pub mod collator_selection;
 pub mod currencies;
 pub mod dex;
 pub mod dex_oracle;
-pub mod earning;
 pub mod emergency_shutdown;
 pub mod evm;
 pub mod evm_accounts;
-pub mod homa;
 pub mod honzon;
 pub mod idle_scheduler;
 pub mod incentives;
-pub mod nominees_election;
 pub mod nutsfinance_stable_asset;
 pub mod prices;
-pub mod session_manager;
 pub mod transaction_pause;
 pub mod transaction_payment;
 
@@ -54,7 +50,6 @@ pub mod auction;
 pub mod authority;
 pub mod oracle;
 pub mod tokens;
-pub mod vesting;
 
 pub fn get_vesting_account() -> super::AccountId {
 	super::TreasuryPalletId::get().into_account_truncating()

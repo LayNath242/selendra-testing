@@ -2,9 +2,9 @@ cargo-features = ["resolver"]
 
 [workspace]
 members = [
-	"node",
+	# "node",
 	# "node/cli",
-	# "node/service",
+	"node/service",
 	# "node/e2e-tests",
 
 	# "modules/*",
@@ -15,10 +15,6 @@ members = [
 
 	"runtime/common",
 	"runtime/mandala",
-]
-
-exclude = [
-	"evm-tests",
 ]
 
 resolver = "2"

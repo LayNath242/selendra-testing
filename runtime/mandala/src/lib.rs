@@ -789,7 +789,6 @@ parameter_type_with_key! {
 	};
 }
 
-
 impl module_prices::Config for Runtime {
 	type Event = Event;
 	type Source = AggregatedDataProvider;
@@ -1404,7 +1403,7 @@ impl module_evm_bridge::Config for Runtime {
 impl module_session_manager::Config for Runtime {
 	type Event = Event;
 	type ValidatorSet = Session;
-	type WeightInfo = weights::module_session_manager::WeightInfo<Runtime>;
+	type WeightInfo = ();
 }
 
 parameter_types! {
@@ -1475,7 +1474,7 @@ impl Contains<CurrencyId> for IsLiquidToken {
 type RebaseTokens = orml_tokens::Combiner<
 	AccountId,
 	IsLiquidToken,
-	orml_tokens::Mapper<AccountId, Currencies, ConvertBalanceSelendra, Balance, GetNativeCurrencyId>,
+	orml_tokens::Mapper<AccountId, Currencies, ConvertBalanceSelendra, Balance, GetLiquidCurrencyId>,
 	Currencies,
 >;
 

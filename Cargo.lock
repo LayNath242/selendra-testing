@@ -13,59 +13,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "acala"
-version = "2.8.2"
-dependencies = [
- "acala-cli",
- "acala-service",
- "futures 0.3.21",
- "parity-util-mem",
-]
-
-[[package]]
-name = "acala-cli"
-version = "2.8.2"
-dependencies = [
- "acala-inspect",
- "acala-service",
- "clap",
- "cumulus-client-cli",
- "cumulus-client-service",
- "cumulus-primitives-core",
- "frame-benchmarking-cli",
- "log",
- "orml-build-script-utils",
- "parity-scale-codec",
- "polkadot-cli",
- "polkadot-parachain",
- "polkadot-primitives",
- "polkadot-service",
- "sc-cli",
- "sc-service",
- "sc-telemetry",
- "sc-tracing",
- "sp-core",
- "sp-runtime",
- "try-runtime-cli",
-]
-
-[[package]]
-name = "acala-inspect"
-version = "2.8.2"
-dependencies = [
- "clap",
- "derive_more",
- "log",
- "parity-scale-codec",
- "sc-cli",
- "sc-client-api",
- "sc-service",
- "sp-blockchain",
- "sp-core",
- "sp-runtime",
-]
-
-[[package]]
 name = "acala-primitives"
 version = "2.8.2"
 dependencies = [
@@ -5223,17 +5170,14 @@ name = "mandala-runtime"
 version = "2.8.2"
 dependencies = [
  "acala-primitives",
- "acala-service",
  "cumulus-pallet-aura-ext",
  "cumulus-pallet-dmp-queue",
  "cumulus-pallet-parachain-system",
  "cumulus-pallet-xcm",
  "cumulus-pallet-xcmp-queue",
  "cumulus-primitives-core",
- "cumulus-primitives-parachain-inherent",
  "cumulus-primitives-timestamp",
  "cumulus-primitives-utility",
- "cumulus-test-relay-sproof-builder",
  "ecosystem-compound-cash",
  "ecosystem-renvm-bridge",
  "ecosystem-starport",
@@ -6758,13 +6702,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "orml-build-script-utils"
-version = "0.4.1-dev"
-dependencies = [
- "platforms 1.1.0",
-]
-
-[[package]]
 name = "orml-currencies"
 version = "0.4.1-dev"
 dependencies = [
@@ -8037,8 +7974,6 @@ dependencies = [
  "parking_lot 0.12.1",
  "primitive-types",
  "smallvec",
- "tikv-jemalloc-ctl",
- "tikv-jemallocator",
  "winapi",
 ]
 
@@ -8303,12 +8238,6 @@ checksum = "1df8c4ec4b0627e53bdf214615ad287367e482558cf84b109250b37464dc03ae"
 
 [[package]]
 name = "platforms"
-version = "1.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "989d43012e2ca1c4a02507c67282691a0a3207f9dc67cec596b43fe925b3d325"
-
-[[package]]
-name = "platforms"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e8d0eef3571242013a0d5dc84861c3ae4a652e56e12adf8bdc26ff5f8cb34c94"
@@ -8428,7 +8357,6 @@ dependencies = [
  "polkadot-primitives",
  "polkadot-runtime",
  "polkadot-runtime-common",
- "rococo-runtime",
  "sc-client-api",
  "sc-consensus",
  "sc-executor",
@@ -9347,7 +9275,6 @@ dependencies = [
  "polkadot-runtime-parachains",
  "polkadot-statement-distribution",
  "rococo-runtime",
- "rococo-runtime-constants",
  "sc-authority-discovery",
  "sc-basic-authorship",
  "sc-block-builder",
@@ -12727,7 +12654,7 @@ name = "substrate-build-script-utils"
 version = "3.0.0"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.24#814752f60ab8cce7e2ece3ce0c1b10799b4eab28"
 dependencies = [
- "platforms 2.0.0",
+ "platforms",
 ]
 
 [[package]]
@@ -12950,17 +12877,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tikv-jemalloc-ctl"
-version = "0.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eb833c46ecbf8b6daeccb347cefcabf9c1beb5c9b0f853e1cec45632d9963e69"
-dependencies = [
- "libc",
- "paste",
- "tikv-jemalloc-sys",
-]
-
-[[package]]
 name = "tikv-jemalloc-sys"
 version = "0.4.3+5.2.1-patched.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -12969,16 +12885,6 @@ dependencies = [
  "cc",
  "fs_extra",
  "libc",
-]
-
-[[package]]
-name = "tikv-jemallocator"
-version = "0.4.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a5b7bcecfafe4998587d636f9ae9d55eb9d0499877b88757767c346875067098"
-dependencies = [
- "libc",
- "tikv-jemalloc-sys",
 ]
 
 [[package]]
