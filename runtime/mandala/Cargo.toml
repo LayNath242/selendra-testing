@@ -85,8 +85,7 @@ orml-tokens = { path = "../../orml/tokens", default-features = false }
 orml-tokens-rpc-runtime-api = { path = "../../orml/tokens/rpc/runtime-api", default-features = false }
 orml-traits = { path = "../../orml/traits", default-features = false }
 orml-rewards = { path = "../../orml/rewards", default-features = false }
-orml-nft= { path = "../../orml/nft", default-features = false }
-orml-payments = { path = "../../orml/payments", default-features = false }
+orml-nft = { path = "../../orml/nft", default-features = false }
 
 # modules
 module-transaction-pause = { path = "../../modules/transaction-pause", default-features = false }

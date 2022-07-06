@@ -3994,7 +3994,6 @@ dependencies = [
  "orml-nft",
  "orml-oracle",
  "orml-oracle-rpc-runtime-api",
- "orml-payments",
  "orml-rewards",
  "orml-tokens",
  "orml-tokens-rpc-runtime-api",
@@ -5377,24 +5376,6 @@ version = "0.4.1-dev"
 dependencies = [
  "parity-scale-codec",
  "sp-api",
- "sp-std",
-]
-
-[[package]]
-name = "orml-payments"
-version = "0.4.1-dev"
-dependencies = [
- "frame-support",
- "frame-system",
- "log",
- "orml-tokens",
- "orml-traits",
- "parity-scale-codec",
- "scale-info",
- "serde",
- "sp-core",
- "sp-io",
- "sp-runtime",
  "sp-std",
 ]
 
