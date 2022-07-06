@@ -929,12 +929,12 @@
   integrity sha512-8GWdrN7qbClYLa9LmETJnywT5fknEQeMw+QKvkUMvsHKegHD0Zkhi0K484mKxRN9RGwcPsKHPj1gMk8xlZuJ9g==
   dependencies:
     "@substrate/connect-extension-protocol" "^1.0.0"
-    "@substrate/smoldot-light" "0.6.15"
+    "@substrate/smolaca-light" "0.6.15"
     eventemitter3 "^4.0.7"
 
-"@substrate/smoldot-light@0.6.15":
+"@substrate/smolaca-light@0.6.15":
   version "0.6.15"
-  resolved "https://registry.yarnpkg.com/@substrate/smoldot-light/-/smoldot-light-0.6.15.tgz#f3fd2a9fa2e3a579d2bf0c13590fb48db4935f9f"
+  resolved "https://registry.yarnpkg.com/@substrate/smolaca-light/-/smolaca-light-0.6.15.tgz#f3fd2a9fa2e3a579d2bf0c13590fb48db4935f9f"
   integrity sha512-c2tJCSp9Litsn/p8wY1FfEqIkJI8Peh89BU7T43bruWRO2SSgLVh0cIVbOCY4en90tIOX4W0CueRWFBRQz7BjQ==
   dependencies:
     buffer "^6.0.1"

@@ -44,7 +44,7 @@ pub const ACA: CurrencyId = CurrencyId::Token(TokenSymbol::ACA);
 pub const AUSD: CurrencyId = CurrencyId::Token(TokenSymbol::AUSD);
 pub const BTC: CurrencyId = CurrencyId::Token(TokenSymbol::RENBTC);
 pub const DOT: CurrencyId = CurrencyId::Token(TokenSymbol::DOT);
-pub const LDOT: CurrencyId = CurrencyId::Token(TokenSymbol::LDOT);
+pub const LACA: CurrencyId = CurrencyId::Token(TokenSymbol::LACA);
 pub const KSM: CurrencyId = CurrencyId::Token(TokenSymbol::KSM);
 pub const TAIKSM: CurrencyId = CurrencyId::StableAssetPoolToken(0);
 pub const LP_AUSD_DOT: CurrencyId =
@@ -221,7 +221,7 @@ ord_parameter_types! {
 parameter_types! {
 	pub const GetStableCurrencyId: CurrencyId = AUSD;
 	pub const GetStakingCurrencyId: CurrencyId = DOT;
-	pub const GetLiquidCurrencyId: CurrencyId = LDOT;
+	pub const GetLiquidCurrencyId: CurrencyId = LACA;
 	pub StableCurrencyFixedPrice: Price = Price::one();
 	pub static MockRelayBlockNumberProvider: BlockNumber = 0;
 }

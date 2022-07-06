@@ -24,7 +24,7 @@ use frame_support::traits::Get;
 use frame_system::RawOrigin;
 use orml_benchmarking::runtime_benchmarks;
 use primitives::{
-	currency::{AssetMetadata, CurrencyId, AUSD, BNC, LDOT, VSKSM},
+	currency::{AssetMetadata, CurrencyId, AUSD, BNC, LACA, VSKSM},
 	DexShare, TokenSymbol,
 };
 use sp_std::prelude::*;
@@ -32,7 +32,7 @@ use sp_std::prelude::*;
 const SEED: u32 = 0;
 const CURRENCY_LIST: [CurrencyId; 5] = [
 	CurrencyId::DexShare(DexShare::Token(TokenSymbol::BNC), DexShare::Token(TokenSymbol::VSKSM)),
-	CurrencyId::DexShare(DexShare::Token(TokenSymbol::VSKSM), DexShare::Token(TokenSymbol::LDOT)),
+	CurrencyId::DexShare(DexShare::Token(TokenSymbol::VSKSM), DexShare::Token(TokenSymbol::LACA)),
 	CurrencyId::DexShare(DexShare::Token(TokenSymbol::VSKSM), DexShare::Token(TokenSymbol::AUSD)),
 	BNC,
 	VSKSM,
@@ -78,7 +78,7 @@ runtime_benchmarks! {
 
 	create_pool {
 		let pool_asset = CurrencyId::StableAssetPoolToken(0);
-		let assets = vec![LDOT, AUSD];
+		let assets = vec![LACA, AUSD];
 		let precisions = vec![1u128, 1u128];
 		let mint_fee = 10000000u128;
 		let swap_fee = 20000000u128;
@@ -90,7 +90,7 @@ runtime_benchmarks! {
 	}: _(RawOrigin::Root, pool_asset, assets, precisions, mint_fee, swap_fee, redeem_fee, intial_a, fee_recipient, yield_recipient, 1000000000000000000u128)
 
 	modify_a {
-		let assets = vec![LDOT, AUSD];
+		let assets = vec![LACA, AUSD];
 		let precisions = vec![1u128, 1u128];
 		create_pools(assets, precisions)?;
 		let pool_id = StableAsset::pool_count() - 1;

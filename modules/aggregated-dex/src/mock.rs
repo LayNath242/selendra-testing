@@ -48,7 +48,7 @@ pub const ALICE: AccountId = AccountId32::new([1u8; 32]);
 pub const BOB: AccountId = AccountId32::new([2u8; 32]);
 pub const AUSD: CurrencyId = CurrencyId::Token(TokenSymbol::AUSD);
 pub const DOT: CurrencyId = CurrencyId::Token(TokenSymbol::DOT);
-pub const LDOT: CurrencyId = CurrencyId::Token(TokenSymbol::LDOT);
+pub const LACA: CurrencyId = CurrencyId::Token(TokenSymbol::LACA);
 pub const STABLE_ASSET: CurrencyId = CurrencyId::StableAssetPoolToken(0);
 
 impl frame_system::Config for Runtime {
@@ -137,7 +137,7 @@ impl ConvertBalance<Balance, Balance> for ConvertBalanceHoma {
 
 	fn convert_balance(balance: Balance, asset_id: CurrencyId) -> Balance {
 		match asset_id {
-			LDOT => ExchangeRate::saturating_from_rational(1, 10)
+			LACA => ExchangeRate::saturating_from_rational(1, 10)
 				.checked_mul_int(balance)
 				.unwrap_or(Bounded::max_value()),
 			_ => balance,
@@ -146,7 +146,7 @@ impl ConvertBalance<Balance, Balance> for ConvertBalanceHoma {
 
 	fn convert_balance_back(balance: Balance, asset_id: CurrencyId) -> Balance {
 		match asset_id {
-			LDOT => ExchangeRate::saturating_from_rational(10, 1)
+			LACA => ExchangeRate::saturating_from_rational(10, 1)
 				.checked_mul_int(balance)
 				.unwrap_or(Bounded::max_value()),
 			_ => balance,
@@ -156,7 +156,7 @@ impl ConvertBalance<Balance, Balance> for ConvertBalanceHoma {
 
 match_types! {
 	pub type IsLiquidToken: impl Contains<CurrencyId> = {
-		CurrencyId::Token(TokenSymbol::LDOT)
+		CurrencyId::Token(TokenSymbol::LACA)
 	};
 }
 
@@ -190,7 +190,7 @@ impl nutsfinance_stable_asset::Config for Runtime {
 
 parameter_types! {
 	pub static DexSwapJointList: Vec<Vec<CurrencyId>> = vec![];
-	pub const GetLiquidCurrencyId: CurrencyId = LDOT;
+	pub const GetLiquidCurrencyId: CurrencyId = LACA;
 }
 
 impl Config for Runtime {
@@ -233,7 +233,7 @@ impl Default for ExtBuilder {
 				(ALICE, DOT, 100_000_000_000),
 				(BOB, AUSD, 1_000_000_000_000_000_000),
 				(BOB, DOT, 1_000_000_000_000_000_000),
-				(BOB, LDOT, 1_000_000_000_000_000_000),
+				(BOB, LACA, 1_000_000_000_000_000_000),
 			],
 		}
 	}

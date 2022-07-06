@@ -169,7 +169,7 @@ fn access_price_of_liquid_currency() {
 			Some(Price::saturating_from_integer(10000000000u128))
 		); // 100 USD, right shift the decimal point (18-12) places
 		assert_eq!(
-			PricesModule::access_price(LDOT),
+			PricesModule::access_price(LACA),
 			Some(Price::saturating_from_integer(5000000000u128))
 		); // dot_price * 1/2
 
@@ -179,7 +179,7 @@ fn access_price_of_liquid_currency() {
 			Some(Price::saturating_from_integer(1000000000u128))
 		); // 10 USD, right shift the decimal point (18-12) places
 		assert_eq!(
-			PricesModule::access_price(LDOT),
+			PricesModule::access_price(LACA),
 			Some(Price::saturating_from_integer(600000000u128))
 		); // dot_price * 3/5
 	});
@@ -377,7 +377,7 @@ fn price_providers_work() {
 			Some(Price::saturating_from_integer(500000000000000u128))
 		);
 		assert_eq!(
-			RealTimePriceProvider::<Runtime>::get_price(LDOT),
+			RealTimePriceProvider::<Runtime>::get_price(LACA),
 			Some(Price::saturating_from_integer(5000000000u128))
 		);
 		assert_eq!(RealTimePriceProvider::<Runtime>::get_price(KSM), None);
@@ -393,7 +393,7 @@ fn price_providers_work() {
 			Some(Price::saturating_from_integer(500000000000000u128))
 		);
 		assert_eq!(
-			PriorityLockedPriceProvider::<Runtime>::get_price(LDOT),
+			PriorityLockedPriceProvider::<Runtime>::get_price(LACA),
 			Some(Price::saturating_from_integer(5000000000u128))
 		);
 		assert_eq!(PriorityLockedPriceProvider::<Runtime>::get_price(KSM), None);
@@ -408,7 +408,7 @@ fn price_providers_work() {
 
 		assert_eq!(LockedPriceProvider::<Runtime>::get_price(AUSD), None);
 		assert_eq!(LockedPriceProvider::<Runtime>::get_price(BTC), None);
-		assert_eq!(LockedPriceProvider::<Runtime>::get_price(LDOT), None);
+		assert_eq!(LockedPriceProvider::<Runtime>::get_price(LACA), None);
 		assert_eq!(LockedPriceProvider::<Runtime>::get_price(KSM), None);
 		assert_eq!(LockedPriceProvider::<Runtime>::get_price(LP_AUSD_DOT), None);
 		assert_eq!(LockedPriceProvider::<Runtime>::get_relative_price(BTC, KSM), None);
@@ -416,7 +416,7 @@ fn price_providers_work() {
 		// lock price
 		assert_ok!(PricesModule::lock_price(Origin::signed(1), AUSD));
 		assert_ok!(PricesModule::lock_price(Origin::signed(1), BTC));
-		assert_ok!(PricesModule::lock_price(Origin::signed(1), LDOT));
+		assert_ok!(PricesModule::lock_price(Origin::signed(1), LACA));
 		assert_noop!(
 			PricesModule::lock_price(Origin::signed(1), KSM),
 			Error::<Runtime>::AccessPriceFailed
@@ -432,7 +432,7 @@ fn price_providers_work() {
 			Some(Price::saturating_from_integer(500000000000000u128))
 		);
 		assert_eq!(
-			LockedPriceProvider::<Runtime>::get_price(LDOT),
+			LockedPriceProvider::<Runtime>::get_price(LACA),
 			Some(Price::saturating_from_integer(5000000000u128))
 		);
 		assert_eq!(LockedPriceProvider::<Runtime>::get_price(KSM), None);
@@ -458,7 +458,7 @@ fn price_providers_work() {
 			Some(Price::saturating_from_integer(400000000000000u128))
 		);
 		assert_eq!(
-			RealTimePriceProvider::<Runtime>::get_price(LDOT),
+			RealTimePriceProvider::<Runtime>::get_price(LACA),
 			Some(Price::saturating_from_integer(600000000u128))
 		);
 		assert_eq!(
@@ -480,7 +480,7 @@ fn price_providers_work() {
 			Some(Price::saturating_from_integer(500000000000000u128))
 		);
 		assert_eq!(
-			PriorityLockedPriceProvider::<Runtime>::get_price(LDOT),
+			PriorityLockedPriceProvider::<Runtime>::get_price(LACA),
 			Some(Price::saturating_from_integer(5000000000u128))
 		);
 		assert_eq!(
@@ -505,7 +505,7 @@ fn price_providers_work() {
 			Some(Price::saturating_from_integer(500000000000000u128))
 		);
 		assert_eq!(
-			LockedPriceProvider::<Runtime>::get_price(LDOT),
+			LockedPriceProvider::<Runtime>::get_price(LACA),
 			Some(Price::saturating_from_integer(5000000000u128))
 		);
 		assert_eq!(LockedPriceProvider::<Runtime>::get_price(KSM), None);
@@ -515,7 +515,7 @@ fn price_providers_work() {
 		// unlock price
 		assert_ok!(PricesModule::unlock_price(Origin::signed(1), AUSD));
 		assert_ok!(PricesModule::unlock_price(Origin::signed(1), BTC));
-		assert_ok!(PricesModule::unlock_price(Origin::signed(1), LDOT));
+		assert_ok!(PricesModule::unlock_price(Origin::signed(1), LACA));
 		assert_noop!(
 			PricesModule::unlock_price(Origin::signed(1), KSM),
 			Error::<Runtime>::NoLockedPrice
@@ -531,7 +531,7 @@ fn price_providers_work() {
 			Some(Price::saturating_from_integer(400000000000000u128))
 		);
 		assert_eq!(
-			PriorityLockedPriceProvider::<Runtime>::get_price(LDOT),
+			PriorityLockedPriceProvider::<Runtime>::get_price(LACA),
 			Some(Price::saturating_from_integer(600000000u128))
 		);
 		assert_eq!(
@@ -549,7 +549,7 @@ fn price_providers_work() {
 
 		assert_eq!(LockedPriceProvider::<Runtime>::get_price(AUSD), None);
 		assert_eq!(LockedPriceProvider::<Runtime>::get_price(BTC), None);
-		assert_eq!(LockedPriceProvider::<Runtime>::get_price(LDOT), None);
+		assert_eq!(LockedPriceProvider::<Runtime>::get_price(LACA), None);
 		assert_eq!(LockedPriceProvider::<Runtime>::get_price(KSM), None);
 		assert_eq!(LockedPriceProvider::<Runtime>::get_price(LP_AUSD_DOT), None);
 		assert_eq!(LockedPriceProvider::<Runtime>::get_relative_price(BTC, KSM), None);
