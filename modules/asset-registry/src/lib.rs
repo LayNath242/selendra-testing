@@ -32,7 +32,7 @@ use frame_support::{
 	transactional,
 };
 use frame_system::pallet_prelude::*;
-use module_support::{AssetIdMapping, BuyWeightRate, EVMBridge, Erc20InfoMapping, InvokeContext, Ratio};
+use module_support::{AssetIdMapping, EVMBridge, Erc20InfoMapping, InvokeContext};
 use primitives::{
 	currency::{
 		AssetIds, AssetMetadata, CurrencyIdType, DexShare, DexShareType, Erc20Id, ForeignAssetId,
@@ -45,13 +45,8 @@ use primitives::{
 	},
 	CurrencyId,
 };
-use sp_runtime::{traits::One, ArithmeticError, FixedPointNumber, FixedU128};
+use sp_runtime::{traits::One, ArithmeticError};
 use sp_std::{boxed::Box, vec::Vec};
-
-use xcm::{
-	v1::{Junction, Junctions::*, MultiLocation},
-	VersionedMultiLocation,
-};
 
 mod mock;
 mod tests;
@@ -90,8 +85,6 @@ pub mod module {
 		/// The given location could not be used (e.g. because it cannot be expressed in the
 		/// desired version of XCM).
 		BadLocation,
-		/// MultiLocation existed
-		MultiLocationExisted,
 		/// AssetId not exists
 		AssetIdNotExists,
 		/// AssetId exists
@@ -101,18 +94,6 @@ pub mod module {
 	#[pallet::event]
 	#[pallet::generate_deposit(fn deposit_event)]
 	pub enum Event<T: Config> {
-		/// The foreign asset registered.
-		ForeignAssetRegistered {
-			asset_id: ForeignAssetId,
-			asset_address: MultiLocation,
-			metadata: AssetMetadata<BalanceOf<T>>,
-		},
-		/// The foreign asset updated.
-		ForeignAssetUpdated {
-			asset_id: ForeignAssetId,
-			asset_address: MultiLocation,
-			metadata: AssetMetadata<BalanceOf<T>>,
-		},
 		/// The asset registered.
 		AssetRegistered {
 			asset_id: AssetIds,
@@ -125,33 +106,12 @@ pub mod module {
 		},
 	}
 
-	/// Next available Foreign AssetId ID.
-	///
-	/// NextForeignAssetId: ForeignAssetId
-	#[pallet::storage]
-	#[pallet::getter(fn next_foreign_asset_id)]
-	pub type NextForeignAssetId<T: Config> = StorageValue<_, ForeignAssetId, ValueQuery>;
-
 	/// Next available Stable AssetId ID.
 	///
 	/// NextStableAssetId: StableAssetPoolId
 	#[pallet::storage]
 	#[pallet::getter(fn next_stable_asset_id)]
 	pub type NextStableAssetId<T: Config> = StorageValue<_, StableAssetPoolId, ValueQuery>;
-
-	/// The storages for MultiLocations.
-	///
-	/// ForeignAssetLocations: map ForeignAssetId => Option<MultiLocation>
-	#[pallet::storage]
-	#[pallet::getter(fn foreign_asset_locations)]
-	pub type ForeignAssetLocations<T: Config> = StorageMap<_, Twox64Concat, ForeignAssetId, MultiLocation, OptionQuery>;
-
-	/// The storages for CurrencyIds.
-	///
-	/// LocationToCurrencyIds: map MultiLocation => Option<CurrencyId>
-	#[pallet::storage]
-	#[pallet::getter(fn location_to_currency_ids)]
-	pub type LocationToCurrencyIds<T: Config> = StorageMap<_, Twox64Concat, MultiLocation, CurrencyId, OptionQuery>;
 
 	/// The storages for EvmAddress.
 	///
@@ -205,47 +165,6 @@ pub mod module {
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-		#[pallet::weight(T::WeightInfo::register_foreign_asset())]
-		#[transactional]
-		pub fn register_foreign_asset(
-			origin: OriginFor<T>,
-			location: Box<VersionedMultiLocation>,
-			metadata: Box<AssetMetadata<BalanceOf<T>>>,
-		) -> DispatchResult {
-			T::RegisterOrigin::ensure_origin(origin)?;
-
-			let location: MultiLocation = (*location).try_into().map_err(|()| Error::<T>::BadLocation)?;
-			let foreign_asset_id = Self::do_register_foreign_asset(&location, &metadata)?;
-
-			Self::deposit_event(Event::<T>::ForeignAssetRegistered {
-				asset_id: foreign_asset_id,
-				asset_address: location,
-				metadata: *metadata,
-			});
-			Ok(())
-		}
-
-		#[pallet::weight(T::WeightInfo::update_foreign_asset())]
-		#[transactional]
-		pub fn update_foreign_asset(
-			origin: OriginFor<T>,
-			foreign_asset_id: ForeignAssetId,
-			location: Box<VersionedMultiLocation>,
-			metadata: Box<AssetMetadata<BalanceOf<T>>>,
-		) -> DispatchResult {
-			T::RegisterOrigin::ensure_origin(origin)?;
-
-			let location: MultiLocation = (*location).try_into().map_err(|()| Error::<T>::BadLocation)?;
-			Self::do_update_foreign_asset(foreign_asset_id, &location, &metadata)?;
-
-			Self::deposit_event(Event::<T>::ForeignAssetUpdated {
-				asset_id: foreign_asset_id,
-				asset_address: location,
-				metadata: *metadata,
-			});
-			Ok(())
-		}
-
 		#[pallet::weight(T::WeightInfo::register_stable_asset())]
 		#[transactional]
 		pub fn register_stable_asset(
@@ -364,72 +283,6 @@ impl<T: Config> Pallet<T> {
 		})
 	}
 
-	fn get_next_foreign_asset_id() -> Result<ForeignAssetId, DispatchError> {
-		NextForeignAssetId::<T>::try_mutate(|current| -> Result<ForeignAssetId, DispatchError> {
-			let id = *current;
-			*current = current.checked_add(One::one()).ok_or(ArithmeticError::Overflow)?;
-			Ok(id)
-		})
-	}
-
-	fn do_register_foreign_asset(
-		location: &MultiLocation,
-		metadata: &AssetMetadata<BalanceOf<T>>,
-	) -> Result<ForeignAssetId, DispatchError> {
-		let foreign_asset_id = Self::get_next_foreign_asset_id()?;
-		LocationToCurrencyIds::<T>::try_mutate(location, |maybe_currency_ids| -> DispatchResult {
-			ensure!(maybe_currency_ids.is_none(), Error::<T>::MultiLocationExisted);
-			*maybe_currency_ids = Some(CurrencyId::ForeignAsset(foreign_asset_id));
-
-			ForeignAssetLocations::<T>::try_mutate(foreign_asset_id, |maybe_location| -> DispatchResult {
-				ensure!(maybe_location.is_none(), Error::<T>::MultiLocationExisted);
-				*maybe_location = Some(location.clone());
-
-				AssetMetadatas::<T>::try_mutate(
-					AssetIds::ForeignAssetId(foreign_asset_id),
-					|maybe_asset_metadatas| -> DispatchResult {
-						ensure!(maybe_asset_metadatas.is_none(), Error::<T>::AssetIdExisted);
-
-						*maybe_asset_metadatas = Some(metadata.clone());
-						Ok(())
-					},
-				)
-			})
-		})?;
-
-		Ok(foreign_asset_id)
-	}
-
-	fn do_update_foreign_asset(
-		foreign_asset_id: ForeignAssetId,
-		location: &MultiLocation,
-		metadata: &AssetMetadata<BalanceOf<T>>,
-	) -> DispatchResult {
-		ForeignAssetLocations::<T>::try_mutate(foreign_asset_id, |maybe_multi_locations| -> DispatchResult {
-			let old_multi_locations = maybe_multi_locations.as_mut().ok_or(Error::<T>::AssetIdNotExists)?;
-
-			AssetMetadatas::<T>::try_mutate(
-				AssetIds::ForeignAssetId(foreign_asset_id),
-				|maybe_asset_metadatas| -> DispatchResult {
-					ensure!(maybe_asset_metadatas.is_some(), Error::<T>::AssetIdNotExists);
-
-					// modify location
-					if location != old_multi_locations {
-						LocationToCurrencyIds::<T>::remove(old_multi_locations.clone());
-						LocationToCurrencyIds::<T>::try_mutate(location, |maybe_currency_ids| -> DispatchResult {
-							ensure!(maybe_currency_ids.is_none(), Error::<T>::MultiLocationExisted);
-							*maybe_currency_ids = Some(CurrencyId::ForeignAsset(foreign_asset_id));
-							Ok(())
-						})?;
-					}
-					*maybe_asset_metadatas = Some(metadata.clone());
-					*old_multi_locations = location.clone();
-					Ok(())
-				},
-			)
-		})
-	}
-
 	fn do_register_stable_asset(metadata: &AssetMetadata<BalanceOf<T>>) -> Result<StableAssetPoolId, DispatchError> {
 		let stable_asset_id = Self::get_next_stable_asset_id()?;
 		AssetMetadatas::<T>::try_mutate(
@@ -534,71 +387,9 @@ impl<T: Config> Pallet<T> {
 
 pub struct AssetIdMaps<T>(sp_std::marker::PhantomData<T>);
 
-impl<T: Config> AssetIdMapping<ForeignAssetId, MultiLocation, AssetMetadata<BalanceOf<T>>> for AssetIdMaps<T> {
+impl<T: Config> AssetIdMapping<AssetMetadata<BalanceOf<T>>> for AssetIdMaps<T> {
 	fn get_asset_metadata(asset_ids: AssetIds) -> Option<AssetMetadata<BalanceOf<T>>> {
 		Pallet::<T>::asset_metadatas(asset_ids)
-	}
-
-	fn get_multi_location(foreign_asset_id: ForeignAssetId) -> Option<MultiLocation> {
-		Pallet::<T>::foreign_asset_locations(foreign_asset_id)
-	}
-
-	fn get_currency_id(multi_location: MultiLocation) -> Option<CurrencyId> {
-		Pallet::<T>::location_to_currency_ids(multi_location)
-	}
-}
-
-pub struct BuyWeightRateOfForeignAsset<T>(sp_std::marker::PhantomData<T>);
-
-impl<T: Config> BuyWeightRate for BuyWeightRateOfForeignAsset<T>
-where
-	BalanceOf<T>: Into<u128>,
-{
-	fn calculate_rate(location: MultiLocation) -> Option<Ratio> {
-		if let Some(CurrencyId::ForeignAsset(foreign_asset_id)) = Pallet::<T>::location_to_currency_ids(location) {
-			if let Some(asset_metadata) = Pallet::<T>::asset_metadatas(AssetIds::ForeignAssetId(foreign_asset_id)) {
-				let minimum_balance = asset_metadata.minimal_balance.into();
-				let rate = FixedU128::saturating_from_rational(minimum_balance, T::Currency::minimum_balance().into());
-				log::debug!(target: "asset-registry::weight", "ForeignAsset: {}, MinimumBalance: {}, rate:{:?}", foreign_asset_id, minimum_balance, rate);
-				return Some(rate);
-			}
-		}
-		None
-	}
-}
-
-pub struct BuyWeightRateOfErc20<T>(sp_std::marker::PhantomData<T>);
-
-impl<T: Config> BuyWeightRate for BuyWeightRateOfErc20<T>
-where
-	BalanceOf<T>: Into<u128>,
-{
-	fn calculate_rate(location: MultiLocation) -> Option<Ratio> {
-		match location {
-			MultiLocation {
-				parents: 0,
-				interior: X1(Junction::GeneralKey(key)),
-			} => {
-				let currency_id = CurrencyId::decode(&mut &*key).ok()?;
-				match currency_id {
-					CurrencyId::Erc20(address) if !is_system_contract(address) => {
-						if let Some(asset_metadata) = Pallet::<T>::asset_metadatas(AssetIds::Erc20(address)) {
-							let minimum_balance = asset_metadata.minimal_balance.into();
-							let rate = FixedU128::saturating_from_rational(
-								minimum_balance,
-								T::Currency::minimum_balance().into(),
-							);
-							log::debug!(target: "asset-registry::weight", "Erc20: {}, MinimumBalance: {}, rate:{:?}", address, minimum_balance, rate);
-							Some(rate)
-						} else {
-							None
-						}
-					}
-					_ => None,
-				}
-			}
-			_ => None,
-		}
 	}
 }
 

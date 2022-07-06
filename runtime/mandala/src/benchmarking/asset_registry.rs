@@ -26,7 +26,6 @@ use module_support::AddressMapping;
 use orml_benchmarking::runtime_benchmarks;
 use primitives::{currency::AssetMetadata, TokenSymbol};
 use sp_std::{boxed::Box, str::FromStr, vec};
-use xcm::{v1::MultiLocation, VersionedMultiLocation};
 
 const NATIVE: CurrencyId = GetNativeCurrencyId::get();
 
@@ -62,34 +61,6 @@ pub fn deploy_contract() {
 
 runtime_benchmarks! {
 	{ Runtime, module_asset_registry }
-
-	register_foreign_asset {
-		let location = VersionedMultiLocation::V1(MultiLocation {
-			parents: 0,
-			interior: xcm::v1::Junctions::X1(xcm::v1::Junction::Parachain(1000)),
-		});
-		let asset_metadata = AssetMetadata {
-			name: b"Token Name".to_vec(),
-			symbol: b"TN".to_vec(),
-			decimals: 12,
-			minimal_balance: 1,
-		};
-	}: _(RawOrigin::Root, Box::new(location), Box::new(asset_metadata))
-
-	update_foreign_asset {
-		let location = VersionedMultiLocation::V1(MultiLocation {
-			parents: 0,
-			interior: xcm::v1::Junctions::X1(xcm::v1::Junction::Parachain(1000)),
-		});
-		let asset_metadata = AssetMetadata {
-			name: b"Token Name".to_vec(),
-			symbol: b"TN".to_vec(),
-			decimals: 12,
-			minimal_balance: 1,
-		};
-
-		AssetRegistry::register_foreign_asset(RawOrigin::Root.into(), Box::new(location.clone()), Box::new(asset_metadata.clone()))?;
-	}: _(RawOrigin::Root, 0, Box::new(location), Box::new(asset_metadata))
 
 	register_stable_asset {
 		let asset_metadata = AssetMetadata {

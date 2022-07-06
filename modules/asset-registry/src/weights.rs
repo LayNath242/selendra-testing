@@ -46,8 +46,6 @@ use sp_std::marker::PhantomData;
 
 /// Weight functions needed for module_asset_registry.
 pub trait WeightInfo {
-	fn register_foreign_asset() -> Weight;
-	fn update_foreign_asset() -> Weight;
 	fn register_stable_asset() -> Weight;
 	fn update_stable_asset() -> Weight;
 	fn register_erc20_asset() -> Weight;
@@ -59,22 +57,6 @@ pub trait WeightInfo {
 /// Weights for module_asset_registry using the Acala node and recommended hardware.
 pub struct AcalaWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for AcalaWeight<T> {
-	// Storage: AssetRegistry NextForeignAssetId (r:1 w:1)
-	// Storage: AssetRegistry LocationToCurrencyIds (r:1 w:1)
-	// Storage: AssetRegistry ForeignAssetLocations (r:1 w:1)
-	// Storage: AssetRegistry AssetMetadatas (r:1 w:1)
-	fn register_foreign_asset() -> Weight {
-		(21_475_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(4 as Weight))
-			.saturating_add(T::DbWeight::get().writes(4 as Weight))
-	}
-	// Storage: AssetRegistry ForeignAssetLocations (r:1 w:1)
-	// Storage: AssetRegistry AssetMetadatas (r:1 w:1)
-	fn update_foreign_asset() -> Weight {
-		(19_334_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(2 as Weight))
-			.saturating_add(T::DbWeight::get().writes(2 as Weight))
-	}
 	// Storage: AssetRegistry NextStableAssetId (r:1 w:1)
 	// Storage: AssetRegistry AssetMetadatas (r:1 w:1)
 	fn register_stable_asset() -> Weight {
@@ -120,16 +102,6 @@ impl<T: frame_system::Config> WeightInfo for AcalaWeight<T> {
 
 // For backwards compatibility and tests
 impl WeightInfo for () {
-	fn register_foreign_asset() -> Weight {
-		(21_475_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(4 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
-	}
-	fn update_foreign_asset() -> Weight {
-		(19_334_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(2 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(2 as Weight))
-	}
 	fn register_stable_asset() -> Weight {
 		(15_830_000 as Weight)
 			.saturating_add(RocksDbWeight::get().reads(2 as Weight))

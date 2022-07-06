@@ -46,22 +46,6 @@ use sp_std::marker::PhantomData;
 /// Weight functions for module_asset_registry.
 pub struct WeightInfo<T>(PhantomData<T>);
 impl<T: frame_system::Config> module_asset_registry::WeightInfo for WeightInfo<T> {
-	// Storage: AssetRegistry NextForeignAssetId (r:1 w:1)
-	// Storage: AssetRegistry LocationToCurrencyIds (r:1 w:1)
-	// Storage: AssetRegistry ForeignAssetLocations (r:1 w:1)
-	// Storage: AssetRegistry AssetMetadatas (r:1 w:1)
-	fn register_foreign_asset() -> Weight {
-		(20_432_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(4 as Weight))
-			.saturating_add(T::DbWeight::get().writes(4 as Weight))
-	}
-	// Storage: AssetRegistry ForeignAssetLocations (r:1 w:1)
-	// Storage: AssetRegistry AssetMetadatas (r:1 w:1)
-	fn update_foreign_asset() -> Weight {
-		(18_158_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(2 as Weight))
-			.saturating_add(T::DbWeight::get().writes(2 as Weight))
-	}
 	// Storage: AssetRegistry NextStableAssetId (r:1 w:1)
 	// Storage: AssetRegistry AssetMetadatas (r:1 w:1)
 	fn register_stable_asset() -> Weight {
