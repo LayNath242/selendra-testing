@@ -27,7 +27,7 @@ orml-traits = { path = "../orml/traits", default-features = false }
 
 module-evm-utility = { path = "../modules/evm-utility", default-features = false }
 module-evm-utility-macro = { path = "../modules/evm-utility/macro" }
-nutsfinance-stable-asset = { version = "0.1.0", default-features = false, path = "../ecosystem-modules/stable-asset/lib/stable-asset", package = "nutsfinance-stable-asset" }
+nutsfinance-stable-asset = { version = "0.1.0", default-features = false, path = "../modules/stable-asset" }
 
 [dev-dependencies]
 serde_json = { version = "1.0.68" }

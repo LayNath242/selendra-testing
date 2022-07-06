@@ -53,7 +53,7 @@ module-evm-accounts = { path = "../../modules/evm-accounts", default-features = 
 module-asset-registry = { path = "../../modules/asset-registry", default-features = false, optional = true }
 module-evm-bridge = { path = "../../modules/evm-bridge", default-features = false, optional = true }
 primitives = { package = "acala-primitives", path = "../../primitives", default-features = false }
-nutsfinance-stable-asset = { version = "0.1.0", default-features = false, path = "../../ecosystem-modules/stable-asset/lib/stable-asset", package = "nutsfinance-stable-asset" }
+nutsfinance-stable-asset = { version = "0.1.0", default-features = false, path = "../../modules/stable-asset" }
 module-honzon = { path = "../../modules/honzon", default-features = false }
 module-loans = { path = "../../modules/loans", default-features = false }
 module-cdp-engine = { path = "../../modules/cdp-engine", default-features = false }

@@ -38,7 +38,7 @@ use sp_core::H160;
 use sp_std::{convert::TryInto, prelude::*, rc::Rc, str::FromStr};
 
 fn get_bench_info(name: &str) -> (Vec<u8>, H160, Vec<u8>, u64, Vec<u8>) {
-	let benches_str = include_str!("../../../../evm-bench/build/benches.json");
+	let benches_str = include_str!("./benches.json");
 	let evm_benches: Value = serde_json::from_str(benches_str).unwrap();
 	let info = evm_benches[name].clone();
 
