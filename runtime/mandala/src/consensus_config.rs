@@ -1,8 +1,8 @@
 use super::{
 	constants::election::{ElectionBenchmarkConfig, MinerMaxLength, MinerMaxWeight},
-	prod_or_fast, voter_bags, Babe, Balances, Call, ElectionProviderMultiPhase, Event, Historical,
+	voter_bags, Babe, Balances, Call, ElectionProviderMultiPhase, Event, Historical,
 	ImOnline, Offences, Runtime, Session, SessionKeys, Staking, Timestamp, TransactionPayment,
-	Treasury, VoterList, Weight, SEL,
+	Treasury, VoterList, Weight, ACA,
 };
 use codec::Decode;
 
@@ -21,7 +21,7 @@ use pallet_election_provider_multi_phase::SolutionAccuracyOf;
 use pallet_grandpa::AuthorityId as GrandpaId;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use primitives::{AccountId, Balance, BlockNumber, Moment};
-use runtime_common::{dollar, CurrencyToVote, EnsureRootOrHalfCouncil, StakingBenchmarkingConfig};
+use runtime_common::{dollar, CurrencyToVote, EnsureRootOrHalfGeneralCouncil, StakingBenchmarkingConfig, prod_or_fast};
 use sp_core::crypto::KeyTypeId;
 use sp_runtime::{
 	curve::PiecewiseLinear,
@@ -138,7 +138,7 @@ impl pallet_staking::Config for Runtime {
 	type BondingDuration = BondingDuration;
 	type SlashDeferDuration = SlashDeferDuration;
 	/// A super-majority of the council can cancel the slash.
-	type SlashCancelOrigin = EnsureRootOrHalfCouncil;
+	type SlashCancelOrigin = EnsureRootOrHalfGeneralCouncil;
 	type SessionInterface = Self;
 	type EraPayout = pallet_staking::ConvertCurve<RewardCurve>;
 	type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
@@ -185,7 +185,7 @@ parameter_types! {
 	pub OffchainRepeat: BlockNumber = UnsignedPhase::get() / 32;
 
 	// signed config
-	pub SignedRewardBase: Balance = 1 * dollar(SEL);
+	pub SignedRewardBase: Balance = 1 * dollar(ACA);
 	pub SignedDepositBase: Balance = deposit(2, 0);
 	pub SignedDepositByte: Balance = deposit(0, 10) / 1024;
 	pub const SignedMaxSubmissions: u32 = 16;
@@ -279,7 +279,7 @@ impl pallet_election_provider_multi_phase::Config for Runtime {
 	type Fallback = onchain::BoundedExecution<OnChainSeqPhragmen>;
 	type GovernanceFallback = onchain::BoundedExecution<OnChainSeqPhragmen>;
 	type Solver = SequentialPhragmen<AccountId, SolutionAccuracyOf<Self>, OffchainRandomBalancing>;
-	type ForceOrigin = EnsureRootOrHalfCouncil;
+	type ForceOrigin = EnsureRootOrHalfGeneralCouncil;
 	type MaxElectableTargets = MaxElectableTargets;
 	type MaxElectingVoters = MaxElectingVoters;
 	type BenchmarkingConfig = ElectionBenchmarkConfig;

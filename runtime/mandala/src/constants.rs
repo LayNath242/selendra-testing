@@ -21,17 +21,19 @@
 /// Time and blocks.
 pub mod time {
 	use primitives::{Balance, BlockNumber, Moment};
-	use runtime_common::{dollar, millicent, ACA};
+	use runtime_common::{dollar, millicent, ACA, prod_or_fast};
 
-	pub const SECS_PER_BLOCK: Moment = 6;
-	pub const MILLISECS_PER_BLOCK: Moment = SECS_PER_BLOCK * 1000;
+	pub const MILLISECS_PER_BLOCK: Moment = 6000;
+	pub const SLOT_DURATION: Moment = MILLISECS_PER_BLOCK;
+	pub const EPOCH_DURATION_IN_SLOTS: BlockNumber = prod_or_fast!(4 * HOURS, 1 * MINUTES);
 
 	// These time units are defined in number of blocks.
-	pub const MINUTES: BlockNumber = 60 / (SECS_PER_BLOCK as BlockNumber);
+	pub const MINUTES: BlockNumber = 60_000 / (MILLISECS_PER_BLOCK as BlockNumber);
 	pub const HOURS: BlockNumber = MINUTES * 60;
 	pub const DAYS: BlockNumber = HOURS * 24;
 
-	pub const SLOT_DURATION: Moment = MILLISECS_PER_BLOCK;
+	// 1 in 4 blocks (on average, not counting collisions) will be primary babe blocks.
+	pub const PRIMARY_PROBABILITY: (u64, u64) = (1, 4);
 
 	pub fn deposit(items: u32, bytes: u32) -> Balance {
 		items as Balance * 2 * dollar(ACA) + (bytes as Balance) * 10 * millicent(ACA)
@@ -104,4 +106,51 @@ mod tests {
 		assert_eq!(p, 1_000_000_000);
 		assert_eq!(q, 85_795_000);
 	}
+}
+
+/// Fee-related
+pub mod election {
+	use crate::{RuntimeBlockLength, RuntimeBlockWeights};
+	use frame_support::{
+		parameter_types,
+		weights::{constants::BlockExecutionWeight, DispatchClass, Weight},
+	};
+	use sp_runtime::Perbill;
+
+	parameter_types! {
+		/// A limit for off-chain phragmen unsigned solution submission.
+		///
+		/// We want to keep it as high as possible, but can't risk having it reject,
+		/// so we always subtract the base block execution weight.
+		pub MinerMaxWeight: Weight = RuntimeBlockWeights::get()
+			.get(DispatchClass::Normal)
+			.max_extrinsic.expect("Normal extrinsics have weight limit configured by default; qed")
+			.saturating_sub(BlockExecutionWeight::get());
+
+		/// A limit for off-chain phragmen unsigned solution length.
+		///
+		/// We allow up to 90% of the block's size to be consumed by the solution.
+		pub MinerMaxLength: u32 = Perbill::from_rational(90_u32, 100) *
+			*RuntimeBlockLength::get()
+			.max
+			.get(DispatchClass::Normal);
+	}
+
+	/// The numbers configured here could always be more than the the maximum limits of staking
+	/// pallet to ensure election snapshot will not run out of memory. For now, we set them to
+	/// smaller values since the staking is bounded and the weight pipeline takes hours for this
+	/// single pallet.
+	pub struct ElectionBenchmarkConfig;
+	impl pallet_election_provider_multi_phase::BenchmarkingConfig for ElectionBenchmarkConfig {
+		const VOTERS: [u32; 2] = [1000, 2000];
+		const TARGETS: [u32; 2] = [500, 1000];
+		const ACTIVE_VOTERS: [u32; 2] = [500, 800];
+		const DESIRED_TARGETS: [u32; 2] = [200, 400];
+		const SNAPSHOT_MAXIMUM_VOTERS: u32 = 1000;
+		const MINER_MAXIMUM_VOTERS: u32 = 1000;
+		const MAXIMUM_TARGETS: u32 = 300;
+	}
+
+	/// The accuracy type used for genesis election provider;
+	pub type OnChainAccuracy = sp_runtime::Perbill;
 }

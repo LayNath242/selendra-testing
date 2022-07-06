@@ -35,10 +35,10 @@ use module_evm::{EvmChainId, EvmTask};
 use module_evm_accounts::EvmAddressMapping;
 use module_support::{
 	mocks::MockStableAsset, AddressMapping as AddressMappingT, AuctionManager, DEXIncentives, DispatchableTask,
-	EmergencyShutdown, ExchangeRate, ExchangeRateProvider, HomaSubAccountXcm, PoolId, PriceProvider, Rate,
+	EmergencyShutdown, ExchangeRate, ExchangeRateProvider, PoolId, PriceProvider, Rate,
 	SpecificJointsSwap,
 };
-use orml_traits::{parameter_type_with_key, MultiCurrency, MultiReservableCurrency};
+use orml_traits::{parameter_type_with_key, MultiReservableCurrency};
 pub use primitives::{
 	define_combined_task,
 	evm::{convert_decimals_to_evm, EvmAddress},
@@ -53,7 +53,6 @@ use sp_runtime::{
 	AccountId32, DispatchResult, FixedPointNumber, FixedU128, Perbill, Percent, Permill,
 };
 use sp_std::prelude::*;
-use xcm::latest::prelude::*;
 
 pub type AccountId = AccountId32;
 type Key = CurrencyId;
@@ -161,7 +160,7 @@ pub const ACA: CurrencyId = CurrencyId::Token(TokenSymbol::ACA);
 pub const RENBTC: CurrencyId = CurrencyId::Token(TokenSymbol::RENBTC);
 pub const AUSD: CurrencyId = CurrencyId::Token(TokenSymbol::AUSD);
 pub const DOT: CurrencyId = CurrencyId::Token(TokenSymbol::DOT);
-pub const LDOT: CurrencyId = CurrencyId::Token(TokenSymbol::LDOT);
+pub const LACA: CurrencyId = CurrencyId::Token(TokenSymbol::LACA);
 pub const LP_ACA_AUSD: CurrencyId =
 	CurrencyId::DexShare(DexShare::Token(TokenSymbol::ACA), DexShare::Token(TokenSymbol::AUSD));
 
@@ -635,80 +634,22 @@ impl module_prices::Config for Test {
 	type Source = Oracle;
 	type GetStableCurrencyId = GetStableCurrencyId;
 	type StableCurrencyFixedPrice = StableCurrencyFixedPrice;
-	type GetStakingCurrencyId = GetStakingCurrencyId;
-	type GetLiquidCurrencyId = GetLiquidCurrencyId;
 	type LockOrigin = EnsureSignedBy<One, AccountId>;
-	type LiquidStakingExchangeRateProvider = MockLiquidStakingExchangeProvider;
 	type DEX = DexModule;
 	type Currency = Currencies;
 	type Erc20InfoMapping = EvmErc20InfoMapping;
-	type LiquidCrowdloanLeaseBlockNumber = LiquidCrowdloanLeaseBlockNumber;
-	type RelayChainBlockNumber = MockRelayBlockNumberProvider;
-	type RewardRatePerRelaychainBlock = RewardRatePerRelaychainBlock;
 	type PricingPegged = PricingPegged;
 	type WeightInfo = ();
 }
 
-/// mock XCM transfer.
-pub struct MockHomaSubAccountXcm;
-impl HomaSubAccountXcm<AccountId, Balance> for MockHomaSubAccountXcm {
-	fn transfer_staking_to_sub_account(sender: &AccountId, _: u16, amount: Balance) -> DispatchResult {
-		Currencies::withdraw(StakingCurrencyId::get(), sender, amount)
-	}
-
-	fn withdraw_unbonded_from_sub_account(_: u16, _: Balance) -> DispatchResult {
-		Ok(())
-	}
-
-	fn bond_extra_on_sub_account(_: u16, _: Balance) -> DispatchResult {
-		Ok(())
-	}
-
-	fn unbond_on_sub_account(_: u16, _: Balance) -> DispatchResult {
-		Ok(())
-	}
-
-	fn get_xcm_transfer_fee() -> Balance {
-		1_000_000
-	}
-
-	fn get_parachain_fee(_: MultiLocation) -> Balance {
-		1_000_000
-	}
-}
-
-ord_parameter_types! {
-	pub const HomaAdmin: AccountId = ALICE;
-}
-
 parameter_types! {
 	pub const StakingCurrencyId: CurrencyId = DOT;
-	pub const LiquidCurrencyId: CurrencyId = LDOT;
-	pub const HomaPalletId: PalletId = PalletId(*b"aca/homa");
-	pub const HomaTreasuryAccount: AccountId = HOMA_TREASURY;
+	pub const LiquidCurrencyId: CurrencyId = LACA;
 	pub DefaultExchangeRate: ExchangeRate = ExchangeRate::saturating_from_rational(1, 10);
 	pub ActiveSubAccountsIndexList: Vec<u16> = vec![0, 1, 2];
 	pub const BondingDuration: EraIndex = 28;
 	pub const MintThreshold: Balance = 0;
 	pub const RedeemThreshold: Balance = 0;
-}
-
-impl module_homa::Config for Test {
-	type Event = Event;
-	type Currency = Currencies;
-	type GovernanceOrigin = EnsureSignedBy<HomaAdmin, AccountId>;
-	type StakingCurrencyId = StakingCurrencyId;
-	type LiquidCurrencyId = LiquidCurrencyId;
-	type PalletId = HomaPalletId;
-	type TreasuryAccount = HomaTreasuryAccount;
-	type DefaultExchangeRate = DefaultExchangeRate;
-	type ActiveSubAccountsIndexList = ActiveSubAccountsIndexList;
-	type BondingDuration = BondingDuration;
-	type MintThreshold = MintThreshold;
-	type RedeemThreshold = RedeemThreshold;
-	type RelayChainBlockNumber = MockRelayBlockNumberProvider;
-	type XcmInterface = MockHomaSubAccountXcm;
-	type WeightInfo = ();
 }
 
 impl orml_rewards::Config for Test {
@@ -748,7 +689,6 @@ pub const ALICE: AccountId = AccountId::new([1u8; 32]);
 pub const BOB: AccountId = AccountId::new([2u8; 32]);
 pub const EVA: AccountId = AccountId::new([5u8; 32]);
 pub const REWARDS_SOURCE: AccountId = AccountId::new([3u8; 32]);
-pub const HOMA_TREASURY: AccountId = AccountId::new([255u8; 32]);
 
 pub fn alice() -> AccountId {
 	<Test as module_evm::Config>::AddressMapping::get_account_id(&alice_evm_addr())
@@ -816,7 +756,6 @@ frame_support::construct_runtime!(
 		EVMModule: module_evm,
 		EvmAccounts: module_evm_accounts,
 		IdleScheduler: module_idle_scheduler,
-		Homa: module_homa,
 		Incentives: module_incentives,
 		Rewards: orml_rewards,
 		StableAsset: nutsfinance_stable_asset,

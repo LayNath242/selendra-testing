@@ -33,7 +33,7 @@ use frame_support::{
 	pallet_prelude::*,
 	traits::{
 		Currency, ExistenceRequirement, Imbalance, IsSubType, NamedReservableCurrency, OnUnbalanced, SameOrOther,
-		WithdrawReasons,
+		WithdrawReasons, EstimateCallFee
 	},
 	transactional,
 	weights::{DispatchInfo, GetDispatchInfo, Pays, PostDispatchInfo, WeightToFee},
@@ -1455,5 +1455,18 @@ where
 	fn apply_multiplier_to_fee(fee: PalletBalanceOf<T>, multiplier: Option<Multiplier>) -> PalletBalanceOf<T> {
 		let multiplier = multiplier.unwrap_or_else(|| Pallet::<T>::next_fee_multiplier());
 		multiplier.saturating_mul_int(fee)
+	}
+}
+
+impl<T: Config, AnyCall: GetDispatchInfo + Encode> EstimateCallFee<AnyCall, PalletBalanceOf<T>>
+	for Pallet<T>
+where
+	PalletBalanceOf<T>: FixedPointOperand,
+	<T as frame_system::Config>::Call: Dispatchable<Info = DispatchInfo, PostInfo = PostDispatchInfo>,
+{
+	fn estimate_call_fee(call: &AnyCall, post_info: PostDispatchInfo) -> PalletBalanceOf<T> {
+		let len = call.encoded_size() as u32;
+		let info = call.get_dispatch_info();
+		Self::compute_actual_fee(len, &info, &post_info, Zero::zero())
 	}
 }

@@ -1472,7 +1472,7 @@ fn buy_weight_transaction_fee_pool_works() {
 		assert_eq!(rate, None);
 
 		// Token not in charge fee pool
-		let currency_id = CurrencyId::Token(TokenSymbol::LDOT);
+		let currency_id = CurrencyId::Token(TokenSymbol::LACA);
 		let location = MultiLocation::new(1, X1(GeneralKey(currency_id.encode())));
 		let rate = <BuyWeightRateOfTransactionFeePool<Runtime, CurrencyIdConvert>>::calculate_rate(location);
 		assert_eq!(rate, None);

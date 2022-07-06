@@ -42,7 +42,6 @@ use sp_std::{collections::btree_set::BTreeSet, marker::PhantomData};
 pub mod dex;
 pub mod evm;
 pub mod evm_accounts;
-pub mod homa;
 pub mod honzon;
 pub mod incentives;
 pub mod input;
@@ -56,7 +55,6 @@ use crate::SystemContractsFilter;
 pub use dex::DEXPrecompile;
 pub use evm::EVMPrecompile;
 pub use evm_accounts::EVMAccountsPrecompile;
-pub use homa::HomaPrecompile;
 pub use honzon::HonzonPrecompile;
 pub use incentives::IncentivesPrecompile;
 pub use multicurrency::MultiCurrencyPrecompile;
@@ -88,7 +86,6 @@ pub const ORACLE: H160 = H160(hex!("0000000000000000000000000000000000000403"));
 pub const SCHEDULER: H160 = H160(hex!("0000000000000000000000000000000000000404"));
 pub const DEX: H160 = H160(hex!("0000000000000000000000000000000000000405"));
 pub const STABLE_ASSET: H160 = H160(hex!("0000000000000000000000000000000000000406"));
-pub const HOMA: H160 = H160(hex!("0000000000000000000000000000000000000407"));
 pub const EVM_ACCOUNTS: H160 = H160(hex!("0000000000000000000000000000000000000408"));
 pub const HONZON: H160 = H160(hex!("0000000000000000000000000000000000000409"));
 pub const INCENTIVES: H160 = H160(hex!("000000000000000000000000000000000000040a"));
@@ -106,72 +103,6 @@ impl<R> AllPrecompiles<R>
 where
 	R: module_evm::Config,
 {
-	pub fn acala() -> Self {
-		Self {
-			active: BTreeSet::from([
-				ECRECOVER,
-				SHA256,
-				RIPEMD,
-				IDENTITY,
-				MODEXP,
-				BN_ADD,
-				BN_MUL,
-				BN_PAIRING,
-				BLAKE2F,
-				// Non-standard precompile starts with 128
-				ECRECOVER_PUBLICKEY,
-				SHA3_256,
-				SHA3_512,
-				// Acala precompile
-				MULTI_CURRENCY,
-				// NFT,
-				EVM,
-				ORACLE,
-				// SCHEDULER,
-				DEX,
-				// STABLE_ASSET,
-				// HOMA,
-				EVM_ACCOUNTS,
-				/* HONZON
-				 * INCENTIVES */
-			]),
-			_marker: Default::default(),
-		}
-	}
-
-	pub fn karura() -> Self {
-		Self {
-			active: BTreeSet::from([
-				ECRECOVER,
-				SHA256,
-				RIPEMD,
-				IDENTITY,
-				MODEXP,
-				BN_ADD,
-				BN_MUL,
-				BN_PAIRING,
-				BLAKE2F,
-				// Non-standard precompile starts with 128
-				ECRECOVER_PUBLICKEY,
-				SHA3_256,
-				SHA3_512,
-				// Acala precompile
-				MULTI_CURRENCY,
-				// NFT,
-				EVM,
-				ORACLE,
-				// SCHEDULER,
-				DEX,
-				// STABLE_ASSET,
-				// HOMA,
-				EVM_ACCOUNTS,
-				/* HONZON
-				 * INCENTIVES */
-			]),
-			_marker: Default::default(),
-		}
-	}
-
 	pub fn mandala() -> Self {
 		Self {
 			active: BTreeSet::from([
@@ -196,7 +127,6 @@ where
 				SCHEDULER,
 				DEX,
 				STABLE_ASSET,
-				// HOMA,
 				EVM_ACCOUNTS,
 				HONZON,
 				INCENTIVES,
@@ -217,7 +147,6 @@ where
 	DEXPrecompile<R>: Precompile,
 	StableAssetPrecompile<R>: Precompile,
 	SchedulePrecompile<R>: Precompile,
-	// HomaPrecompile<R>: Precompile,
 	HonzonPrecompile<R>: Precompile,
 	IncentivesPrecompile<R>: Precompile,
 {
@@ -314,9 +243,6 @@ where
 				Some(StableAssetPrecompile::<R>::execute(
 					input, target_gas, context, is_static,
 				))
-			// } else if address == HOMA {
-			// 	Some(HomaPrecompile::<R>::execute(input, target_gas, context, is_static))
-			// }
 			} else if address == EVM_ACCOUNTS {
 				Some(EVMAccountsPrecompile::<R>::execute(
 					input, target_gas, context, is_static,

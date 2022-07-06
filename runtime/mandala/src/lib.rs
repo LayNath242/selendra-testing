@@ -68,18 +68,22 @@ use primitives::{
 	unchecked_extrinsic::AcalaUncheckedExtrinsic,
 };
 use sp_api::impl_runtime_apis;
-use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata, H160};
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
 	traits::{
 		AccountIdConversion, BadOrigin, BlakeTwo256, Block as BlockT, Convert, SaturatedConversion, StaticLookup,
-		Verify, Bounded
+		Verify, Bounded, NumberFor
 	},
 	transaction_validity::{TransactionSource, TransactionValidity},
 	ApplyExtrinsicResult, DispatchResult, FixedPointNumber,
 };
 use sp_std::prelude::*;
+use pallet_session::historical::{self as pallet_session_historical};
+use pallet_grandpa::{
+	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
+};
+use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
@@ -111,7 +115,6 @@ pub use runtime_common::{
 	Ratio, RuntimeBlockLength, RuntimeBlockWeights, SystemContractsFilter, TechnicalCommitteeInstance,
 	TechnicalCommitteeMembershipInstance, TimeStampedPrice, TipPerWeightStep, ACA, AUSD, DOT, LACA, KSM, RENBTC,
 };
-pub use xcm::latest::prelude::*;
 
 /// Import the stable_asset pallet.
 pub use nutsfinance_stable_asset;
@@ -121,7 +124,12 @@ mod benchmarking;
 pub mod constants;
 /// Weights for pallets used in the runtime.
 mod weights;
-pub mod xcm_config;
+mod voter_bags;
+
+// runtime config
+mod consensus_config;
+
+pub use consensus_config::{EpochDuration, MaxNominations};
 
 /// This runtime version.
 #[sp_version::runtime_version]
@@ -146,9 +154,19 @@ pub fn native_version() -> NativeVersion {
 	}
 }
 
+/// The BABE epoch configuration at genesis.
+pub const BABE_GENESIS_EPOCH_CONFIG: sp_consensus_babe::BabeEpochConfiguration =
+	sp_consensus_babe::BabeEpochConfiguration {
+		c: PRIMARY_PROBABILITY,
+		allowed_slots: sp_consensus_babe::AllowedSlots::PrimaryAndSecondaryPlainSlots,
+	};
+
 impl_opaque_keys! {
 	pub struct SessionKeys {
-		pub aura: Aura,
+		pub babe: Babe,
+		pub grandpa: Grandpa,
+		pub im_online: ImOnline,
+		pub authority_discovery: AuthorityDiscovery,
 	}
 }
 
@@ -230,21 +248,8 @@ impl frame_system::Config for Runtime {
 	type BaseCallFilter = BaseCallFilter;
 	type SystemWeightInfo = ();
 	type SS58Prefix = SS58Prefix;
-	type OnSetCode = cumulus_pallet_parachain_system::ParachainSetCode<Self>;
+	type OnSetCode = ();
 	type MaxConsumers = ConstU32<16>;
-}
-
-impl pallet_aura::Config for Runtime {
-	type AuthorityId = AuraId;
-	type DisabledValidators = ();
-	type MaxAuthorities = ConstU32<32>;
-}
-
-impl pallet_authorship::Config for Runtime {
-	type FindAuthor = pallet_session::FindAccountFromAuthorIndex<Self, Aura>;
-	type UncleGenerations = ConstU32<0>;
-	type FilterUncle = ();
-	type EventHandler = CollatorSelection;
 }
 
 parameter_types! {
@@ -252,39 +257,10 @@ parameter_types! {
 	pub const SessionDuration: BlockNumber = DAYS; // used in SessionManagerConfig of genesis
 }
 
-impl pallet_session::Config for Runtime {
-	type Event = Event;
-	type ValidatorId = <Self as frame_system::Config>::AccountId;
-	// we don't have stash and controller, thus we don't need the convert as well.
-	type ValidatorIdOf = module_collator_selection::IdentityCollator;
-	type ShouldEndSession = SessionManager;
-	type NextSessionRotation = SessionManager;
-	type SessionManager = CollatorSelection;
-	// Essentially just Aura, but lets be pedantic.
-	type SessionHandler = <SessionKeys as sp_runtime::traits::OpaqueKeys>::KeyTypeIdProviders;
-	type Keys = SessionKeys;
-	type WeightInfo = ();
-}
-
 parameter_types! {
 	pub const CollatorKickThreshold: Permill = Permill::from_percent(50);
 	// Ensure that can create the author(`ExistentialDeposit`) with dev mode.
 	pub MinRewardDistributeAmount: Balance = NativeTokenExistentialDeposit::get();
-}
-
-impl module_collator_selection::Config for Runtime {
-	type Event = Event;
-	type Currency = Balances;
-	type ValidatorSet = Session;
-	type UpdateOrigin = EnsureRootOrHalfGeneralCouncil;
-	type PotId = CollatorPotId;
-	type MinCandidates = ConstU32<5>;
-	type MaxCandidates = ConstU32<200>;
-	type MaxInvulnerables = ConstU32<50>;
-	type KickPenaltySessionLength = ConstU32<8>;
-	type CollatorKickThreshold = CollatorKickThreshold;
-	type MinRewardDistributeAmount = MinRewardDistributeAmount;
-	type WeightInfo = weights::module_collator_selection::WeightInfo<Runtime>;
 }
 
 parameter_types! {
@@ -1061,7 +1037,7 @@ impl module_aggregated_dex::Config for Runtime {
 
 pub type RebasedStableAsset = module_support::RebasedStableAsset<
 	StableAsset,
-	ConvertBalanceSelendra,
+	ConvertBalanceAcala,
 	module_aggregated_dex::RebasedStableAssetErrorConvertor<Runtime>,
 >;
 
@@ -1105,30 +1081,13 @@ parameter_types! {
 	pub const AlternativeFeeSurplus: Percent = Percent::from_percent(25);
 }
 
-type NegativeImbalance = <Balances as PalletCurrency<AccountId>>::NegativeImbalance;
-pub struct DealWithFees;
-impl OnUnbalanced<NegativeImbalance> for DealWithFees {
-	fn on_unbalanceds<B>(mut fees_then_tips: impl Iterator<Item = NegativeImbalance>) {
-		if let Some(mut fees) = fees_then_tips.next() {
-			if let Some(tips) = fees_then_tips.next() {
-				tips.merge_into(&mut fees);
-			}
-			// for fees and tips, 80% to treasury, 20% to collator-selection pot.
-			let split = fees.ration(80, 20);
-			Treasury::on_unbalanced(split.0);
-
-			Balances::resolve_creating(&CollatorSelection::account_id(), split.1);
-		}
-	}
-}
-
 impl module_transaction_payment::Config for Runtime {
 	type Event = Event;
 	type Call = Call;
 	type NativeCurrencyId = GetNativeCurrencyId;
 	type Currency = Balances;
 	type MultiCurrency = Currencies;
-	type OnTransactionPayment = DealWithFees;
+	type OnTransactionPayment = ();
 	type AlternativeFeeSwapDeposit = NativeTokenExistentialDeposit;
 	type OperationalFeeMultiplier = OperationalFeeMultiplier;
 	type TipPerWeightStep = TipPerWeightStep;
@@ -1385,7 +1344,7 @@ impl module_evm::Config for Runtime {
 	type TreasuryAccount = TreasuryAccount;
 	type FreePublicationOrigin = EnsureRootOrHalfGeneralCouncil;
 	type Runner = module_evm::runner::stack::Runner<Self>;
-	type FindAuthor = pallet_session::FindAccountFromAuthorIndex<Self, Aura>;
+	type FindAuthor = pallet_session::FindAccountFromAuthorIndex<Self, Babe>;
 	type Task = ScheduledTasks;
 	type IdleScheduler = IdleScheduler;
 	type WeightInfo = weights::module_evm::WeightInfo<Runtime>;
@@ -1400,39 +1359,6 @@ impl module_evm_bridge::Config for Runtime {
 	type EVM = EVM;
 }
 
-impl module_session_manager::Config for Runtime {
-	type Event = Event;
-	type ValidatorSet = Session;
-	type WeightInfo = ();
-}
-
-parameter_types! {
-	pub ReservedXcmpWeight: Weight = RuntimeBlockWeights::get().max_block / 4;
-	pub ReservedDmpWeight: Weight = RuntimeBlockWeights::get().max_block / 4;
-}
-
-impl cumulus_pallet_parachain_system::Config for Runtime {
-	type Event = Event;
-	type OnSystemEvent = ();
-	type SelfParaId = ParachainInfo;
-	type DmpMessageHandler = DmpQueue;
-	type ReservedDmpWeight = ReservedDmpWeight;
-	type OutboundXcmpMessageSource = XcmpQueue;
-	type XcmpMessageHandler = XcmpQueue;
-	type ReservedXcmpWeight = ReservedXcmpWeight;
-}
-
-impl parachain_info::Config for Runtime {}
-
-impl orml_unknown_tokens::Config for Runtime {
-	type Event = Event;
-}
-
-impl orml_xcm::Config for Runtime {
-	type Event = Event;
-	type SovereignOrigin = EnsureRootOrHalfGeneralCouncil;
-}
-
 pub struct EnsurePoolAssetId;
 impl nutsfinance_stable_asset::traits::ValidateAssetId<CurrencyId> for EnsurePoolAssetId {
 	fn validate(currency_id: CurrencyId) -> bool {
@@ -1441,8 +1367,8 @@ impl nutsfinance_stable_asset::traits::ValidateAssetId<CurrencyId> for EnsurePoo
 }
 
 
-pub struct ConvertBalanceSelendra;
-impl orml_tokens::ConvertBalance<Balance, Balance> for ConvertBalanceSelendra {
+pub struct ConvertBalanceAcala;
+impl orml_tokens::ConvertBalance<Balance, Balance> for ConvertBalanceAcala {
 	type AssetId = CurrencyId;
 
 	fn convert_balance(balance: Balance, asset_id: CurrencyId) -> Balance {
@@ -1474,7 +1400,7 @@ impl Contains<CurrencyId> for IsLiquidToken {
 type RebaseTokens = orml_tokens::Combiner<
 	AccountId,
 	IsLiquidToken,
-	orml_tokens::Mapper<AccountId, Currencies, ConvertBalanceSelendra, Balance, GetLiquidCurrencyId>,
+	orml_tokens::Mapper<AccountId, Currencies, ConvertBalanceAcala, Balance, GetLiquidCurrencyId>,
 	Currencies,
 >;
 
@@ -1513,8 +1439,6 @@ impl module_idle_scheduler::Config for Runtime {
 	type Task = ScheduledTasks;
 	type MinimumWeightRemainInBlock = MinimumWeightRemainInBlock;
 }
-
-impl cumulus_pallet_aura_ext::Config for Runtime {}
 
 #[derive(Clone, Encode, Decode, PartialEq, Eq, RuntimeDebug)]
 pub struct ConvertEthereumTx;
@@ -1665,10 +1589,24 @@ construct_runtime!(
 		Multisig: pallet_multisig = 31,
 		Recovery: pallet_recovery = 32,
 		Proxy: pallet_proxy = 33,
-		// NOTE: IdleScheduler must be put before ParachainSystem in order to read relaychain blocknumber
 		IdleScheduler: module_idle_scheduler = 34,
 
-		Indices: pallet_indices = 40,
+		Indices: pallet_indices = 39,
+
+		// Consensus
+		// Authorship must be before session in order to note author in the correct session and era
+		// for im-online and staking.
+		Authorship: pallet_authorship = 40,
+		Babe: pallet_babe = 41,
+		Staking: pallet_staking = 42,
+		Offences: pallet_offences = 43,
+		Historical: pallet_session_historical::{Pallet} = 44,
+		Session: pallet_session = 45,
+		Grandpa: pallet_grandpa = 46,
+		ImOnline: pallet_im_online = 47,
+		AuthorityDiscovery: pallet_authority_discovery = 48,
+		// placed behind indices to maintain it.
+		ElectionProviderMultiPhase: pallet_election_provider_multi_phase = 49,
 
 		// Governance
 		GeneralCouncil: pallet_collective::<Instance1> = 50,
@@ -1677,6 +1615,10 @@ construct_runtime!(
 		FinancialCouncilMembership: pallet_membership::<Instance2> = 53,
 		TechnicalCommittee: pallet_collective::<Instance4> = 56,
 		TechnicalCommitteeMembership: pallet_membership::<Instance4> = 57,
+
+		// norminator
+		VoterList: pallet_bags_list = 60,
+		NominationPools: pallet_nomination_pools = 61,
 
 		Authority: orml_authority = 70,
 		PhragmenElection: pallet_elections_phragmen = 71,
@@ -1712,36 +1654,13 @@ construct_runtime!(
 		NFT: module_nft = 141,
 		AssetRegistry: module_asset_registry = 142,
 
-		// Parachain
-		ParachainInfo: parachain_info exclude_parts { Call } = 161,
-
-		// XCM
-		XcmpQueue: cumulus_pallet_xcmp_queue = 170,
-		PolkadotXcm: pallet_xcm = 171,
-		CumulusXcm: cumulus_pallet_xcm exclude_parts { Call } = 172,
-		DmpQueue: cumulus_pallet_dmp_queue = 173,
-		XTokens: orml_xtokens = 174,
-		UnknownTokens: orml_unknown_tokens exclude_parts { Call } = 175,
-		OrmlXcm: orml_xcm = 176,
-
 		// Smart contracts
 		EVM: module_evm = 180,
 		EVMBridge: module_evm_bridge exclude_parts { Call } = 181,
 		EvmAccounts: module_evm_accounts = 182,
 
-		// Collator support. the order of these 4 are important and shall not change.
-		Authorship: pallet_authorship = 190,
-		CollatorSelection: module_collator_selection = 191,
-		Session: pallet_session = 192,
-		Aura: pallet_aura = 193,
-		AuraExt: cumulus_pallet_aura_ext exclude_parts { Call } = 194,
-		SessionManager: module_session_manager = 195,
-
 		// Stable asset
 		StableAsset: nutsfinance_stable_asset = 200,
-
-		// Parachain System, always put it at the end
-		ParachainSystem: cumulus_pallet_parachain_system = 160,
 
 		// Dev
 		Sudo: pallet_sudo = 255,
@@ -1765,7 +1684,6 @@ mod benches {
 		[module_evm, benchmarking::evm]
 		[module_honzon, benchmarking::honzon]
 		[module_cdp_treasury, benchmarking::cdp_treasury]
-		[module_collator_selection, benchmarking::collator_selection]
 		[module_nominees_election, benchmarking::nominees_election]
 		[module_transaction_pause, benchmarking::transaction_pause]
 		[module_transaction_payment, benchmarking::transaction_payment]
@@ -1773,7 +1691,6 @@ mod benches {
 		[module_prices, benchmarking::prices]
 		[module_evm_accounts, benchmarking::evm_accounts]
 		[module_currencies, benchmarking::currencies]
-		[module_session_manager, benchmarking::session_manager]
 		[orml_tokens, benchmarking::tokens]
 		[orml_auction, benchmarking::auction]
 		[orml_authority, benchmarking::authority]
@@ -1783,7 +1700,6 @@ mod benches {
 	);
 }
 
-#[cfg(not(feature = "disable-runtime-api"))]
 impl_runtime_apis! {
 	impl sp_api::Core<Block> for Runtime {
 		fn version() -> RuntimeVersion {
@@ -1842,13 +1758,98 @@ impl_runtime_apis! {
 		}
 	}
 
-	impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
-		fn slot_duration() -> sp_consensus_aura::SlotDuration {
-			sp_consensus_aura::SlotDuration::from_millis(Aura::slot_duration())
+	impl fg_primitives::GrandpaApi<Block> for Runtime {
+		fn grandpa_authorities() -> GrandpaAuthorityList {
+			Grandpa::grandpa_authorities()
 		}
 
-		fn authorities() -> Vec<AuraId> {
-			Aura::authorities().into_inner()
+		fn current_set_id() -> fg_primitives::SetId {
+			Grandpa::current_set_id()
+		}
+
+		fn submit_report_equivocation_unsigned_extrinsic(
+			equivocation_proof: fg_primitives::EquivocationProof<
+				<Block as BlockT>::Hash,
+				NumberFor<Block>,
+			>,
+			key_owner_proof: fg_primitives::OpaqueKeyOwnershipProof,
+		) -> Option<()> {
+			let key_owner_proof = key_owner_proof.decode()?;
+
+			Grandpa::submit_unsigned_equivocation_report(
+				equivocation_proof,
+				key_owner_proof,
+			)
+		}
+
+		fn generate_key_ownership_proof(
+			_set_id: fg_primitives::SetId,
+			authority_id: GrandpaId,
+		) -> Option<fg_primitives::OpaqueKeyOwnershipProof> {
+			use codec::Encode;
+
+			Historical::prove((fg_primitives::KEY_TYPE, authority_id))
+				.map(|p| p.encode())
+				.map(fg_primitives::OpaqueKeyOwnershipProof::new)
+		}
+	}
+
+	impl sp_consensus_babe::BabeApi<Block> for Runtime {
+		fn configuration() -> sp_consensus_babe::BabeGenesisConfiguration {
+			// The choice of `c` parameter (where `1 - c` represents the
+			// probability of a slot being empty), is done in accordance to the
+			// slot duration and expected target block time, for safely
+			// resisting network delays of maximum two seconds.
+			// <https://research.web3.foundation/en/latest/polkadot/BABE/Babe/#6-practical-results>
+			sp_consensus_babe::BabeGenesisConfiguration {
+				slot_duration: Babe::slot_duration(),
+				epoch_length: EpochDuration::get(),
+				c: BABE_GENESIS_EPOCH_CONFIG.c,
+				genesis_authorities: Babe::authorities().to_vec(),
+				randomness: Babe::randomness(),
+				allowed_slots: BABE_GENESIS_EPOCH_CONFIG.allowed_slots,
+			}
+		}
+
+		fn current_epoch_start() -> sp_consensus_babe::Slot {
+			Babe::current_epoch_start()
+		}
+
+		fn current_epoch() -> sp_consensus_babe::Epoch {
+			Babe::current_epoch()
+		}
+
+		fn next_epoch() -> sp_consensus_babe::Epoch {
+			Babe::next_epoch()
+		}
+
+		fn generate_key_ownership_proof(
+			_slot: sp_consensus_babe::Slot,
+			authority_id: sp_consensus_babe::AuthorityId,
+		) -> Option<sp_consensus_babe::OpaqueKeyOwnershipProof> {
+			use codec::Encode;
+
+			Historical::prove((sp_consensus_babe::KEY_TYPE, authority_id))
+				.map(|p| p.encode())
+				.map(sp_consensus_babe::OpaqueKeyOwnershipProof::new)
+		}
+
+		fn submit_report_equivocation_unsigned_extrinsic(
+			equivocation_proof: sp_consensus_babe::EquivocationProof<<Block as BlockT>::Header>,
+			key_owner_proof: sp_consensus_babe::OpaqueKeyOwnershipProof,
+		) -> Option<()> {
+			let key_owner_proof = key_owner_proof.decode()?;
+
+			Babe::submit_unsigned_equivocation_report(
+				equivocation_proof,
+				key_owner_proof,
+			)
+		}
+	}
+
+	impl sp_authority_discovery::AuthorityDiscoveryApi<Block> for Runtime {
+		fn authorities() -> Vec<AuthorityDiscoveryId> {
+			AuthorityDiscovery::authorities()
 		}
 	}
 
@@ -1877,6 +1878,7 @@ impl_runtime_apis! {
 		fn query_info(uxt: <Block as BlockT>::Extrinsic, len: u32) -> RuntimeDispatchInfo<Balance> {
 			TransactionPayment::query_info(uxt, len)
 		}
+
 		fn query_fee_details(uxt: <Block as BlockT>::Extrinsic, len: u32) -> FeeDetails<Balance> {
 			TransactionPayment::query_fee_details(uxt, len)
 		}
@@ -2002,12 +2004,6 @@ impl_runtime_apis! {
 		}
 	}
 
-	impl cumulus_primitives_core::CollectCollationInfo<Block> for Runtime {
-		fn collect_collation_info(header: &<Block as BlockT>::Header) -> cumulus_primitives_core::CollationInfo {
-			ParachainSystem::collect_collation_info(header)
-		}
-	}
-
 	#[cfg(feature = "try-runtime")]
 	impl frame_try_runtime::TryRuntime<Block> for Runtime {
 		fn on_runtime_upgrade() -> (Weight, Weight) {
@@ -2080,35 +2076,6 @@ impl_runtime_apis! {
 	}
 }
 
-struct CheckInherents;
-
-impl cumulus_pallet_parachain_system::CheckInherents<Block> for CheckInherents {
-	fn check_inherents(
-		block: &Block,
-		relay_state_proof: &cumulus_pallet_parachain_system::RelayChainStateProof,
-	) -> sp_inherents::CheckInherentsResult {
-		let relay_chain_slot = relay_state_proof
-			.read_slot()
-			.expect("Could not read the relay chain slot from the proof");
-
-		let inherent_data = cumulus_primitives_timestamp::InherentDataProvider::from_relay_chain_slot_and_duration(
-			relay_chain_slot,
-			sp_std::time::Duration::from_secs(6),
-		)
-		.create_inherent_data()
-		.expect("Could not create the timestamp inherent data");
-
-		inherent_data.check_extrinsics(block)
-	}
-}
-
-#[cfg(not(feature = "standalone"))]
-cumulus_pallet_parachain_system::register_validate_block!(
-	Runtime = Runtime,
-	BlockExecutor = cumulus_pallet_aura_ext::BlockExecutor::<Runtime, Executive>,
-	CheckInherents = CheckInherents,
-);
-
 #[cfg(test)]
 mod tests {
 	use super::*;
@@ -2137,18 +2104,6 @@ mod tests {
 			Balance::from(NewContractExtraBytes::get()).saturating_mul(
 				<StorageDepositPerByte as frame_support::traits::Get<Balance>>::get() / 10u128.saturating_pow(6)
 			) >= NativeTokenExistentialDeposit::get()
-		);
-	}
-
-	#[test]
-	fn ensure_can_kick_collator() {
-		// Ensure that `required_point` > 0, collator can be kicked out normally.
-		assert!(
-			CollatorKickThreshold::get().mul_floor(
-				(SessionDuration::get() * module_collator_selection::POINT_PER_BLOCK)
-					.checked_div(<Runtime as module_collator_selection::Config>::MaxCandidates::get())
-					.unwrap()
-			) > 0
 		);
 	}
 
