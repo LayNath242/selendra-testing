@@ -26,8 +26,6 @@ use primitives::{task::TaskResult, CurrencyId, Multiplier, ReserveIdentifier};
 use sp_runtime::{
 	traits::CheckedDiv, transaction_validity::TransactionValidityError, DispatchError, DispatchResult, FixedU128,
 };
-use sp_std::prelude::*;
-use xcm::latest::prelude::*;
 
 pub mod dex;
 pub mod evm;
@@ -113,17 +111,4 @@ impl<Task> IdleScheduler<Task> for () {
 	fn schedule(_task: Task) -> DispatchResult {
 		unimplemented!()
 	}
-}
-
-#[impl_trait_for_tuples::impl_for_tuples(30)]
-pub trait OnNewEra<EraIndex> {
-	fn on_new_era(era: EraIndex);
-}
-
-pub trait NomineesProvider<AccountId> {
-	fn nominees() -> Vec<AccountId>;
-}
-
-pub trait BuyWeightRate {
-	fn calculate_rate(location: MultiLocation) -> Option<Ratio>;
 }

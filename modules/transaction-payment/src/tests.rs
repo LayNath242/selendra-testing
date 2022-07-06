@@ -39,9 +39,7 @@ use sp_runtime::{
 	testing::TestXt,
 	traits::{One, UniqueSaturatedInto},
 };
-use support::{BuyWeightRate, Price, TransactionPayment as TransactionPaymentT};
-use xcm::latest::prelude::*;
-use xcm::prelude::GeneralKey;
+use support::{Price, TransactionPayment as TransactionPaymentT};
 
 const CALL: <Runtime as frame_system::Config>::Call = Call::Currencies(module_currencies::Call::transfer {
 	dest: BOB,
@@ -1433,55 +1431,6 @@ fn max_tip_has_same_priority() {
 			// max_tx_per_block = 10
 			assert_eq!(priority, 10_000);
 		});
-}
-
-struct CurrencyIdConvert;
-impl Convert<MultiLocation, Option<CurrencyId>> for CurrencyIdConvert {
-	fn convert(location: MultiLocation) -> Option<CurrencyId> {
-		use CurrencyId::Token;
-		use TokenSymbol::*;
-
-		if location == MultiLocation::parent() {
-			return Some(Token(DOT));
-		}
-
-		match location {
-			MultiLocation {
-				interior: X1(GeneralKey(key)),
-				..
-			} => match &key[..] {
-				key => {
-					if let Ok(currency_id) = CurrencyId::decode(&mut &*key) {
-						Some(currency_id)
-					} else {
-						None
-					}
-				}
-			},
-			_ => None,
-		}
-	}
-}
-
-#[test]
-fn buy_weight_transaction_fee_pool_works() {
-	builder_with_dex_and_fee_pool(true).execute_with(|| {
-		// Location convert return None.
-		let location = MultiLocation::new(1, X1(Junction::Parachain(2000)));
-		let rate = <BuyWeightRateOfTransactionFeePool<Runtime, CurrencyIdConvert>>::calculate_rate(location);
-		assert_eq!(rate, None);
-
-		// Token not in charge fee pool
-		let currency_id = CurrencyId::Token(TokenSymbol::LACA);
-		let location = MultiLocation::new(1, X1(GeneralKey(currency_id.encode())));
-		let rate = <BuyWeightRateOfTransactionFeePool<Runtime, CurrencyIdConvert>>::calculate_rate(location);
-		assert_eq!(rate, None);
-
-		// DOT Token is in charge fee pool.
-		let location = MultiLocation::parent();
-		let rate = <BuyWeightRateOfTransactionFeePool<Runtime, CurrencyIdConvert>>::calculate_rate(location);
-		assert_eq!(rate, Some(Ratio::saturating_from_rational(1, 10)));
-	});
 }
 
 #[test]

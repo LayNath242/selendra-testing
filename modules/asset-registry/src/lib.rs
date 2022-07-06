@@ -83,7 +83,6 @@ pub mod module {
 	#[pallet::error]
 	pub enum Error<T> {
 		/// The given location could not be used (e.g. because it cannot be expressed in the
-		/// desired version of XCM).
 		BadLocation,
 		/// AssetId not exists
 		AssetIdNotExists,

@@ -19,7 +19,6 @@ primitives = { package = "acala-primitives", path = "../../primitives", default-
 support = { package = "module-support", path = "../support", default-features = false }
 
 orml-traits = { path = "../../orml/traits", default-features = false }
-xcm = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", default-features = false }
 
 [dev-dependencies]
 sp-core = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }
@@ -45,6 +44,5 @@ std = [
 	"primitives/std",
 	"support/std",
 	"orml-traits/std",
-	"xcm/std",
 ]
 try-runtime = ["frame-support/try-runtime"]

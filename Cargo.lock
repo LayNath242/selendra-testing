@@ -4718,7 +4718,6 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
- "xcm",
 ]
 
 [[package]]
@@ -4763,7 +4762,6 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
- "xcm",
 ]
 
 [[package]]
