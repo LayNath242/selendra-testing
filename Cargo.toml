@@ -2,10 +2,7 @@ cargo-features = ["resolver"]
 
 [workspace]
 members = [
-	# "node",
-	# "node/cli",
-	# "node/service",
-	# "node/e2e-tests",
+	"node/client",
 
 	# "modules/*",
 	# "modules/evm-utility/macro",

@@ -5371,6 +5371,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "orml-oracle-rpc"
+version = "0.4.1-dev"
+dependencies = [
+ "jsonrpsee",
+ "orml-oracle-rpc-runtime-api",
+ "parity-scale-codec",
+ "sp-api",
+ "sp-blockchain",
+ "sp-runtime",
+]
+
+[[package]]
 name = "orml-oracle-rpc-runtime-api"
 version = "0.4.1-dev"
 dependencies = [
@@ -5411,6 +5423,21 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
+]
+
+[[package]]
+name = "orml-tokens-rpc"
+version = "0.4.1-dev"
+dependencies = [
+ "frame-support",
+ "jsonrpsee",
+ "orml-tokens-rpc-runtime-api",
+ "parity-scale-codec",
+ "sp-api",
+ "sp-blockchain",
+ "sp-core",
+ "sp-rpc",
+ "sp-runtime",
 ]
 
 [[package]]
@@ -6608,6 +6635,46 @@ dependencies = [
 [[package]]
 name = "polkadot-client"
 version = "0.9.24"
+dependencies = [
+ "acala-primitives",
+ "frame-benchmarking",
+ "frame-benchmarking-cli",
+ "frame-system",
+ "frame-system-rpc-runtime-api",
+ "mandala-runtime",
+ "module-evm",
+ "module-evm-rpc-runtime-api",
+ "module-transaction-payment",
+ "orml-oracle-rpc",
+ "orml-tokens-rpc",
+ "pallet-transaction-payment",
+ "pallet-transaction-payment-rpc-runtime-api",
+ "runtime-common",
+ "sc-client-api",
+ "sc-consensus",
+ "sc-executor",
+ "sc-service",
+ "sp-api",
+ "sp-authority-discovery",
+ "sp-block-builder",
+ "sp-blockchain",
+ "sp-consensus",
+ "sp-consensus-babe",
+ "sp-core",
+ "sp-finality-grandpa",
+ "sp-inherents",
+ "sp-keyring",
+ "sp-offchain",
+ "sp-runtime",
+ "sp-session",
+ "sp-storage",
+ "sp-timestamp",
+ "sp-transaction-pool",
+]
+
+[[package]]
+name = "polkadot-client"
+version = "0.9.24"
 source = "git+https://github.com/paritytech/polkadot?branch=release-v0.9.24#22836e55d41eef24ed5917fd654ee82a683a7cfe"
 dependencies = [
  "beefy-primitives",
@@ -7481,7 +7548,7 @@ dependencies = [
  "polkadot-availability-bitfield-distribution",
  "polkadot-availability-distribution",
  "polkadot-availability-recovery",
- "polkadot-client",
+ "polkadot-client 0.9.24 (git+https://github.com/paritytech/polkadot?branch=release-v0.9.24)",
  "polkadot-collator-protocol",
  "polkadot-dispute-distribution",
  "polkadot-gossip-support",

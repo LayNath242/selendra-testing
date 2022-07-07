@@ -107,7 +107,7 @@ pub use runtime_common::{
 	EnsureRootOrThreeFourthsCouncil, EnsureRootOrTwoThirdsCouncil,
 	EnsureRootOrTwoThirdsTechnicalCommittee, ExchangeRate, ExistentialDepositsTimesOneHundred,
 	FinancialCouncilInstance, FinancialCouncilMembershipInstance, GasToWeight, CouncilInstance,
-	CouncilMembershipInstance, MaxTipsOfPriority,
+	CouncilMembershipInstance, MaxTipsOfPriority, BlockHashCount,
 	OffchainSolutionWeightLimit, OperationalFeeMultiplier, OperatorMembershipInstanceAcala, Price, ProxyType, Rate,
 	Ratio, RuntimeBlockLength, RuntimeBlockWeights, SystemContractsFilter, TechnicalCommitteeInstance,
 	TechnicalCommitteeMembershipInstance, TimeStampedPrice, TipPerWeightStep, ACA, AUSD, DOT, LACA, KSM, RENBTC,
@@ -183,7 +183,6 @@ parameter_types! {
 	pub const TreasuryReservePalletId: PalletId = PalletId(*b"aca/reve");
 	pub const PhragmenElectionPalletId: LockIdentifier = *b"aca/phre";
 	pub const NftPalletId: PalletId = PalletId(*b"aca/aNFT");
-	pub const NomineesElectionId: LockIdentifier = *b"aca/nome";
 	pub UnreleasedNativeVaultAccountId: AccountId = PalletId(*b"aca/urls").into_account_truncating();
 	// This Pallet is only used to payment fee pool, it's not added to whitelist by design.
 	// because transaction payment pallet will ensure the accounts always have enough ED.
@@ -209,7 +208,6 @@ pub fn get_all_module_accounts() -> Vec<AccountId> {
 }
 
 parameter_types! {
-	pub const BlockHashCount: BlockNumber = HOURS; // mortal tx can be valid up to 1 hour after signing
 	pub const Version: RuntimeVersion = VERSION;
 	pub const SS58Prefix: u8 = 42; // Ss58AddressFormat::SubstrateAccount
 }
@@ -911,7 +909,10 @@ where
 			frame_system::CheckSpecVersion::<Runtime>::new(),
 			frame_system::CheckTxVersion::<Runtime>::new(),
 			frame_system::CheckGenesis::<Runtime>::new(),
-			frame_system::CheckEra::<Runtime>::from(generic::Era::mortal(period, current_block)),
+			frame_system::CheckMortality::<Runtime>::from(generic::Era::mortal(
+				period,
+				current_block,
+			)),
 			runtime_common::CheckNonce::<Runtime>::from(nonce),
 			frame_system::CheckWeight::<Runtime>::new(),
 			module_transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip),
@@ -1237,7 +1238,6 @@ impl InstanceFilter<Call> for ProxyType {
 						| Call::StableAsset(module_stable_asset::Call::redeem_multi { .. })
 				)
 			}
-			ProxyType::Homa => todo!()
 		}
 	}
 	fn is_superset(&self, o: &Self) -> bool {
@@ -1571,7 +1571,6 @@ mod benches {
 		[module_evm, benchmarking::evm]
 		[module_honzon, benchmarking::honzon]
 		[module_cdp_treasury, benchmarking::cdp_treasury]
-		[module_nominees_election, benchmarking::nominees_election]
 		[module_transaction_pause, benchmarking::transaction_pause]
 		[module_transaction_payment, benchmarking::transaction_payment]
 		[module_incentives, benchmarking::incentives]
