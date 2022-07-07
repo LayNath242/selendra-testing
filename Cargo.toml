@@ -4,6 +4,7 @@ cargo-features = ["resolver"]
 members = [
 	"rpc",
 	"node/service",
+	"node/cli",
 
 	# "modules/*",
 	# "modules/evm-utility/macro",

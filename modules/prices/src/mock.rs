@@ -49,9 +49,6 @@ pub const KSM: CurrencyId = CurrencyId::Token(TokenSymbol::KSM);
 pub const TAIKSM: CurrencyId = CurrencyId::StableAssetPoolToken(0);
 pub const LP_AUSD_DOT: CurrencyId =
 	CurrencyId::DexShare(DexShare::Token(TokenSymbol::AUSD), DexShare::Token(TokenSymbol::DOT));
-pub const LIQUID_CROWDLOAN_LEASE_1: CurrencyId = CurrencyId::LiquidCrowdloan(1);
-pub const LIQUID_CROWDLOAN_LEASE_2: CurrencyId = CurrencyId::LiquidCrowdloan(2);
-pub const LIQUID_CROWDLOAN_LEASE_3: CurrencyId = CurrencyId::LiquidCrowdloan(3);
 
 mod prices {
 	pub use super::super::*;

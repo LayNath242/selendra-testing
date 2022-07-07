@@ -16,12 +16,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-use clap::Parser;
+//! Structs to easily compose inspect sub-command for CLI.
+
 use sc_cli::{ImportParams, SharedParams};
-use std::fmt::Debug;
 
 /// The `inspect` command used to print decoded chain data.
-#[derive(Debug, Parser)]
+#[derive(Debug, clap::Parser)]
 pub struct InspectCmd {
 	#[allow(missing_docs)]
 	#[clap(subcommand)]
@@ -43,19 +43,18 @@ pub enum InspectSubCmd {
 	Block {
 		/// Address of the block to print out.
 		///
-		/// Can be either a block hash (no 0x prefix) or a number to retrieve
-		/// existing block, or a 0x-prefixed bytes hex string, representing
-		/// SCALE encoding of a block.
+		/// Can be either a block hash (no 0x prefix) or a number to retrieve existing block,
+		/// or a 0x-prefixed bytes hex string, representing SCALE encoding of
+		/// a block.
 		#[clap(value_name = "HASH or NUMBER or BYTES")]
 		input: String,
 	},
-	/// Decode extrinsic with native version of runtime and print out the
-	/// details.
+	/// Decode extrinsic with native version of runtime and print out the details.
 	Extrinsic {
 		/// Address of an extrinsic to print out.
 		///
-		/// Can be either a block hash (no 0x prefix) or number and the index,
-		/// in the form of `{block}:{index}` or a 0x-prefixed bytes hex string,
+		/// Can be either a block hash (no 0x prefix) or number and the index, in the form
+		/// of `{block}:{index}` or a 0x-prefixed bytes hex string,
 		/// representing SCALE encoding of an extrinsic.
 		#[clap(value_name = "BLOCK:INDEX or BYTES")]
 		input: String,
