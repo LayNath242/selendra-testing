@@ -64,6 +64,8 @@ use primitives::{
 	evm::{AccessListItem, EthereumTransactionMessage},
 	unchecked_extrinsic::AcalaUncheckedExtrinsic,
 };
+#[cfg(feature = "std")]
+pub use pallet_staking::StakerStatus;
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata, H160};
 use sp_runtime::{
