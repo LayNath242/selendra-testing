@@ -25,17 +25,8 @@ use sp_consensus_babe::AuthorityId as BabeId;
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 
 use sc_chain_spec::ChainSpecExtension;
-use sp_core::{sr25519, Pair, Public, H160};
+use sp_core::{sr25519, Pair, Public};
 use sp_runtime::traits::IdentifyAccount;
-
-use std::str::FromStr;
-use coins_bip39::{English, Mnemonic, Wordlist};
-use k256::{
-	ecdsa::{SigningKey, VerifyingKey},
-	EncodedPoint as K256PublicKey,
-};
-use tiny_keccak::{Hasher, Keccak};
-use elliptic_curve::sec1::ToEncodedPoint;
 
 use acala_primitives::{currency::TokenInfo, AccountId, AccountPublic, Balance};
 
@@ -88,45 +79,3 @@ fn testnet_accounts() -> Vec<AccountId> {
 	]
 }
 
-// Child key at derivation path: m/44'/60'/0'/0/{index}
-const DEFAULT_DERIVATION_PATH_PREFIX: &str = "m/44'/60'/0'/0/";
-
-fn generate_evm_address<W: Wordlist>(phrase: &str, index: u32) -> H160 {
-	let derivation_path =
-		coins_bip32::path::DerivationPath::from_str(&format!("{}{}", DEFAULT_DERIVATION_PATH_PREFIX, index))
-			.expect("should parse the default derivation path");
-	let mnemonic = Mnemonic::<W>::new_from_phrase(phrase).unwrap();
-
-	let derived_priv_key = mnemonic.derive_key(&derivation_path, None).unwrap();
-	let key: &SigningKey = derived_priv_key.as_ref();
-	let secret_key: SigningKey = SigningKey::from_bytes(&key.to_bytes()).unwrap();
-	let verify_key: VerifyingKey = secret_key.verifying_key();
-
-	let point: &K256PublicKey = &verify_key.to_encoded_point(false);
-	let public_key = point.to_bytes();
-
-	let hash = keccak256(&public_key[1..]);
-	H160::from_slice(&hash[12..])
-}
-
-fn keccak256<S>(bytes: S) -> [u8; 32]
-where
-	S: AsRef<[u8]>,
-{
-	let mut output = [0u8; 32];
-	let mut hasher = Keccak::v256();
-	hasher.update(bytes.as_ref());
-	hasher.finalize(&mut output);
-	output
-}
-
-fn get_evm_accounts(mnemonic: Option<&str>) -> Vec<H160> {
-	let phrase = mnemonic.unwrap_or("fox sight canyon orphan hotel grow hedgehog build bless august weather swarm");
-	let mut evm_accounts = Vec::new();
-	for index in 0..10u32 {
-		let addr = generate_evm_address::<English>(phrase, index);
-		evm_accounts.push(addr);
-		log::info!("index: {:?}, evm address: {:?}", index, addr);
-	}
-	evm_accounts
-}

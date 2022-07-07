@@ -94,7 +94,6 @@ module-asset-registry = { path = "../../modules/asset-registry", default-feature
 module-auction-manager = { path = "../../modules/auction-manager", default-features = false }
 module-cdp-engine = { path = "../../modules/cdp-engine", default-features = false }
 module-cdp-treasury = { path = "../../modules/cdp-treasury", default-features = false }
-module-collator-selection = { path = "../../modules/collator-selection", default-features = false }
 module-currencies = { path = "../../modules/currencies", default-features = false }
 module-dex = { path = "../../modules/dex", default-features = false }
 module-dex-oracle = { path = "../../modules/dex-oracle", default-features = false }
@@ -206,7 +205,6 @@ std = [
 	"module-auction-manager/std",
 	"module-cdp-engine/std",
 	"module-cdp-treasury/std",
-	"module-collator-selection/std",
 	"module-currencies/std",
 	"module-dex/std",
 	"module-dex-oracle/std",
@@ -316,7 +314,6 @@ try-runtime = [
 	"module-auction-manager/try-runtime",
 	"module-cdp-engine/try-runtime",
 	"module-cdp-treasury/try-runtime",
-	"module-collator-selection/try-runtime",
 	"module-currencies/try-runtime",
 	"module-dex/try-runtime",
 	"module-dex-oracle/try-runtime",

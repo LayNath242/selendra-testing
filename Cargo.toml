@@ -5,6 +5,7 @@ members = [
 	"rpc",
 	"node/service",
 	"node/cli",
+	"node",
 
 	# "modules/*",
 	# "modules/evm-utility/macro",

@@ -21,7 +21,7 @@
 use super::{
 	authority_keys_from_seed, get_account_id_from_seed, testnet_accounts, AccountId,
 	AuthorityDiscoveryId, BabeId, Balance, ChainSpecExtension, GrandpaId, ImOnlineId, TokenInfo,
-	DEFAULT_PROTOCOL_ID, TELEMETRY_URL, get_evm_accounts, H160
+	DEFAULT_PROTOCOL_ID, TELEMETRY_URL
 };
 
 use hex_literal::hex;
@@ -32,7 +32,6 @@ use sc_service::{ChainType, Properties};
 use sc_telemetry::TelemetryEndpoints;
 use sp_core::{crypto::UncheckedInto, sr25519};
 use sp_runtime::Perbill;
-use runtime_common::evm_genesis;
 
 use mandala_runtime::{
 	dollar, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, Block, CouncilConfig, CdpEngineConfig,
@@ -148,20 +147,17 @@ pub fn staging_config() -> ChainSpec {
 
 fn development_config_genesis() -> GenesisConfig {
 	let wasm_binary = mandala_runtime::WASM_BINARY.unwrap_or_default();
-	let evm_accounts = get_evm_accounts(None);
 
 	selendra_development_genesis(
 		wasm_binary,
 		vec![authority_keys_from_seed("Alice")],
 		get_account_id_from_seed::<sr25519::Public>("Alice"),
-		evm_accounts.clone(),
 		None,
 	)
 }
 
 fn local_selendra_genesis() -> GenesisConfig {
 	let wasm_binary = mandala_runtime::WASM_BINARY.unwrap_or_default();
-	let evm_accounts = get_evm_accounts(None);
 
 	selendra_development_genesis(
 		wasm_binary,
@@ -172,7 +168,6 @@ fn local_selendra_genesis() -> GenesisConfig {
 			authority_keys_from_seed("Dave"),
 		],
 		get_account_id_from_seed::<sr25519::Public>("Alice"),
-		evm_accounts.clone(),
 		None,
 	)
 }
@@ -285,14 +280,11 @@ pub fn selendra_development_genesis(
 		AuthorityDiscoveryId,
 	)>,
 	root_key: AccountId,
-	evm_accounts: Vec<H160>,
 	endowed_accounts: Option<Vec<AccountId>>,
 ) -> GenesisConfig {
 	let endowment: Balance = 10_000_000 * dollar(ACA);
 	let stash: Balance = endowment / 1000;
 	let endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(testnet_accounts);
-
-	let evm_genesis_accounts = evm_genesis(evm_accounts);
 
 	GenesisConfig {
 		system: SystemConfig { code: wasm_binary.to_vec() },
@@ -363,7 +355,7 @@ pub fn selendra_development_genesis(
 		asset_registry: Default::default(),
 		evm: EVMConfig {
 			chain_id: 597u64,
-			accounts: evm_genesis_accounts,
+			accounts: Default::default()
 		},
 		dex: DexConfig {
 			initial_listing_trading_pairs: vec![],
