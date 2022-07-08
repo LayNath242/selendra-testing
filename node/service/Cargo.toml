@@ -81,18 +81,18 @@ selendra-rpc = { path = "../../rpc" }
 module-evm-rpc-runtime-api = { path = "../../modules/evm/rpc/runtime_api" }
 
 runtime-common = { path = "../../runtime/common" }
-mandala-runtime = { path = "../../runtime/mandala" }
+selendra-runtime = { path = "../../runtime/selendra" }
 
 [features]
 default = [ "std" ]
 std = []
 
 runtime-benchmarks = [
-	"mandala-runtime/runtime-benchmarks",
+	"selendra-runtime/runtime-benchmarks",
 ]
 
 try-runtime = [
-	"mandala-runtime/try-runtime",
+	"selendra-runtime/try-runtime",
 ]
 
 # fast-runtime = [

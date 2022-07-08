@@ -32,7 +32,7 @@ use sc_network::{Event, NetworkService};
 use sc_service::{config::Configuration, error::Error as ServiceError, RpcHandlers, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use selendra_primitives::Block;
-use mandala_runtime::RuntimeApi;
+use selendra_runtime::RuntimeApi;
 use sp_api::ProvideRuntimeApi;
 use sp_core::crypto::Pair;
 use sp_runtime::{generic, traits::Block as BlockT};

@@ -217,8 +217,6 @@ impl module_idle_scheduler::Config for Test {
 	type WeightInfo = ();
 	type Task = ScheduledTasks;
 	type MinimumWeightRemainInBlock = ConstU64<0>;
-	type RelayChainBlockNumberProvider = MockBlockNumberProvider;
-	type DisableBlockThreshold = ConstU32<6>;
 }
 
 parameter_types! {
@@ -539,7 +537,7 @@ pub type EvmErc20InfoMapping = module_asset_registry::EvmErc20InfoMapping<Test>;
 
 parameter_types! {
 	pub NetworkContractSource: H160 = alice_evm_addr();
-	pub PrecompilesValue: AllPrecompiles<Test> = AllPrecompiles::<_>::mandala();
+	pub PrecompilesValue: AllPrecompiles<Test> = AllPrecompiles::<_>::selendra();
 }
 
 ord_parameter_types! {

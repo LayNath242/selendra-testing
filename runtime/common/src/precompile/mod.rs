@@ -103,7 +103,7 @@ impl<R> AllPrecompiles<R>
 where
 	R: module_evm::Config,
 {
-	pub fn mandala() -> Self {
+	pub fn selendra() -> Self {
 		Self {
 			active: BTreeSet::from([
 				ECRECOVER,

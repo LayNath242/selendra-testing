@@ -26,10 +26,10 @@ impl sc_executor::NativeExecutionDispatch for ExecutorDispatch {
 	type ExtendHostFunctions = frame_benchmarking::benchmarking::HostFunctions;
 
 	fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
-		mandala_runtime::api::dispatch(method, data)
+		selendra_runtime::api::dispatch(method, data)
 	}
 
 	fn native_version() -> sc_executor::NativeVersion {
-		mandala_runtime::native_version()
+		selendra_runtime::native_version()
 	}
 }

@@ -65,24 +65,11 @@ impl frame_system::Config for Runtime {
 	type MaxConsumers = ConstU32<16>;
 }
 
-pub struct MockBlockNumberProvider;
-
-impl BlockNumberProvider for MockBlockNumberProvider {
-	type BlockNumber = u32;
-
-	fn current_block_number() -> Self::BlockNumber {
-		// gets a local mock storage value
-		u32::decode(&mut &sp_io::storage::get(&RELAY_BLOCK_KEY).unwrap()[..]).unwrap()
-	}
-}
-
 impl module_idle_scheduler::Config for Runtime {
 	type Event = Event;
 	type WeightInfo = ();
 	type Task = ScheduledTasks;
 	type MinimumWeightRemainInBlock = ConstU64<100_000_000_000>;
-	type RelayChainBlockNumberProvider = MockBlockNumberProvider;
-	type DisableBlockThreshold = ConstU32<6>;
 }
 
 // Mock dispatachable tasks

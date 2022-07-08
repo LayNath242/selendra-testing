@@ -24,7 +24,7 @@ use selendra_primitives::Block;
 use service::{chain_spec, new_partial, ExecutorDispatch, FullClient};
 use sp_core::crypto::Ss58AddressFormat;
 
-use mandala_runtime::RuntimeApi;
+use selendra_runtime::RuntimeApi;
 
 use std::sync::Arc;
 
@@ -67,7 +67,7 @@ impl SubstrateCli for Cli {
 	}
 
 	fn native_runtime_version(_: &Box<dyn ChainSpec>) -> &'static RuntimeVersion {
-		&mandala_runtime::VERSION
+		&selendra_runtime::VERSION
 	}
 }
 

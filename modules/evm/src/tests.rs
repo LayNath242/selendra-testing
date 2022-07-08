@@ -2084,7 +2084,7 @@ fn remove_account_works() {
 #[test]
 fn auto_publish_works() {
 	let json: serde_json::Value =
-		serde_json::from_str(include_str!("../../../ts-tests/build/CreateContractFactory.json")).unwrap();
+		serde_json::from_str(include_str!("../ts-tests/build/CreateContractFactory.json")).unwrap();
 	let code = hex::decode(json.get("bytecode").unwrap().as_str().unwrap()).unwrap();
 
 	new_test_ext().execute_with(|| {

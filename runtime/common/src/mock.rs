@@ -151,8 +151,6 @@ impl module_idle_scheduler::Config for TestRuntime {
 	type WeightInfo = ();
 	type Task = ScheduledTasks;
 	type MinimumWeightRemainInBlock = ConstU64<0>;
-	type RelayChainBlockNumberProvider = MockBlockNumberProvider;
-	type DisableBlockThreshold = ConstU32<6>;
 }
 
 pub struct GasToWeight;

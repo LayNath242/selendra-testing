@@ -33,7 +33,7 @@ use sc_telemetry::TelemetryEndpoints;
 use sp_core::{crypto::UncheckedInto, sr25519};
 use sp_runtime::Perbill;
 
-use mandala_runtime::{
+use selendra_runtime::{
 	dollar, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, Block, CouncilConfig, CdpEngineConfig,
 	DexConfig, EVMConfig, GenesisConfig, GrandpaConfig, ImOnlineConfig,
 	OperatorMembershipSelendraConfig, OrmlNFTConfig, SS58Prefix, SessionConfig, SessionKeys, IndicesConfig,
@@ -146,7 +146,7 @@ pub fn staging_config() -> ChainSpec {
 }
 
 fn development_config_genesis() -> GenesisConfig {
-	let wasm_binary = mandala_runtime::WASM_BINARY.unwrap_or_default();
+	let wasm_binary = selendra_runtime::WASM_BINARY.unwrap_or_default();
 
 	selendra_development_genesis(
 		wasm_binary,
@@ -157,7 +157,7 @@ fn development_config_genesis() -> GenesisConfig {
 }
 
 fn local_selendra_genesis() -> GenesisConfig {
-	let wasm_binary = mandala_runtime::WASM_BINARY.unwrap_or_default();
+	let wasm_binary = selendra_runtime::WASM_BINARY.unwrap_or_default();
 
 	selendra_development_genesis(
 		wasm_binary,
@@ -263,7 +263,7 @@ fn staging_config_genesis() -> GenesisConfig {
 	.into();
 
 	let endowed_accounts: Vec<AccountId> = vec![root_key.clone()];
-	let wasm_binary = mandala_runtime::WASM_BINARY.unwrap_or_default();
+	let wasm_binary = selendra_runtime::WASM_BINARY.unwrap_or_default();
 
 	selendra_genesis(wasm_binary, initial_authorities, root_key, Some(endowed_accounts))
 }
@@ -336,7 +336,7 @@ pub fn selendra_development_genesis(
 		phragmen_election: Default::default(),
 		babe: BabeConfig {
 			authorities: vec![],
-			epoch_config: Some(mandala_runtime::BABE_GENESIS_EPOCH_CONFIG),
+			epoch_config: Some(selendra_runtime::BABE_GENESIS_EPOCH_CONFIG),
 		},
 		im_online: ImOnlineConfig { keys: vec![] },
 		authority_discovery: AuthorityDiscoveryConfig { keys: vec![] },
@@ -439,7 +439,7 @@ pub fn selendra_genesis(
 		phragmen_election: Default::default(),
 		babe: BabeConfig {
 			authorities: vec![],
-			epoch_config: Some(mandala_runtime::BABE_GENESIS_EPOCH_CONFIG),
+			epoch_config: Some(selendra_runtime::BABE_GENESIS_EPOCH_CONFIG),
 		},
 		im_online: ImOnlineConfig { keys: vec![] },
 		authority_discovery: AuthorityDiscoveryConfig { keys: vec![] },

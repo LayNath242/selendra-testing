@@ -368,7 +368,7 @@ pub mod module {
 		fn build(&self) {
 			use sp_std::rc::Rc;
 
-			// NOTE: Only applicable for mandala testnet, unit test and integration test.
+			// NOTE: Only applicable for selendra testnet, unit test and integration test.
 			// Use create_predeploy_contract to deploy predeploy contracts on the mainnet.
 			let source = T::NetworkContractSource::get();
 
@@ -1587,7 +1587,7 @@ impl<T: Config> Pallet<T> {
 			..
 		}) = Accounts::<T>::get(address)
 		{
-			// https://github.com/SelendraNetwork/Selendra/blob/af1c277/modules/evm/rpc/src/lib.rs#L176
+			// https://github.com/AcalaNetwork/acala/blob/af1c277/modules/evm/rpc/src/lib.rs#L176
 			// when rpc is called, from is empty, allowing the call
 			published || maintainer == *caller || Self::is_developer_or_contract(caller) || *caller == H160::default()
 		} else {

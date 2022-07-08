@@ -22,7 +22,7 @@ try-runtime-cli = { git = "https://github.com/paritytech/substrate", branch = "p
 
 inspect = { package = "selendra-inspect", path = "../../inspect" }
 service = { package = "selendra-service", path = "../service", default-features = false, optional = true }
-mandala-runtime = { path = "../../runtime/mandala" }
+selendra-runtime = { path = "../../runtime/selendra" }
 selendra-primitives = { path = "../../primitives" }
 
 [build-dependencies]
