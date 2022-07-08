@@ -76,16 +76,16 @@ sp-transaction-pool = { git = "https://github.com/paritytech/substrate", branch 
 sp-version = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 
 # orml
-orml-auction = { path = "../../orml/auction", default-features = false }
-orml-authority = { path = "../../orml/authority", default-features = false }
-orml-benchmarking = { path = "../../orml/benchmarking", default-features = false, optional = true }
-orml-oracle = { path = "../../orml/oracle", default-features = false }
-orml-oracle-rpc-runtime-api = { path = "../../orml/oracle/rpc/runtime-api", default-features = false }
-orml-tokens = { path = "../../orml/tokens", default-features = false }
-orml-tokens-rpc-runtime-api = { path = "../../orml/tokens/rpc/runtime-api", default-features = false }
-orml-traits = { path = "../../orml/traits", default-features = false }
-orml-rewards = { path = "../../orml/rewards", default-features = false }
-orml-nft = { path = "../../orml/nft", default-features = false }
+orml-auction = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5" , default-features = false }
+orml-authority = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false }
+orml-benchmarking = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false, optional = true }
+orml-oracle = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false }
+orml-oracle-rpc-runtime-api = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false }
+orml-tokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false }
+orml-tokens-rpc-runtime-api = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false }
+orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false }
+orml-rewards = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false }
+orml-nft = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false }
 
 # modules
 module-transaction-pause = { path = "../../modules/transaction-pause", default-features = false }

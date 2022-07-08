@@ -513,6 +513,7 @@ dependencies = [
 [[package]]
 name = "bencher-procedural"
 version = "0.1.0"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library?rev=b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5#b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -4569,6 +4570,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "module-example"
+version = "0.1.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+]
+
+[[package]]
 name = "module-honzon"
 version = "0.1.0"
 dependencies = [
@@ -4583,6 +4598,27 @@ dependencies = [
  "orml-traits",
  "pallet-balances",
  "pallet-timestamp",
+ "parity-scale-codec",
+ "scale-info",
+ "selendra-primitives",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "module-honzon-bridge"
+version = "0.1.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "module-currencies",
+ "module-support",
+ "orml-tokens",
+ "orml-traits",
+ "pallet-balances",
  "parity-scale-codec",
  "scale-info",
  "selendra-primitives",
@@ -5229,6 +5265,7 @@ dependencies = [
 [[package]]
 name = "orml-auction"
 version = "0.4.1-dev"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library?rev=b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5#b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -5236,8 +5273,6 @@ dependencies = [
  "parity-scale-codec",
  "scale-info",
  "serde",
- "sp-core",
- "sp-io",
  "sp-runtime",
  "sp-std",
 ]
@@ -5245,14 +5280,13 @@ dependencies = [
 [[package]]
 name = "orml-authority"
 version = "0.4.1-dev"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library?rev=b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5#b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5"
 dependencies = [
  "frame-support",
  "frame-system",
- "pallet-scheduler",
  "parity-scale-codec",
  "scale-info",
  "serde",
- "sp-core",
  "sp-io",
  "sp-runtime",
  "sp-std",
@@ -5261,6 +5295,7 @@ dependencies = [
 [[package]]
 name = "orml-bencher"
 version = "0.4.1-dev"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library?rev=b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5#b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5"
 dependencies = [
  "ansi_term",
  "bencher-procedural",
@@ -5295,11 +5330,10 @@ dependencies = [
 [[package]]
 name = "orml-benchmarking"
 version = "0.4.1-dev"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library?rev=b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5#b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
- "frame-system",
- "hex-literal",
  "log",
  "parity-scale-codec",
  "paste",
@@ -5316,17 +5350,15 @@ dependencies = [
 [[package]]
 name = "orml-currencies"
 version = "0.4.1-dev"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library?rev=b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5#b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5"
 dependencies = [
  "frame-support",
  "frame-system",
- "orml-tokens",
  "orml-traits",
  "orml-utilities",
- "pallet-balances",
  "parity-scale-codec",
  "scale-info",
  "serde",
- "sp-core",
  "sp-io",
  "sp-runtime",
  "sp-std",
@@ -5335,14 +5367,13 @@ dependencies = [
 [[package]]
 name = "orml-nft"
 version = "0.4.1-dev"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library?rev=b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5#b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5"
 dependencies = [
  "frame-support",
  "frame-system",
  "parity-scale-codec",
  "scale-info",
  "serde",
- "sp-core",
- "sp-io",
  "sp-runtime",
  "sp-std",
 ]
@@ -5350,6 +5381,7 @@ dependencies = [
 [[package]]
 name = "orml-oracle"
 version = "0.4.1-dev"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library?rev=b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5#b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -5359,7 +5391,6 @@ dependencies = [
  "scale-info",
  "serde",
  "sp-application-crypto",
- "sp-core",
  "sp-io",
  "sp-runtime",
  "sp-std",
@@ -5368,6 +5399,7 @@ dependencies = [
 [[package]]
 name = "orml-oracle-rpc"
 version = "0.4.1-dev"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library?rev=b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5#b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5"
 dependencies = [
  "jsonrpsee",
  "orml-oracle-rpc-runtime-api",
@@ -5380,6 +5412,7 @@ dependencies = [
 [[package]]
 name = "orml-oracle-rpc-runtime-api"
 version = "0.4.1-dev"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library?rev=b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5#b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5"
 dependencies = [
  "parity-scale-codec",
  "sp-api",
@@ -5389,6 +5422,7 @@ dependencies = [
 [[package]]
 name = "orml-rewards"
 version = "0.4.1-dev"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library?rev=b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5#b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -5405,17 +5439,14 @@ dependencies = [
 [[package]]
 name = "orml-tokens"
 version = "0.4.1-dev"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library?rev=b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5#b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5"
 dependencies = [
  "frame-support",
  "frame-system",
  "orml-traits",
- "pallet-elections-phragmen",
- "pallet-treasury",
  "parity-scale-codec",
  "scale-info",
  "serde",
- "sp-core",
- "sp-io",
  "sp-runtime",
  "sp-std",
 ]
@@ -5423,6 +5454,7 @@ dependencies = [
 [[package]]
 name = "orml-tokens-rpc"
 version = "0.4.1-dev"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library?rev=b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5#b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5"
 dependencies = [
  "frame-support",
  "jsonrpsee",
@@ -5438,6 +5470,7 @@ dependencies = [
 [[package]]
 name = "orml-tokens-rpc-runtime-api"
 version = "0.4.1-dev"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library?rev=b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5#b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5"
 dependencies = [
  "frame-support",
  "orml-tokens",
@@ -5449,6 +5482,7 @@ dependencies = [
 [[package]]
 name = "orml-traits"
 version = "0.4.1-dev"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library?rev=b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5#b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5"
 dependencies = [
  "frame-support",
  "impl-trait-for-tuples",
@@ -5466,13 +5500,12 @@ dependencies = [
 [[package]]
 name = "orml-utilities"
 version = "0.4.1-dev"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library?rev=b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5#b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5"
 dependencies = [
  "frame-support",
- "frame-system",
  "parity-scale-codec",
  "scale-info",
  "serde",
- "serde_json",
  "sp-io",
  "sp-runtime",
  "sp-std",

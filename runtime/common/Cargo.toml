@@ -61,13 +61,13 @@ module-cdp-treasury = { path = "../../modules/cdp-treasury", default-features = 
 module-incentives = { path = "../../modules/incentives", default-features = false }
 
 # orml
-orml-oracle = { path = "../../orml/oracle", default-features = false }
-orml-traits = { path = "../../orml/traits", default-features = false }
-orml-bencher = { path = "../../orml/bencher", default-features = false, optional = true }
-orml-tokens = { path = "../../orml/tokens", default-features = false, optional = true }
-orml-nft = { path = "../../orml/nft", default-features = false, optional = true }
-orml-currencies = { path = "../../orml/currencies", default-features = false, optional = true }
-orml-rewards = { path = "../../orml/rewards", default-features = false, optional = true }
+orml-oracle = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false }
+orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false }
+orml-bencher = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false, optional = true }
+orml-tokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false, optional = true }
+orml-nft = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false, optional = true }
+orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false, optional = true }
+orml-rewards = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false, optional = true }
 
 [features]
 default = ["std"]

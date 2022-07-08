@@ -34,7 +34,7 @@ substrate-state-trie-migration-rpc = { git = "https://github.com/paritytech/subs
 pallet-transaction-payment-rpc = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }
 
 primitives = { package = "selendra-primitives", path = "../primitives" }
-orml-oracle-rpc = { path = "../orml/oracle/rpc" }
+orml-oracle-rpc = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5" }
 runtime-common = { path = "../runtime/common" }
 evm-rpc = { path = "../modules/evm/rpc" }
-orml-tokens-rpc = {path = "../orml/tokens/rpc" }
+orml-tokens-rpc = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5" }

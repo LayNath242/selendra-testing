@@ -6,13 +6,9 @@ members = [
 	"node/service",
 	"node/cli",
 	"node",
-
-	# "modules/*",
-	# "modules/evm-utility/macro",
-	# "inspect",
-	# "primitives",
-	# "rpc",
-
+	"modules/*",
+	"inspect",
+	"primitives",
 	"runtime/common",
 	"runtime/selendra",
 ]
