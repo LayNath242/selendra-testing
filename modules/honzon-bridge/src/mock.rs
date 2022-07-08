@@ -1,6 +1,6 @@
-// This file is part of Acala.
+// This file is part of Selendra.
 
-// Copyright (C) 2020-2022 Acala Foundation.
+// Copyright (C) 2021-2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -42,7 +42,7 @@ pub fn dollar(b: Balance) -> Balance {
 }
 pub const ALICE: AccountId = AccountId::new([1u8; 32]);
 pub const INITIAL_BALANCE: Balance = 1_000_000;
-pub const ACALA: CurrencyId = CurrencyId::Token(TokenSymbol::ACA);
+pub const SELENDRA: CurrencyId = CurrencyId::Token(TokenSymbol::ACA);
 pub const AUSD: CurrencyId = CurrencyId::Token(TokenSymbol::AUSD);
 pub const KUSD: CurrencyId = CurrencyId::Token(TokenSymbol::KUSD);
 
@@ -109,7 +109,7 @@ impl pallet_balances::Config for Runtime {
 pub type AdaptedBasicCurrency = module_currencies::BasicCurrencyAdapter<Runtime, PalletBalances, Amount, BlockNumber>;
 
 parameter_types! {
-	pub const GetNativeCurrencyId: CurrencyId = ACALA;
+	pub const GetNativeCurrencyId: CurrencyId = SELENDRA;
 	pub Erc20HoldingAccount: H160 = H160::from_low_u64_be(1);
 }
 

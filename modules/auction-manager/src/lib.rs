@@ -1,6 +1,6 @@
-// This file is part of Acala.
+// This file is part of Selendra.
 
-// Copyright (C) 2020-2022 Acala Foundation.
+// Copyright (C) 2021-2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -62,9 +62,9 @@ pub mod weights;
 pub use module::*;
 pub use weights::WeightInfo;
 
-pub const OFFCHAIN_WORKER_DATA: &[u8] = b"acala/auction-manager/data/";
-pub const OFFCHAIN_WORKER_LOCK: &[u8] = b"acala/auction-manager/lock/";
-pub const OFFCHAIN_WORKER_MAX_ITERATIONS: &[u8] = b"acala/auction-manager/max-iterations/";
+pub const OFFCHAIN_WORKER_DATA: &[u8] = b"selendra/auction-manager/data/";
+pub const OFFCHAIN_WORKER_LOCK: &[u8] = b"selendra/auction-manager/lock/";
+pub const OFFCHAIN_WORKER_MAX_ITERATIONS: &[u8] = b"selendra/auction-manager/max-iterations/";
 pub const LOCK_DURATION: u64 = 100;
 pub const DEFAULT_MAX_ITERATIONS: u32 = 1000;
 

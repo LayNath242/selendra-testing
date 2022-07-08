@@ -1,7 +1,7 @@
 [package]
 name = "mandala-runtime"
 version = "2.8.2"
-authors = ["Acala Developers"]
+authors = ["Selendra <info@selendra.org>"]
 edition = "2021"
 build = "build.rs"
 
@@ -112,7 +112,7 @@ module-support = { path = "../../modules/support", default-features = false }
 module-idle-scheduler = { package = "mandala-module-idle-scheduler", path = "../../modules/midle-scheduler", default-features = false }
 module-aggregated-dex = { path = "../../modules/aggregated-dex", default-features = false }
 
-primitives = { package = "acala-primitives", path = "../../primitives", default-features = false }
+primitives = { package = "selendra-primitives", path = "../../primitives", default-features = false }
 runtime-common = { path = "../common", default-features = false }
 
 # ecosystem

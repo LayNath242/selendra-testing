@@ -1,6 +1,6 @@
-// This file is part of Acala.
+// This file is part of Selendra.
 
-// Copyright (C) 2020-2022 Acala Foundation.
+// Copyright (C) 2021-2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -28,7 +28,7 @@ use frame_support::pallet_prelude::*;
 use frame_system::pallet_prelude::*;
 pub use module_support::{DispatchableTask, IdleScheduler};
 use scale_info::TypeInfo;
-use acala_primitives::{task::TaskResult, BlockNumber, Nonce};
+use selendra_primitives::{task::TaskResult, BlockNumber, Nonce};
 use sp_runtime::{traits::One, ArithmeticError};
 use sp_std::{cmp::PartialEq, fmt::Debug, prelude::*};
 

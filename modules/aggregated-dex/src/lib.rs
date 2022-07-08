@@ -1,6 +1,6 @@
-// This file is part of Acala.
+// This file is part of Selendra.
 
-// Copyright (C) 2022 Acala Foundation.
+// Copyright (C) 2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -389,7 +389,7 @@ impl<T: Config> Pallet<T> {
 	}
 }
 
-/// Swap by Acala DEX which has specific joints.
+/// Swap by Selendra DEX which has specific joints.
 pub struct DexSwap<T>(PhantomData<T>);
 impl<T: Config> Swap<T::AccountId, Balance, CurrencyId> for DexSwap<T> {
 	fn get_swap_amount(

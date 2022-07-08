@@ -1,6 +1,6 @@
-// This file is part of Acala.
+// This file is part of Selendra.
 
-// Copyright (C) 2020-2022 Acala Foundation.
+// Copyright (C) 2021-2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 //! ## Overview
 //!
 //! The data from Oracle cannot be used in business, prices module will do some
-//! process and feed prices for Acala. Process include:
+//! process and feed prices for Selendra. Process include:
 //!   - specify a fixed price for stable currency
 //!   - feed price in USD or related price bewteen two currencies
 //!   - lock/unlock the price data get from oracle
@@ -58,11 +58,11 @@ pub mod module {
 		/// The data source, such as Oracle.
 		type Source: DataProvider<CurrencyId, Price> + DataFeeder<CurrencyId, Price, Self::AccountId>;
 
-		/// The stable currency id, it should be AUSD in Acala.
+		/// The stable currency id, it should be AUSD in Selendra.
 		#[pallet::constant]
 		type GetStableCurrencyId: Get<CurrencyId>;
 
-		/// The fixed prices of stable currency, it should be 1 USD in Acala.
+		/// The fixed prices of stable currency, it should be 1 USD in Selendra.
 		#[pallet::constant]
 		type StableCurrencyFixedPrice: Get<Price>;
 

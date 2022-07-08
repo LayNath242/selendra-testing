@@ -9,7 +9,7 @@ pub type CouncilMembershipInstance = pallet_membership::Instance1;
 pub type FinancialCouncilMembershipInstance = pallet_membership::Instance2;
 pub type HomaCouncilMembershipInstance = pallet_membership::Instance3;
 pub type TechnicalCommitteeMembershipInstance = pallet_membership::Instance4;
-pub type OperatorMembershipInstanceAcala = pallet_membership::Instance5;
+pub type OperatorMembershipInstanceSelendra = pallet_membership::Instance5;
 
 // General Council
 pub type EnsureRootOrAllCouncil = EnsureOneOf<

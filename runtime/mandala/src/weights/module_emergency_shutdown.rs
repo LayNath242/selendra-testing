@@ -1,6 +1,6 @@
-// This file is part of Acala.
+// This file is part of Selendra.
 
-// Copyright (C) 2020-2022 Acala Foundation.
+// Copyright (C) 2021-2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -23,7 +23,7 @@
 //! EXECUTION: Some(Wasm), WASM-EXECUTION: Compiled, CHAIN: Some("dev"), DB CACHE: 1024
 
 // Executed Command:
-// target/production/acala
+// target/production/selendra
 // benchmark
 // --chain=dev
 // --steps=50
@@ -47,10 +47,10 @@ use sp_std::marker::PhantomData;
 pub struct WeightInfo<T>(PhantomData<T>);
 impl<T: frame_system::Config> module_emergency_shutdown::WeightInfo for WeightInfo<T> {
 	// Storage: EmergencyShutdown IsShutdown (r:1 w:1)
-	// Storage: AcalaOracle IsUpdated (r:3 w:0)
-	// Storage: OperatorMembershipAcala Members (r:1 w:0)
-	// Storage: AcalaOracle RawValues (r:9 w:0)
-	// Storage: AcalaOracle Values (r:3 w:0)
+	// Storage: SelendraOracle IsUpdated (r:3 w:0)
+	// Storage: OperatorMembershipSelendra Members (r:1 w:0)
+	// Storage: SelendraOracle RawValues (r:9 w:0)
+	// Storage: SelendraOracle Values (r:3 w:0)
 	// Storage: Timestamp Now (r:1 w:0)
 	// Storage: AssetRegistry AssetMetadatas (r:1 w:0)
 	// Storage: Homa StakingLedgers (r:1 w:0)

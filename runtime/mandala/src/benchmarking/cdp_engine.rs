@@ -1,6 +1,6 @@
-// This file is part of Acala.
+// This file is part of Selendra.
 
-// Copyright (C) 2020-2022 Acala Foundation.
+// Copyright (C) 2021-2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -239,8 +239,8 @@ runtime_benchmarks! {
 	verify {
 		let (_, stable_amount) = Dex::get_liquidity_pool(STAKING, STABLECOIN);
 		let (_, stable_amount_mandala) = Dex::get_liquidity_pool(LIQUID, STABLECOIN);
-		// paths of karura and acala are LIQUID => STAKING => STABLECOIN
-		#[cfg(any(feature = "with-karura-runtime", feature = "with-acala-runtime"))]
+		// paths of karura and selendra are LIQUID => STAKING => STABLECOIN
+		#[cfg(any(feature = "with-karura-runtime", feature = "with-selendra-runtime"))]
 		assert!(stable_amount < 10_000 * dollar(STABLECOIN));
 		// path of mandala is LIQUID => STABLECOIN
 		#[cfg(feature = "with-mandala-runtime")]

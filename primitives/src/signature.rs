@@ -1,6 +1,6 @@
-// This file is part of Acala.
+// This file is part of Selendra.
 
-// Copyright (C) 2020-2022 Acala Foundation.
+// Copyright (C) 2021-2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -28,7 +28,7 @@ use sp_core::{crypto::ByteArray, ecdsa, ed25519, sr25519};
 use sp_std::prelude::*;
 
 #[derive(Eq, PartialEq, Clone, Encode, Decode, RuntimeDebug, TypeInfo)]
-pub enum AcalaMultiSignature {
+pub enum SelendraMultiSignature {
 	/// An Ed25519 signature.
 	Ed25519(ed25519::Signature),
 	/// An Sr25519 signature.
@@ -40,19 +40,19 @@ pub enum AcalaMultiSignature {
 	// An Ethereum SECP256k1 signature using Eip1559 for message encoding.
 	Eip1559([u8; 65]),
 	// An Ethereum SECP256k1 signature using Eip712 for message encoding.
-	AcalaEip712([u8; 65]),
+	SelendraEip712([u8; 65]),
 }
 
-impl From<ed25519::Signature> for AcalaMultiSignature {
+impl From<ed25519::Signature> for SelendraMultiSignature {
 	fn from(x: ed25519::Signature) -> Self {
 		Self::Ed25519(x)
 	}
 }
 
-impl TryFrom<AcalaMultiSignature> for ed25519::Signature {
+impl TryFrom<SelendraMultiSignature> for ed25519::Signature {
 	type Error = ();
-	fn try_from(m: AcalaMultiSignature) -> Result<Self, Self::Error> {
-		if let AcalaMultiSignature::Ed25519(x) = m {
+	fn try_from(m: SelendraMultiSignature) -> Result<Self, Self::Error> {
+		if let SelendraMultiSignature::Ed25519(x) = m {
 			Ok(x)
 		} else {
 			Err(())
@@ -60,16 +60,16 @@ impl TryFrom<AcalaMultiSignature> for ed25519::Signature {
 	}
 }
 
-impl From<sr25519::Signature> for AcalaMultiSignature {
+impl From<sr25519::Signature> for SelendraMultiSignature {
 	fn from(x: sr25519::Signature) -> Self {
 		Self::Sr25519(x)
 	}
 }
 
-impl TryFrom<AcalaMultiSignature> for sr25519::Signature {
+impl TryFrom<SelendraMultiSignature> for sr25519::Signature {
 	type Error = ();
-	fn try_from(m: AcalaMultiSignature) -> Result<Self, Self::Error> {
-		if let AcalaMultiSignature::Sr25519(x) = m {
+	fn try_from(m: SelendraMultiSignature) -> Result<Self, Self::Error> {
+		if let SelendraMultiSignature::Sr25519(x) = m {
 			Ok(x)
 		} else {
 			Err(())
@@ -77,16 +77,16 @@ impl TryFrom<AcalaMultiSignature> for sr25519::Signature {
 	}
 }
 
-impl From<ecdsa::Signature> for AcalaMultiSignature {
+impl From<ecdsa::Signature> for SelendraMultiSignature {
 	fn from(x: ecdsa::Signature) -> Self {
 		Self::Ecdsa(x)
 	}
 }
 
-impl TryFrom<AcalaMultiSignature> for ecdsa::Signature {
+impl TryFrom<SelendraMultiSignature> for ecdsa::Signature {
 	type Error = ();
-	fn try_from(m: AcalaMultiSignature) -> Result<Self, Self::Error> {
-		if let AcalaMultiSignature::Ecdsa(x) = m {
+	fn try_from(m: SelendraMultiSignature) -> Result<Self, Self::Error> {
+		if let SelendraMultiSignature::Ecdsa(x) = m {
 			Ok(x)
 		} else {
 			Err(())
@@ -94,13 +94,13 @@ impl TryFrom<AcalaMultiSignature> for ecdsa::Signature {
 	}
 }
 
-impl Default for AcalaMultiSignature {
+impl Default for SelendraMultiSignature {
 	fn default() -> Self {
 		Self::Ed25519(ed25519::Signature([0u8; 64]))
 	}
 }
 
-impl Verify for AcalaMultiSignature {
+impl Verify for SelendraMultiSignature {
 	type Signer = MultiSigner;
 	fn verify<L: Lazy<[u8]>>(&self, mut msg: L, signer: &AccountId32) -> bool {
 		match (self, signer) {

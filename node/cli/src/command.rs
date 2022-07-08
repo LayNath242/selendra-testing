@@ -1,6 +1,6 @@
 // This file is part of Selendra.
 
-// Copyright (C) 2020-2022 Selendra.
+// Copyright (C) 2021-2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -20,7 +20,7 @@ use crate::{Cli, Subcommand};
 use frame_benchmarking_cli::*;
 use sc_cli::{ChainSpec, Result, RuntimeVersion, SubstrateCli};
 use sc_service::PartialComponents;
-use acala_primitives::Block;
+use selendra_primitives::Block;
 use service::{chain_spec, new_partial, ExecutorDispatch, FullClient};
 use sp_core::crypto::Ss58AddressFormat;
 

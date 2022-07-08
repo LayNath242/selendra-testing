@@ -1,7 +1,7 @@
 [package]
 name = "module-idle-scheduler"
 version = "2.8.2"
-authors = ["Acala Developers"]
+authors = ["Selendra <info@selendra.org>"]
 edition = "2021"
 
 [dependencies]
@@ -12,7 +12,7 @@ sp-runtime = { git = "https://github.com/paritytech/substrate", branch = "polkad
 sp-std = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 frame-support = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 frame-system = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
-acala-primitives = { path = "../../primitives", default-features = false }
+selendra-primitives = { path = "../../primitives", default-features = false }
 module-support = { path = "../support", default-features = false }
 
 [dev-dependencies]
@@ -28,7 +28,7 @@ std = [
 	"sp-std/std",
 	"frame-support/std",
 	"frame-system/std",
-	"acala-primitives/std",
+	"selendra-primitives/std",
 	"module-support/std",
 ]
 try-runtime = ["frame-support/try-runtime"]

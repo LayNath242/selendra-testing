@@ -1,6 +1,6 @@
-// This file is part of Acala.
+// This file is part of Selendra.
 
-// Copyright (C) 2020-2022 Acala Foundation.
+// Copyright (C) 2021-2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -20,7 +20,7 @@
 //!
 //! ## Overview
 //!
-//! Built-in decentralized exchange modules in Acala network, the swap
+//! Built-in decentralized exchange modules in Selendra network, the swap
 //! mechanism refers to the design of Uniswap V2. In addition to being used for
 //! trading, DEX also participates in CDP liquidation, which is faster than
 //! liquidation by auction when the liquidity is sufficient. And providing

@@ -23,7 +23,7 @@ resolver = "2"
 split-debuginfo = "unpacked"
 
 [profile.release]
-# Acala runtime requires unwinding.
+# Selendra runtime requires unwinding.
 panic = "unwind"
 
 [profile.production]

@@ -1,6 +1,6 @@
 // This file is part of Selendra.
 
-// Copyright (C) 2020-2022 Selendra.
+// Copyright (C) 2021-2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -31,7 +31,7 @@ use sc_executor::NativeElseWasmExecutor;
 use sc_network::{Event, NetworkService};
 use sc_service::{config::Configuration, error::Error as ServiceError, RpcHandlers, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
-use acala_primitives::Block;
+use selendra_primitives::Block;
 use mandala_runtime::RuntimeApi;
 use sp_api::ProvideRuntimeApi;
 use sp_core::crypto::Pair;
@@ -74,7 +74,7 @@ pub fn new_partial(
 		sc_transaction_pool::FullPool<Block, FullClient>,
 		(
 			impl Fn(
-				acala_rpc::DenyUnsafe,
+				selendra_rpc::DenyUnsafe,
 				sc_rpc::SubscriptionTaskExecutor,
 			) -> Result<jsonrpsee::RpcModule<()>, sc_service::Error>,
 			(
@@ -196,18 +196,18 @@ pub fn new_partial(
 
 		let rpc_backend = backend.clone();
 		let rpc_extensions_builder = move |deny_unsafe, subscription_executor| {
-			let deps = acala_rpc::FullDeps {
+			let deps = selendra_rpc::FullDeps {
 				client: client.clone(),
 				pool: pool.clone(),
 				select_chain: select_chain.clone(),
 				chain_spec: chain_spec.cloned_box(),
 				deny_unsafe,
-				babe: acala_rpc::BabeDeps {
+				babe: selendra_rpc::BabeDeps {
 					babe_config: babe_config.clone(),
 					shared_epoch_changes: shared_epoch_changes.clone(),
 					keystore: keystore.clone(),
 				},
-				grandpa: acala_rpc::GrandpaDeps {
+				grandpa: selendra_rpc::GrandpaDeps {
 					shared_voter_state: shared_voter_state.clone(),
 					shared_authority_set: shared_authority_set.clone(),
 					justification_stream: justification_stream.clone(),
@@ -217,7 +217,7 @@ pub fn new_partial(
 				command_sink: None,
 			};
 
-			acala_rpc::create_full(deps, rpc_backend.clone()).map_err(Into::into)
+			selendra_rpc::create_full(deps, rpc_backend.clone()).map_err(Into::into)
 		};
 
 		(rpc_extensions_builder, shared_voter_state2)

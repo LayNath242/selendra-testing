@@ -1,7 +1,7 @@
 [package]
 name = "module-transaction-pause"
 version = "2.8.2"
-authors = ["Acala Developers"]
+authors = ["Selendra <info@selendra.org>"]
 edition = "2021"
 
 [dependencies]
@@ -18,7 +18,7 @@ sp-io = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0
 pallet-balances = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }
 orml-tokens = { path = "../../orml/tokens" }
 orml-traits = { path = "../../orml/traits" }
-primitives = { package = "acala-primitives", path = "../../primitives" }
+primitives = { package = "selendra-primitives", path = "../../primitives" }
 smallvec = "1.4.1"
 
 [features]

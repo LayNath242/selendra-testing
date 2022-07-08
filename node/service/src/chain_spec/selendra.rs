@@ -1,6 +1,6 @@
 // This file is part of Selendra.
 
-// Copyright (C) 2020-2022 Selendra.
+// Copyright (C) 2021-2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -36,7 +36,7 @@ use sp_runtime::Perbill;
 use mandala_runtime::{
 	dollar, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, Block, CouncilConfig, CdpEngineConfig,
 	DexConfig, EVMConfig, GenesisConfig, GrandpaConfig, ImOnlineConfig,
-	OperatorMembershipAcalaConfig, OrmlNFTConfig, SS58Prefix, SessionConfig, SessionKeys, IndicesConfig,
+	OperatorMembershipSelendraConfig, OrmlNFTConfig, SS58Prefix, SessionConfig, SessionKeys, IndicesConfig,
 	StakerStatus, StakingConfig, SudoConfig, SystemConfig, TechnicalCommitteeMembershipConfig, TokensConfig,
 	ACA, AUSD, CouncilMembershipConfig, FinancialCouncilMembershipConfig, CdpTreasuryConfig
 };
@@ -306,7 +306,7 @@ pub fn selendra_development_genesis(
 			members: vec![],
 			phantom: Default::default(),
 		},
-		operator_membership_acala: OperatorMembershipAcalaConfig {
+		operator_membership_selendra: OperatorMembershipSelendraConfig {
 			members: vec![],
 			phantom: Default::default(),
 		},
@@ -409,7 +409,7 @@ pub fn selendra_genesis(
 			members: vec![],
 			phantom: Default::default(),
 		},
-		operator_membership_acala: OperatorMembershipAcalaConfig {
+		operator_membership_selendra: OperatorMembershipSelendraConfig {
 			members: vec![],
 			phantom: Default::default(),
 		},

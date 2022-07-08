@@ -1,6 +1,6 @@
-// This file is part of Acala.
+// This file is part of Selendra.
 
-// Copyright (C) 2020-2022 Acala Foundation.
+// Copyright (C) 2021-2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -119,7 +119,7 @@ where
 				ECRECOVER_PUBLICKEY,
 				SHA3_256,
 				SHA3_512,
-				// Acala precompile
+				// Selendra precompile
 				MULTI_CURRENCY,
 				NFT,
 				EVM,
@@ -205,7 +205,7 @@ where
 		} else if address == SHA3_512 {
 			Some(Sha3FIPS512::execute(input, target_gas, context, is_static))
 		}
-		// Acala precompile
+		// Selendra precompile
 		else {
 			if !SystemContractsFilter::is_allowed(context.caller) {
 				log::debug!(target: "evm", "Precompile no permission: {:?}", context.caller);

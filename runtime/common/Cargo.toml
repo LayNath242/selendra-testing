@@ -1,7 +1,7 @@
 [package]
 name = "runtime-common"
 version = "2.8.2"
-authors = ["Acala Developers"]
+authors = ["Selendra <info@selendra.org>"]
 edition = "2021"
 
 [[bench]]
@@ -52,7 +52,7 @@ module-dex = { path = "../../modules/dex", default-features = false }
 module-evm-accounts = { path = "../../modules/evm-accounts", default-features = false }
 module-asset-registry = { path = "../../modules/asset-registry", default-features = false, optional = true }
 module-evm-bridge = { path = "../../modules/evm-bridge", default-features = false, optional = true }
-primitives = { package = "acala-primitives", path = "../../primitives", default-features = false }
+primitives = { package = "selendra-primitives", path = "../../primitives", default-features = false }
 module-stable-asset = { version = "0.1.0", default-features = false, path = "../../modules/stable-asset" }
 module-honzon = { path = "../../modules/honzon", default-features = false }
 module-loans = { path = "../../modules/loans", default-features = false }

@@ -1,6 +1,6 @@
-// This file is part of Acala.
+// This file is part of Selendra.
 
-// Copyright (C) 2020-2022 Acala Foundation.
+// Copyright (C) 2021-2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -62,7 +62,7 @@ use orml_traits::{
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
 use primitives::{
 	evm::{AccessListItem, EthereumTransactionMessage},
-	unchecked_extrinsic::AcalaUncheckedExtrinsic,
+	unchecked_extrinsic::SelendraUncheckedExtrinsic,
 };
 #[cfg(feature = "std")]
 pub use pallet_staking::StakerStatus;
@@ -110,7 +110,7 @@ pub use runtime_common::{
 	EnsureRootOrTwoThirdsTechnicalCommittee, ExchangeRate, ExistentialDepositsTimesOneHundred,
 	FinancialCouncilInstance, FinancialCouncilMembershipInstance, GasToWeight, CouncilInstance,
 	CouncilMembershipInstance, MaxTipsOfPriority, BlockHashCount,
-	OffchainSolutionWeightLimit, OperationalFeeMultiplier, OperatorMembershipInstanceAcala, Price, ProxyType, Rate,
+	OffchainSolutionWeightLimit, OperationalFeeMultiplier, OperatorMembershipInstanceSelendra, Price, ProxyType, Rate,
 	Ratio, RuntimeBlockLength, RuntimeBlockWeights, SystemContractsFilter, TechnicalCommitteeInstance,
 	TechnicalCommitteeMembershipInstance, TimeStampedPrice, TipPerWeightStep, ACA, AUSD, DOT, LACA, KSM, RENBTC,
 };
@@ -406,7 +406,7 @@ impl pallet_membership::Config<TechnicalCommitteeMembershipInstance> for Runtime
 	type WeightInfo = ();
 }
 
-impl pallet_membership::Config<OperatorMembershipInstanceAcala> for Runtime {
+impl pallet_membership::Config<OperatorMembershipInstanceSelendra> for Runtime {
 	type Event = Event;
 	type AddOrigin = EnsureRootOrTwoThirdsCouncil;
 	type RemoveOrigin = EnsureRootOrTwoThirdsCouncil;
@@ -414,7 +414,7 @@ impl pallet_membership::Config<OperatorMembershipInstanceAcala> for Runtime {
 	type ResetOrigin = EnsureRootOrTwoThirdsCouncil;
 	type PrimeOrigin = EnsureRootOrTwoThirdsCouncil;
 	type MembershipInitialized = ();
-	type MembershipChanged = AcalaOracle;
+	type MembershipChanged = SelendraOracle;
 	type MaxMembers = ConstU32<50>;
 	type WeightInfo = ();
 }
@@ -649,16 +649,16 @@ parameter_types! {
 	pub RootOperatorAccountId: AccountId = AccountId::from([0xffu8; 32]);
 }
 
-type AcalaDataProvider = orml_oracle::Instance1;
-impl orml_oracle::Config<AcalaDataProvider> for Runtime {
+type SelendraDataProvider = orml_oracle::Instance1;
+impl orml_oracle::Config<SelendraDataProvider> for Runtime {
 	type Event = Event;
 	type OnNewData = ();
-	type CombineData = orml_oracle::DefaultCombineData<Runtime, MinimumCount, ExpiresIn, AcalaDataProvider>;
+	type CombineData = orml_oracle::DefaultCombineData<Runtime, MinimumCount, ExpiresIn, SelendraDataProvider>;
 	type Time = Timestamp;
 	type OracleKey = CurrencyId;
 	type OracleValue = Price;
 	type RootOperatorAccountId = RootOperatorAccountId;
-	type Members = OperatorMembershipAcala;
+	type Members = OperatorMembershipSelendra;
 	type MaxHasDispatchedSize = ConstU32<40>;
 	type WeightInfo = weights::orml_oracle::WeightInfo<Runtime>;
 }
@@ -668,7 +668,7 @@ create_median_value_data_provider!(
 	CurrencyId,
 	Price,
 	TimeStampedPrice,
-	[AcalaOracle]
+	[SelendraOracle]
 );
 // Aggregated data provider cannot feed.
 impl DataFeeder<CurrencyId, Price, AccountId> for AggregatedDataProvider {
@@ -971,7 +971,7 @@ impl module_cdp_engine::Config for Runtime {
 	type UnixTime = Timestamp;
 	type Currency = Currencies;
 	type DEX = Dex;
-	type Swap = AcalaSwap;
+	type Swap = SelendraSwap;
 	type WeightInfo = weights::module_cdp_engine::WeightInfo<Runtime>;
 }
 
@@ -1032,11 +1032,11 @@ impl module_aggregated_dex::Config for Runtime {
 
 pub type RebasedStableAsset = module_support::RebasedStableAsset<
 	StableAsset,
-	ConvertBalanceAcala,
+	ConvertBalanceSelendra,
 	module_aggregated_dex::RebasedStableAssetErrorConvertor<Runtime>,
 >;
 
-pub type AcalaSwap = module_aggregated_dex::AggregatedSwap<Runtime>;
+pub type SelendraSwap = module_aggregated_dex::AggregatedSwap<Runtime>;
 
 impl module_dex_oracle::Config for Runtime {
 	type DEX = Dex;
@@ -1056,7 +1056,7 @@ impl module_cdp_treasury::Config for Runtime {
 	type AuctionManagerHandler = AuctionManager;
 	type UpdateOrigin = EnsureRootOrHalfFinancialCouncil;
 	type DEX = Dex;
-	type Swap = AcalaSwap;
+	type Swap = SelendraSwap;
 	type MaxAuctionsCount = ConstU32<50>;
 	type PalletId = CDPTreasuryPalletId;
 	type TreasuryAccount = HonzonTreasuryAccount;
@@ -1275,8 +1275,8 @@ impl module_stable_asset::traits::ValidateAssetId<CurrencyId> for EnsurePoolAsse
 }
 
 
-pub struct ConvertBalanceAcala;
-impl orml_tokens::ConvertBalance<Balance, Balance> for ConvertBalanceAcala {
+pub struct ConvertBalanceSelendra;
+impl orml_tokens::ConvertBalance<Balance, Balance> for ConvertBalanceSelendra {
 	type AssetId = CurrencyId;
 
 	fn convert_balance(balance: Balance, asset_id: CurrencyId) -> Balance {
@@ -1308,7 +1308,7 @@ impl Contains<CurrencyId> for IsLiquidToken {
 type RebaseTokens = orml_tokens::Combiner<
 	AccountId,
 	IsLiquidToken,
-	orml_tokens::Mapper<AccountId, Currencies, ConvertBalanceAcala, Balance, GetLiquidCurrencyId>,
+	orml_tokens::Mapper<AccountId, Currencies, ConvertBalanceSelendra, Balance, GetLiquidCurrencyId>,
 	Currencies,
 >;
 
@@ -1433,7 +1433,7 @@ pub type SignedExtra = (
 	module_evm::SetEvmOrigin<Runtime>,
 );
 /// Unchecked extrinsic type as expected by this runtime.
-pub type UncheckedExtrinsic = AcalaUncheckedExtrinsic<
+pub type UncheckedExtrinsic = SelendraUncheckedExtrinsic<
 	Call,
 	SignedExtra,
 	ConvertEthereumTx,
@@ -1516,15 +1516,15 @@ construct_runtime!(
 		// Oracle
 		//
 		// NOTE: OperatorMembership must be placed after Oracle or else will have race condition on initialization
-		AcalaOracle: orml_oracle::<Instance1> = 80,
-		OperatorMembershipAcala: pallet_membership::<Instance5> = 82,
+		SelendraOracle: orml_oracle::<Instance1> = 80,
+		OperatorMembershipSelendra: pallet_membership::<Instance5> = 82,
 
 		// ORML Core
 		Auction: orml_auction = 100,
 		Rewards: orml_rewards = 101,
 		OrmlNFT: orml_nft exclude_parts { Call } = 102,
 
-		// Acala Core
+		// Selendra Core
 		Prices: module_prices = 110,
 		Dex: module_dex = 111,
 		DexOracle: module_dex_oracle = 112,
@@ -1538,7 +1538,7 @@ construct_runtime!(
 		CdpEngine: module_cdp_engine = 124,
 		EmergencyShutdown: module_emergency_shutdown = 125,
 
-		// Acala Other
+		// Selendra Other
 		Incentives: module_incentives = 140,
 		NFT: module_nft = 141,
 		AssetRegistry: module_asset_registry = 142,
@@ -1780,14 +1780,14 @@ impl_runtime_apis! {
 	> for Runtime {
 		fn get_value(provider_id: DataProviderId ,key: CurrencyId) -> Option<TimeStampedPrice> {
 			match provider_id {
-				DataProviderId::Acala => AcalaOracle::get_no_op(&key),
+				DataProviderId::Selendra => SelendraOracle::get_no_op(&key),
 				DataProviderId::Aggregated => <AggregatedDataProvider as DataProviderExtended<_, _>>::get_no_op(&key)
 			}
 		}
 
 		fn get_all_values(provider_id: DataProviderId) -> Vec<(CurrencyId, Option<TimeStampedPrice>)> {
 			match provider_id {
-				DataProviderId::Acala => AcalaOracle::get_all_values(),
+				DataProviderId::Selendra => SelendraOracle::get_all_values(),
 				DataProviderId::Aggregated => <AggregatedDataProvider as DataProviderExtended<_, _>>::get_all_values()
 			}
 		}
@@ -1907,7 +1907,7 @@ impl_runtime_apis! {
 		}
 	}
 
-	// benchmarks for acala modules
+	// benchmarks for selendra modules
 	#[cfg(feature = "runtime-benchmarks")]
 	impl frame_benchmarking::Benchmark<Block> for Runtime {
 		fn benchmark_metadata(extra: bool) -> (

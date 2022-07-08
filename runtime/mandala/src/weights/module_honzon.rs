@@ -1,6 +1,6 @@
-// This file is part of Acala.
+// This file is part of Selendra.
 
-// Copyright (C) 2020-2022 Acala Foundation.
+// Copyright (C) 2021-2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -23,7 +23,7 @@
 //! EXECUTION: Some(Wasm), WASM-EXECUTION: Compiled, CHAIN: Some("dev"), DB CACHE: 1024
 
 // Executed Command:
-// target/production/acala
+// target/production/selendra
 // benchmark
 // --chain=dev
 // --steps=50
@@ -78,10 +78,10 @@ impl<T: frame_system::Config> module_honzon::WeightInfo for WeightInfo<T> {
 	// Storage: CdpEngine DebitExchangeRate (r:1 w:0)
 	// Storage: Tokens TotalIssuance (r:1 w:1)
 	// Storage: Prices LockedPrice (r:2 w:0)
-	// Storage: AcalaOracle IsUpdated (r:1 w:1)
-	// Storage: OperatorMembershipAcala Members (r:1 w:0)
-	// Storage: AcalaOracle RawValues (r:3 w:0)
-	// Storage: AcalaOracle Values (r:1 w:1)
+	// Storage: SelendraOracle IsUpdated (r:1 w:1)
+	// Storage: OperatorMembershipSelendra Members (r:1 w:0)
+	// Storage: SelendraOracle RawValues (r:3 w:0)
+	// Storage: SelendraOracle Values (r:1 w:1)
 	// Storage: Timestamp Now (r:1 w:0)
 	fn adjust_loan() -> Weight {
 		(110_666_000 as Weight)
@@ -93,8 +93,8 @@ impl<T: frame_system::Config> module_honzon::WeightInfo for WeightInfo<T> {
 	// Storage: Loans Positions (r:2 w:2)
 	// Storage: CdpEngine DebitExchangeRate (r:1 w:0)
 	// Storage: Prices LockedPrice (r:2 w:0)
-	// Storage: AcalaOracle IsUpdated (r:1 w:0)
-	// Storage: AcalaOracle Values (r:1 w:0)
+	// Storage: SelendraOracle IsUpdated (r:1 w:0)
+	// Storage: SelendraOracle Values (r:1 w:0)
 	// Storage: CdpEngine CollateralParams (r:1 w:0)
 	// Storage: Rewards SharesAndWithdrawnRewards (r:2 w:2)
 	// Storage: Rewards PoolInfos (r:1 w:1)
@@ -108,8 +108,8 @@ impl<T: frame_system::Config> module_honzon::WeightInfo for WeightInfo<T> {
 	// Storage: EmergencyShutdown IsShutdown (r:1 w:0)
 	// Storage: Loans Positions (r:1 w:1)
 	// Storage: Prices LockedPrice (r:2 w:0)
-	// Storage: AcalaOracle IsUpdated (r:1 w:0)
-	// Storage: AcalaOracle Values (r:1 w:0)
+	// Storage: SelendraOracle IsUpdated (r:1 w:0)
+	// Storage: SelendraOracle Values (r:1 w:0)
 	// Storage: Homa StakingLedgers (r:1 w:0)
 	// Storage: Homa ToBondPool (r:1 w:0)
 	// Storage: Tokens TotalIssuance (r:1 w:0)
@@ -141,8 +141,8 @@ impl<T: frame_system::Config> module_honzon::WeightInfo for WeightInfo<T> {
 	// Storage: Rewards PoolInfos (r:1 w:1)
 	// Storage: Loans TotalPositions (r:1 w:1)
 	// Storage: Prices LockedPrice (r:2 w:0)
-	// Storage: AcalaOracle IsUpdated (r:1 w:0)
-	// Storage: AcalaOracle Values (r:1 w:0)
+	// Storage: SelendraOracle IsUpdated (r:1 w:0)
+	// Storage: SelendraOracle Values (r:1 w:0)
 	// Storage: CdpEngine CollateralParams (r:1 w:0)
 	fn expand_position_collateral() -> Weight {
 		(129_184_000 as Weight)
@@ -170,7 +170,7 @@ impl<T: frame_system::Config> module_honzon::WeightInfo for WeightInfo<T> {
 	// Storage: Tokens Accounts (r:1 w:1)
 	// Storage: Tokens TotalIssuance (r:2 w:1)
 	// Storage: Prices LockedPrice (r:3 w:0)
-	// Storage: AcalaOracle Values (r:1 w:0)
+	// Storage: SelendraOracle Values (r:1 w:0)
 	// Storage: AssetRegistry AssetMetadatas (r:2 w:0)
 	// Storage: Homa StakingLedgers (r:1 w:0)
 	// Storage: Homa ToBondPool (r:1 w:0)
@@ -183,7 +183,7 @@ impl<T: frame_system::Config> module_honzon::WeightInfo for WeightInfo<T> {
 	}
 	// Storage: Loans Positions (r:1 w:0)
 	// Storage: Prices LockedPrice (r:2 w:0)
-	// Storage: AcalaOracle Values (r:1 w:0)
+	// Storage: SelendraOracle Values (r:1 w:0)
 	// Storage: AssetRegistry AssetMetadatas (r:2 w:0)
 	// Storage: Homa StakingLedgers (r:1 w:0)
 	// Storage: Homa ToBondPool (r:1 w:0)

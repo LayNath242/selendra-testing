@@ -1,6 +1,6 @@
-// This file is part of Acala.
+// This file is part of Selendra.
 
-// Copyright (C) 2020-2022 Acala Foundation.
+// Copyright (C) 2021-2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -23,7 +23,7 @@
 //! EXECUTION: Some(Wasm), WASM-EXECUTION: Compiled, CHAIN: Some("karura-dev"), DB CACHE: 128
 
 // Executed Command:
-// target/release/acala
+// target/release/selendra
 // benchmark
 // --chain=karura-dev
 // --steps=50
@@ -51,9 +51,9 @@ pub trait WeightInfo {
 	fn from_bridged() -> Weight;
 }
 
-/// Weights for module_homa_lite using the Acala node and recommended hardware.
-pub struct AcalaWeight<T>(PhantomData<T>);
-impl<T: frame_system::Config> WeightInfo for AcalaWeight<T> {
+/// Weights for module_homa_lite using the Selendra node and recommended hardware.
+pub struct SelendraWeight<T>(PhantomData<T>);
+impl<T: frame_system::Config> WeightInfo for SelendraWeight<T> {
 	fn to_bridged() -> Weight {
 		(8_000_000 as Weight)
 	}

@@ -1,6 +1,6 @@
-// This file is part of Acala.
+// This file is part of Selendra.
 
-// Copyright (C) 2020-2022 Acala Foundation.
+// Copyright (C) 2021-2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -24,7 +24,7 @@
 //! EXECUTION: Some(Wasm), WASM-EXECUTION: Compiled, CHAIN: Some("dev"), DB CACHE: 128
 
 // Executed Command:
-// target/release/acala
+// target/release/selendra
 // benchmark
 // --chain=dev
 // --steps=50
@@ -57,9 +57,9 @@ pub trait WeightInfo {
 	fn update_claim_reward_deduction_rates(c: u32, ) -> Weight;
 }
 
-/// Weights for module_incentives using the Acala node and recommended hardware.
-pub struct AcalaWeight<T>(PhantomData<T>);
-impl<T: frame_system::Config> WeightInfo for AcalaWeight<T> {
+/// Weights for module_incentives using the Selendra node and recommended hardware.
+pub struct SelendraWeight<T>(PhantomData<T>);
+impl<T: frame_system::Config> WeightInfo for SelendraWeight<T> {
 	fn on_initialize(c: u32) -> Weight {
 		(33_360_000 as Weight)
 			.saturating_add((23_139_000 as Weight).saturating_mul(c as Weight))

@@ -1,6 +1,6 @@
-// This file is part of Acala.
+// This file is part of Selendra.
 
-// Copyright (C) 2020-2022 Acala Foundation.
+// Copyright (C) 2021-2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -118,28 +118,28 @@ macro_rules! create_currency_id {
 				address: EvmAddress,
 			}
 
-			// Acala tokens
-			let mut acala_tokens = vec![];
+			// Selendra tokens
+			let mut selendra_tokens = vec![];
 			$(
 				if $val < 128 {
-					acala_tokens.push(Token {
+					selendra_tokens.push(Token {
 						symbol: stringify!($symbol).to_string(),
 						address: EvmAddress::try_from(CurrencyId::Token(TokenSymbol::$symbol)).unwrap(),
 					});
 				}
 			)*
 
-			acala_tokens.push(Token {
+			selendra_tokens.push(Token {
 				symbol: "SA_DOT".to_string(),
 				address: EvmAddress::try_from(CurrencyId::StableAssetPoolToken(0)).unwrap(),
 			});
 
-			acala_tokens.push(Token {
+			selendra_tokens.push(Token {
 				symbol: "SA_3USD".to_string(),
 				address: EvmAddress::try_from(CurrencyId::StableAssetPoolToken(1)).unwrap(),
 			});
 
-			let mut acala_lp_tokens = vec![
+			let mut selendra_lp_tokens = vec![
 				Token {
 					symbol: "LP_ACA_AUSD".to_string(),
 					address: EvmAddress::try_from(TradingPair::from_currency_ids(CurrencyId::Token(ACA), CurrencyId::Token(AUSD)).unwrap().dex_share_currency_id()).unwrap(),
@@ -153,9 +153,9 @@ macro_rules! create_currency_id {
 					address: EvmAddress::try_from(TradingPair::from_currency_ids(CurrencyId::Token(RENBTC), CurrencyId::Token(AUSD)).unwrap().dex_share_currency_id()).unwrap(),
 				},
 			];
-			acala_tokens.append(&mut acala_lp_tokens);
+			selendra_tokens.append(&mut selendra_lp_tokens);
 
-			frame_support::assert_ok!(std::fs::write("../predeploy-contracts/resources/acala_tokens.json", serde_json::to_string_pretty(&acala_tokens).unwrap()));
+			frame_support::assert_ok!(std::fs::write("../predeploy-contracts/resources/selendra_tokens.json", serde_json::to_string_pretty(&selendra_tokens).unwrap()));
 		}
     }
 }
@@ -164,7 +164,7 @@ create_currency_id! {
 	// Represent a Token symbol with 8 bit
 	//
 	// 0 - 127: Polkadot Ecosystem tokens
-	// 0 - 19: Acala & Polkadot native tokens
+	// 0 - 19: Selendra & Polkadot native tokens
 	// 20 - 39: External tokens (e.g. bridged)
 	// 40 - 127: Polkadot parachain tokens
 	//
@@ -176,11 +176,11 @@ create_currency_id! {
 	#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 	#[repr(u8)]
 	pub enum TokenSymbol {
-		// 0 - 19: Acala & Polkadot native tokens
-		ACA("Acala", 12) = 0,
-		AUSD("Acala Dollar", 12) = 1,
+		// 0 - 19: Selendra & Polkadot native tokens
+		ACA("Selendra", 12) = 0,
+		AUSD("Selendra Dollar", 12) = 1,
 		DOT("Polkadot", 10) = 2,
-		LACA("Liquid Acala", 10) = 3,
+		LACA("Liquid Selendra", 10) = 3,
 		// 20 - 39: External tokens (e.g. bridged)
 		RENBTC("Ren Protocol BTC", 8) = 20,
 		CASH("Compound CASH", 8) = 21,

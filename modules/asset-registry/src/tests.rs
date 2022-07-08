@@ -1,6 +1,6 @@
-// This file is part of Acala.
+// This file is part of Selendra.
 
-// Copyright (C) 2020-2022 Acala Foundation.
+// Copyright (C) 2021-2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -436,7 +436,7 @@ fn name_works() {
 			));
 			assert_eq!(
 				EvmErc20InfoMapping::<Runtime>::name(CurrencyId::Token(TokenSymbol::ACA)),
-				Some(b"Acala".to_vec())
+				Some(b"Selendra".to_vec())
 			);
 			assert_eq!(
 				EvmErc20InfoMapping::<Runtime>::name(CurrencyId::Erc20(erc20_address())),
@@ -450,12 +450,12 @@ fn name_works() {
 
 			assert_eq!(
 				EvmErc20InfoMapping::<Runtime>::name(CurrencyId::DexShare(DexShare::Token(TokenSymbol::ACA), DexShare::Token(TokenSymbol::AUSD))),
-				Some(b"LP Acala - Acala Dollar".to_vec())
+				Some(b"LP Selendra - Selendra Dollar".to_vec())
 			);
 
 			assert_eq!(
 				EvmErc20InfoMapping::<Runtime>::name(CurrencyId::DexShare(DexShare::Erc20(erc20_address()), DexShare::Token(TokenSymbol::AUSD))),
-				Some(b"LP long string name, long string name, long string name, long string name, long string name - Acala Dollar"[..32].to_vec())
+				Some(b"LP long string name, long string name, long string name, long string name, long string name - Selendra Dollar"[..32].to_vec())
 			);
 
 			assert_eq!(

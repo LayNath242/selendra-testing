@@ -1,6 +1,6 @@
-// This file is part of Acala.
+// This file is part of Selendra.
 
-// Copyright (C) 2020-2022 Acala Foundation.
+// Copyright (C) 2021-2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -24,7 +24,7 @@ use module_evm::{Context, ExitRevert};
 use primitives::evm::{PRECOMPILE_ADDRESS_START, PREDEPLOY_ADDRESS_START};
 
 #[test]
-fn precompile_filter_works_on_acala_precompiles() {
+fn precompile_filter_works_on_selendra_precompiles() {
 	let precompile = PRECOMPILE_ADDRESS_START;
 
 	let mut non_system = [0u8; 20];

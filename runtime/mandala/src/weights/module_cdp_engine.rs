@@ -1,6 +1,6 @@
-// This file is part of Acala.
+// This file is part of Selendra.
 
-// Copyright (C) 2020-2022 Acala Foundation.
+// Copyright (C) 2021-2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -23,7 +23,7 @@
 //! EXECUTION: Some(Wasm), WASM-EXECUTION: Compiled, CHAIN: Some("dev"), DB CACHE: 1024
 
 // Executed Command:
-// target/production/acala
+// target/production/selendra
 // benchmark
 // --chain=dev
 // --steps=50
@@ -72,8 +72,8 @@ impl<T: frame_system::Config> module_cdp_engine::WeightInfo for WeightInfo<T> {
 	// Storage: EmergencyShutdown IsShutdown (r:1 w:0)
 	// Storage: Loans Positions (r:1 w:1)
 	// Storage: Prices LockedPrice (r:2 w:0)
-	// Storage: AcalaOracle IsUpdated (r:1 w:0)
-	// Storage: AcalaOracle Values (r:1 w:0)
+	// Storage: SelendraOracle IsUpdated (r:1 w:0)
+	// Storage: SelendraOracle Values (r:1 w:0)
 	// Storage: CdpEngine DebitExchangeRate (r:1 w:0)
 	// Storage: CdpEngine CollateralParams (r:1 w:0)
 	// Storage: Tokens Accounts (r:2 w:2)
@@ -102,8 +102,8 @@ impl<T: frame_system::Config> module_cdp_engine::WeightInfo for WeightInfo<T> {
 	// Storage: EmergencyShutdown IsShutdown (r:1 w:0)
 	// Storage: Loans Positions (r:1 w:1)
 	// Storage: Prices LockedPrice (r:2 w:0)
-	// Storage: AcalaOracle IsUpdated (r:1 w:0)
-	// Storage: AcalaOracle Values (r:1 w:0)
+	// Storage: SelendraOracle IsUpdated (r:1 w:0)
+	// Storage: SelendraOracle Values (r:1 w:0)
 	// Storage: Homa StakingLedgers (r:1 w:0)
 	// Storage: Homa ToBondPool (r:1 w:0)
 	// Storage: Tokens TotalIssuance (r:1 w:0)

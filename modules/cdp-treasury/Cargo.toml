@@ -1,7 +1,7 @@
 [package]
 name = "module-cdp-treasury"
 version = "2.8.2"
-authors = ["Acala Developers"]
+authors = ["Selendra <info@selendra.org>"]
 edition = "2021"
 
 [dependencies]
@@ -14,7 +14,7 @@ frame-system = { git = "https://github.com/paritytech/substrate", branch = "polk
 sp-std = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 orml-traits = { path = "../../orml/traits", default-features = false }
 support = { package = "module-support", path = "../support", default-features = false }
-primitives = { package = "acala-primitives", path = "../../primitives", default-features = false }
+primitives = { package = "selendra-primitives", path = "../../primitives", default-features = false }
 module-stable-asset = { version = "0.1.0", default-features = false, path = "../stable-asset" }
 
 [dev-dependencies]

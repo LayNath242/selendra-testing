@@ -1,6 +1,6 @@
-// This file is part of Acala.
+// This file is part of Selendra.
 
-// Copyright (C) 2020-2022 Acala Foundation.
+// Copyright (C) 2021-2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -17,8 +17,8 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 use crate::{
-	AcalaOracle, AccountId, AssetRegistry, Balance, Currencies, CurrencyId, ExistentialDeposits, GetNativeCurrencyId,
-	MinimumCount, NativeTokenExistentialDeposit, OperatorMembershipAcala, Origin, Price, Runtime,
+	SelendraOracle, AccountId, AssetRegistry, Balance, Currencies, CurrencyId, ExistentialDeposits, GetNativeCurrencyId,
+	MinimumCount, NativeTokenExistentialDeposit, OperatorMembershipSelendra, Origin, Price, Runtime,
 };
 
 use frame_benchmarking::account;
@@ -70,10 +70,10 @@ pub fn set_balance(currency_id: CurrencyId, who: &AccountId, balance: Balance) {
 pub fn feed_price(prices: Vec<(CurrencyId, Price)>) -> DispatchResult {
 	for i in 0..MinimumCount::get() {
 		let oracle: AccountId = account("oracle", 0, i);
-		if !OperatorMembershipAcala::contains(&oracle) {
-			OperatorMembershipAcala::add_member(RawOrigin::Root.into(), oracle.clone())?;
+		if !OperatorMembershipSelendra::contains(&oracle) {
+			OperatorMembershipSelendra::add_member(RawOrigin::Root.into(), oracle.clone())?;
 		}
-		AcalaOracle::feed_values(RawOrigin::Signed(oracle).into(), prices.to_vec())
+		SelendraOracle::feed_values(RawOrigin::Signed(oracle).into(), prices.to_vec())
 			.map_or_else(|e| Err(e.error), |_| Ok(()))?;
 	}
 

@@ -1,6 +1,6 @@
-// This file is part of Acala.
+// This file is part of Selendra.
 
-// Copyright (C) 2020-2022 Acala Foundation.
+// Copyright (C) 2021-2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -64,9 +64,9 @@ fn should_calculate_contract_address() {
 			gas_price: U256::one(),
 			..Default::default()
 		};
-		let metadata = StackSubstateMetadata::new(1000, 1000, &ACALA_CONFIG);
+		let metadata = StackSubstateMetadata::new(1000, 1000, &SELENDRA_CONFIG);
 		let state = SubstrateStackState::<Runtime>::new(&vicinity, metadata);
-		let mut executor = StackExecutor::new_with_precompiles(state, &ACALA_CONFIG, &());
+		let mut executor = StackExecutor::new_with_precompiles(state, &SELENDRA_CONFIG, &());
 
 		assert_eq!(
 			executor.create_address(evm::CreateScheme::Legacy { caller: addr }),

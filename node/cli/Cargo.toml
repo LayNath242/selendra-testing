@@ -1,5 +1,5 @@
 [package]
-name = "acala-cli"
+name = "selendra-cli"
 version = "0.1.0"
 authors = ["Selendra <info@selendra.org>"]
 edition = "2021"
@@ -20,10 +20,10 @@ sc-telemetry = { git = "https://github.com/paritytech/substrate", branch = "polk
 frame-benchmarking-cli = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", optional = true }
 try-runtime-cli = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", optional = true }
 
-inspect = { package = "acala-inspect", path = "../../inspect" }
-service = { package = "acala-service", path = "../service", default-features = false, optional = true }
+inspect = { package = "selendra-inspect", path = "../../inspect" }
+service = { package = "selendra-service", path = "../service", default-features = false, optional = true }
 mandala-runtime = { path = "../../runtime/mandala" }
-acala-primitives = { path = "../../primitives" }
+selendra-primitives = { path = "../../primitives" }
 
 [build-dependencies]
 substrate-build-script-utils = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }

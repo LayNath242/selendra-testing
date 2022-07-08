@@ -1,6 +1,6 @@
-// This file is part of Acala.
+// This file is part of Selendra.
 
-// Copyright (C) 2020-2022 Acala Foundation.
+// Copyright (C) 2021-2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -54,7 +54,7 @@ pub type BlockNumber = u32;
 
 /// Alias to 512-bit hash when used in the context of a transaction signature on
 /// the chain.
-pub type Signature = signature::AcalaMultiSignature;
+pub type Signature = signature::SelendraMultiSignature;
 
 /// Alias to the public key used for this chain, actually a `MultiSigner`. Like
 /// the signature, this also isn't a fixed size when encoded, as different
@@ -135,7 +135,7 @@ pub enum AuthoritysOriginIdMadala {
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum DataProviderId {
 	Aggregated = 0,
-	Acala = 1,
+	Selendra = 1,
 }
 
 #[derive(Encode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord, TypeInfo, MaxEncodedLen)]

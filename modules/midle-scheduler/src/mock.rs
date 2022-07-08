@@ -1,6 +1,6 @@
-// This file is part of Acala.
+// This file is part of Selendra.
 
-// Copyright (C) 2020-2022 Acala Foundation.
+// Copyright (C) 2021-2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 #![cfg(test)]
 
 use crate as module_idle_scheduler;
-use acala_primitives::{define_combined_task, task::TaskResult};
+use selendra_primitives::{define_combined_task, task::TaskResult};
 use frame_support::weights::Weight;
 use frame_support::{
 	construct_runtime,

@@ -1,6 +1,6 @@
-// This file is part of Acala.
+// This file is part of Selendra.
 
-// Copyright (C) 2020-2022 Acala Foundation.
+// Copyright (C) 2021-2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -1176,7 +1176,7 @@ fn fungible_inspect_trait_should_work() {
 				DepositConsequence::Success
 			);
 
-			// TODO: update test code to assert_eq! for this: https://github.com/AcalaNetwork/Acala/issues/2038
+			// TODO: update test code to assert_eq! for this: https://github.com/SelendraNetwork/Selendra/issues/2038
 			// Test Inspect::can_withdraw
 			assert_eq!(
 				<Currencies as fungibles::Inspect<_>>::can_withdraw(NATIVE_CURRENCY_ID, &alice(), Bounded::max_value()),

@@ -1,5 +1,5 @@
 [package]
-name = "acala-service"
+name = "selendra-service"
 version = "0.1.0"
 authors = ["Selendra <info@selendra.org>"]
 edition = "2021"
@@ -76,8 +76,8 @@ module-evm = { path = "../../modules/evm" }
 module-nft = { path = "../../modules/nft" }
 orml-oracle-rpc = { path = "../../orml/oracle/rpc" }
 orml-tokens-rpc = { path = "../../orml/tokens/rpc" }
-acala-primitives = { path = "../../primitives" }
-acala-rpc = { path = "../../rpc" }
+selendra-primitives = { path = "../../primitives" }
+selendra-rpc = { path = "../../rpc" }
 module-evm-rpc-runtime-api = { path = "../../modules/evm/rpc/runtime_api" }
 
 runtime-common = { path = "../../runtime/common" }

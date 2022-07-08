@@ -1,6 +1,6 @@
-// This file is part of Acala.
+// This file is part of Selendra.
 
-// Copyright (C) 2020-2022 Acala Foundation.
+// Copyright (C) 2021-2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -23,7 +23,7 @@
 //! EXECUTION: Some(Wasm), WASM-EXECUTION: Compiled, CHAIN: Some("dev"), DB CACHE: 1024
 
 // Executed Command:
-// target/production/acala
+// target/production/selendra
 // benchmark
 // --chain=dev
 // --steps=50
@@ -46,10 +46,10 @@ use sp_std::marker::PhantomData;
 /// Weight functions for orml_oracle.
 pub struct WeightInfo<T>(PhantomData<T>);
 impl<T: frame_system::Config> orml_oracle::WeightInfo for WeightInfo<T> {
-	// Storage: AcalaOracle HasDispatched (r:1 w:1)
+	// Storage: SelendraOracle HasDispatched (r:1 w:1)
 	// Storage: Timestamp Now (r:1 w:0)
-	// Storage: AcalaOracle RawValues (r:0 w:1)
-	// Storage: AcalaOracle IsUpdated (r:0 w:1)
+	// Storage: SelendraOracle RawValues (r:0 w:1)
+	// Storage: SelendraOracle IsUpdated (r:0 w:1)
 	fn feed_values(c: u32, ) -> Weight {
 		(12_541_000 as Weight)
 			// Standard Error: 39_000
@@ -58,7 +58,7 @@ impl<T: frame_system::Config> orml_oracle::WeightInfo for WeightInfo<T> {
 			.saturating_add(T::DbWeight::get().writes(1 as Weight))
 			.saturating_add(T::DbWeight::get().writes((2 as Weight).saturating_mul(c as Weight)))
 	}
-	// Storage: AcalaOracle HasDispatched (r:0 w:1)
+	// Storage: SelendraOracle HasDispatched (r:0 w:1)
 	fn on_finalize() -> Weight {
 		(2_862_000 as Weight)
 			.saturating_add(T::DbWeight::get().writes(1 as Weight))

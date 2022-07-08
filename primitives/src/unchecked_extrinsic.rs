@@ -1,6 +1,6 @@
-// This file is part of Acala.
+// This file is part of Selendra.
 
-// Copyright (C) 2020-2022 Acala Foundation.
+// Copyright (C) 2021-2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{evm::EthereumTransactionMessage, signature::AcalaMultiSignature, to_bytes, Address, Balance};
+use crate::{evm::EthereumTransactionMessage, signature::SelendraMultiSignature, to_bytes, Address, Balance};
 use codec::{Decode, Encode};
 use frame_support::{
 	log,
@@ -38,7 +38,7 @@ use sp_std::{marker::PhantomData, prelude::*};
 
 #[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug, TypeInfo)]
 #[scale_info(skip_type_params(ConvertEthTx, CheckPayerTx))]
-pub struct AcalaUncheckedExtrinsic<
+pub struct SelendraUncheckedExtrinsic<
 	Call,
 	Extra: SignedExtension,
 	ConvertEthTx,
@@ -46,13 +46,13 @@ pub struct AcalaUncheckedExtrinsic<
 	TxFeePerGas,
 	CheckPayerTx,
 >(
-	pub UncheckedExtrinsic<Address, Call, AcalaMultiSignature, Extra>,
+	pub UncheckedExtrinsic<Address, Call, SelendraMultiSignature, Extra>,
 	PhantomData<(ConvertEthTx, StorageDepositPerByte, TxFeePerGas, CheckPayerTx)>,
 );
 
 #[cfg(feature = "std")]
 impl<Call, Extra, ConvertEthTx, StorageDepositPerByte, TxFeePerGas, CheckPayerTx> parity_util_mem::MallocSizeOf
-	for AcalaUncheckedExtrinsic<Call, Extra, ConvertEthTx, StorageDepositPerByte, TxFeePerGas, CheckPayerTx>
+	for SelendraUncheckedExtrinsic<Call, Extra, ConvertEthTx, StorageDepositPerByte, TxFeePerGas, CheckPayerTx>
 where
 	Extra: SignedExtension,
 {
@@ -63,11 +63,11 @@ where
 }
 
 impl<Call, Extra: SignedExtension, ConvertEthTx, StorageDepositPerByte, TxFeePerGas, CheckPayerTx> Extrinsic
-	for AcalaUncheckedExtrinsic<Call, Extra, ConvertEthTx, StorageDepositPerByte, TxFeePerGas, CheckPayerTx>
+	for SelendraUncheckedExtrinsic<Call, Extra, ConvertEthTx, StorageDepositPerByte, TxFeePerGas, CheckPayerTx>
 {
 	type Call = Call;
 
-	type SignaturePayload = (Address, AcalaMultiSignature, Extra);
+	type SignaturePayload = (Address, SelendraMultiSignature, Extra);
 
 	fn is_signed(&self) -> Option<bool> {
 		self.0.is_signed()
@@ -86,14 +86,14 @@ impl<Call, Extra: SignedExtension, ConvertEthTx, StorageDepositPerByte, TxFeePer
 }
 
 impl<Call, Extra: SignedExtension, ConvertEthTx, StorageDepositPerByte, TxFeePerGas, CheckPayerTx> ExtrinsicMetadata
-	for AcalaUncheckedExtrinsic<Call, Extra, ConvertEthTx, StorageDepositPerByte, TxFeePerGas, CheckPayerTx>
+	for SelendraUncheckedExtrinsic<Call, Extra, ConvertEthTx, StorageDepositPerByte, TxFeePerGas, CheckPayerTx>
 {
-	const VERSION: u8 = UncheckedExtrinsic::<Address, Call, AcalaMultiSignature, Extra>::VERSION;
+	const VERSION: u8 = UncheckedExtrinsic::<Address, Call, SelendraMultiSignature, Extra>::VERSION;
 	type SignedExtensions = Extra;
 }
 
 impl<Call, Extra: SignedExtension, ConvertEthTx, StorageDepositPerByte, TxFeePerGas, CheckPayerTx> ExtrinsicCall
-	for AcalaUncheckedExtrinsic<Call, Extra, ConvertEthTx, StorageDepositPerByte, TxFeePerGas, CheckPayerTx>
+	for SelendraUncheckedExtrinsic<Call, Extra, ConvertEthTx, StorageDepositPerByte, TxFeePerGas, CheckPayerTx>
 {
 	fn call(&self) -> &Self::Call {
 		self.0.call()
@@ -101,7 +101,7 @@ impl<Call, Extra: SignedExtension, ConvertEthTx, StorageDepositPerByte, TxFeePer
 }
 
 impl<Call, Extra, ConvertEthTx, StorageDepositPerByte, TxFeePerGas, Lookup, CheckPayerTx> Checkable<Lookup>
-	for AcalaUncheckedExtrinsic<Call, Extra, ConvertEthTx, StorageDepositPerByte, TxFeePerGas, CheckPayerTx>
+	for SelendraUncheckedExtrinsic<Call, Extra, ConvertEthTx, StorageDepositPerByte, TxFeePerGas, CheckPayerTx>
 where
 	Call: Encode + Member,
 	Extra: SignedExtension<AccountId = AccountId32>,
@@ -121,7 +121,7 @@ where
 		}
 
 		match self.0.signature {
-			Some((addr, AcalaMultiSignature::Ethereum(sig), extra)) => {
+			Some((addr, SelendraMultiSignature::Ethereum(sig), extra)) => {
 				let (eth_msg, eth_extra) = ConvertEthTx::convert((function.clone(), extra))?;
 				log::trace!(
 					target: "evm", "Ethereum eth_msg: {:?}", eth_msg
@@ -170,7 +170,7 @@ where
 					function,
 				})
 			}
-			Some((addr, AcalaMultiSignature::Eip1559(sig), extra)) => {
+			Some((addr, SelendraMultiSignature::Eip1559(sig), extra)) => {
 				let (eth_msg, eth_extra) = ConvertEthTx::convert((function.clone(), extra))?;
 				log::trace!(
 					target: "evm", "Eip1559 eth_msg: {:?}", eth_msg
@@ -214,10 +214,10 @@ where
 					function,
 				})
 			}
-			Some((addr, AcalaMultiSignature::AcalaEip712(sig), extra)) => {
+			Some((addr, SelendraMultiSignature::SelendraEip712(sig), extra)) => {
 				let (eth_msg, eth_extra) = ConvertEthTx::convert((function.clone(), extra))?;
 				log::trace!(
-					target: "evm", "AcalaEip712 eth_msg: {:?}", eth_msg
+					target: "evm", "SelendraEip712 eth_msg: {:?}", eth_msg
 				);
 
 				let signer = verify_eip712_signature(eth_msg, sig).ok_or(InvalidTransaction::BadProof)?;
@@ -240,7 +240,7 @@ where
 }
 
 impl<Call, Extra, ConvertEthTx, StorageDepositPerByte, TxFeePerGas, CheckPayerTx> GetDispatchInfo
-	for AcalaUncheckedExtrinsic<Call, Extra, ConvertEthTx, StorageDepositPerByte, TxFeePerGas, CheckPayerTx>
+	for SelendraUncheckedExtrinsic<Call, Extra, ConvertEthTx, StorageDepositPerByte, TxFeePerGas, CheckPayerTx>
 where
 	Call: GetDispatchInfo,
 	Extra: SignedExtension,
@@ -253,7 +253,7 @@ where
 #[cfg(feature = "std")]
 impl<Call: Encode, Extra: SignedExtension, ConvertEthTx, StorageDepositPerByte, TxFeePerGas, CheckPayerTx>
 	serde::Serialize
-	for AcalaUncheckedExtrinsic<Call, Extra, ConvertEthTx, StorageDepositPerByte, TxFeePerGas, CheckPayerTx>
+	for SelendraUncheckedExtrinsic<Call, Extra, ConvertEthTx, StorageDepositPerByte, TxFeePerGas, CheckPayerTx>
 {
 	fn serialize<S>(&self, seq: S) -> Result<S::Ok, S::Error>
 	where
@@ -266,7 +266,7 @@ impl<Call: Encode, Extra: SignedExtension, ConvertEthTx, StorageDepositPerByte, 
 #[cfg(feature = "std")]
 impl<'a, Call: Decode, Extra: SignedExtension, ConvertEthTx, StorageDepositPerByte, TxFeePerGas, CheckPayerTx>
 	serde::Deserialize<'a>
-	for AcalaUncheckedExtrinsic<Call, Extra, ConvertEthTx, StorageDepositPerByte, TxFeePerGas, CheckPayerTx>
+	for SelendraUncheckedExtrinsic<Call, Extra, ConvertEthTx, StorageDepositPerByte, TxFeePerGas, CheckPayerTx>
 {
 	fn deserialize<D>(de: D) -> Result<Self, D::Error>
 	where
@@ -289,7 +289,7 @@ fn verify_eip712_signature(eth_msg: EthereumTransactionMessage, sig: [u8; 65]) -
 	let tx_type_hash = keccak256!("Transaction(string action,address to,uint256 nonce,uint256 tip,bytes data,uint256 value,uint256 gasLimit,uint256 storageLimit,AccessList[] accessList,uint256 validUntil)AccessList(address address,uint256[] storageKeys)");
 
 	let mut domain_seperator_msg = domain_hash.to_vec();
-	domain_seperator_msg.extend_from_slice(keccak256!("Acala EVM")); // name
+	domain_seperator_msg.extend_from_slice(keccak256!("Selendra EVM")); // name
 	domain_seperator_msg.extend_from_slice(keccak256!("1")); // version
 	domain_seperator_msg.extend_from_slice(&to_bytes(eth_msg.chain_id)); // chain id
 	domain_seperator_msg.extend_from_slice(eth_msg.genesis.as_bytes()); // salt

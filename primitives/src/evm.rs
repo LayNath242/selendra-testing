@@ -1,6 +1,6 @@
-// This file is part of Acala.
+// This file is part of Selendra.
 
-// Copyright (C) 2020-2022 Acala Foundation.
+// Copyright (C) 2021-2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -114,7 +114,7 @@ pub struct EthereumTransactionMessage {
 
 /// Ethereum precompiles
 /// 0 - 0x0000000000000000000000000000000000000400
-/// Acala precompiles
+/// Selendra precompiles
 /// 0x0000000000000000000000000000000000000400 - 0x0000000000000000000000000000000000000800
 pub const PRECOMPILE_ADDRESS_START: EvmAddress = H160(hex!("0000000000000000000000000000000000000400"));
 /// Predeployed system contracts (except Mirrored ERC20)
