@@ -52,11 +52,7 @@ impl<T: frame_system::Config> module_emergency_shutdown::WeightInfo for WeightIn
 	// Storage: SelendraOracle RawValues (r:9 w:0)
 	// Storage: SelendraOracle Values (r:3 w:0)
 	// Storage: Timestamp Now (r:1 w:0)
-	// Storage: AssetRegistry AssetMetadatas (r:1 w:0)
-	// Storage: Homa StakingLedgers (r:1 w:0)
-	// Storage: Homa ToBondPool (r:1 w:0)
 	// Storage: Tokens TotalIssuance (r:1 w:0)
-	// Storage: Homa TotalVoidLiquid (r:1 w:0)
 	// Storage: Prices LockedPrice (r:0 w:2)
 	fn emergency_shutdown(c: u32, ) -> Weight {
 		(60_648_000 as Weight)

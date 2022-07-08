@@ -48,7 +48,7 @@ pub use precompile::{
 	SchedulePrecompile, StableAssetPrecompile,
 };
 pub use primitives::{
-	currency::{TokenInfo, ACA, AUSD, DOT, KSM, KUSD, LACA, LKSM, RENBTC},
+	currency::{TokenInfo, ACA, AUSD, LACA, KSM, DOT, RENBTC},
 	AccountId, BlockNumber
 };
 

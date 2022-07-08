@@ -66,7 +66,6 @@ pub type EnsureRootOrThreeFourthsFinancialCouncil = EnsureOneOf<
 	pallet_collective::EnsureProportionAtLeast<AccountId, FinancialCouncilInstance, 3, 4>,
 >;
 
-// Homa Council
 pub type EnsureRootOrAllHomaCouncil = EnsureOneOf<
 	EnsureRoot<AccountId>,
 	pallet_collective::EnsureProportionAtLeast<AccountId, HomaCouncilInstance, 1, 1>,

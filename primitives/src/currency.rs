@@ -179,20 +179,14 @@ create_currency_id! {
 		// 0 - 19: Selendra & Polkadot native tokens
 		ACA("Selendra", 12) = 0,
 		AUSD("Selendra Dollar", 12) = 1,
-		DOT("Polkadot", 10) = 2,
-		LACA("Liquid Selendra", 10) = 3,
+		LACA("Liquid Selendra", 10) = 2,
+
 		// 20 - 39: External tokens (e.g. bridged)
 		RENBTC("Ren Protocol BTC", 8) = 20,
-		CASH("Compound CASH", 8) = 21,
-		// 40 - 127: Polkadot parachain tokens
 
-		// 128 - 147: Karura & Kusama native tokens
-		KUSD("Karura Dollar", 12) = 129,
+		// 130 - 147: Polkadot & Kumasam bridged tokens
 		KSM("Kusama", 12) = 130,
-		LKSM("Liquid KSM", 12) = 131,
-		// 148 - 167: External tokens (e.g. bridged)
-		// 149: Reserved for renBTC
-		// 150: Reserved for CASH
+		DOT("Polkadot", 10) = 131,
 	}
 }
 
