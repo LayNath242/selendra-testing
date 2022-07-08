@@ -13,185 +13,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "acala-cli"
-version = "0.1.0"
-dependencies = [
- "acala-inspect",
- "acala-primitives",
- "acala-service",
- "clap",
- "frame-benchmarking-cli",
- "log",
- "mandala-runtime",
- "parity-scale-codec",
- "sc-cli",
- "sc-consensus-babe",
- "sc-finality-grandpa",
- "sc-service",
- "sc-telemetry",
- "sc-tracing",
- "sp-core",
- "sp-runtime",
- "substrate-build-script-utils",
- "try-runtime-cli",
-]
-
-[[package]]
-name = "acala-inspect"
-version = "2.8.2"
-dependencies = [
- "clap",
- "derive_more",
- "log",
- "parity-scale-codec",
- "sc-cli",
- "sc-client-api",
- "sc-executor",
- "sc-service",
- "sp-blockchain",
- "sp-core",
- "sp-runtime",
-]
-
-[[package]]
-name = "acala-primitives"
-version = "2.8.2"
-dependencies = [
- "bstringify",
- "enumflags2 0.6.4",
- "frame-support",
- "hex-literal",
- "module-evm-utility",
- "module-evm-utility-macro",
- "module-stable-asset",
- "num_enum",
- "orml-traits",
- "parity-scale-codec",
- "parity-util-mem",
- "paste",
- "scale-info",
- "serde",
- "serde_json",
- "sp-api",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std",
-]
-
-[[package]]
-name = "acala-rpc"
-version = "2.8.2"
-dependencies = [
- "acala-primitives",
- "evm-rpc",
- "futures",
- "jsonrpsee",
- "orml-oracle-rpc",
- "orml-tokens-rpc",
- "pallet-transaction-payment-rpc",
- "runtime-common",
- "sc-chain-spec",
- "sc-client-api",
- "sc-consensus-babe",
- "sc-consensus-babe-rpc",
- "sc-consensus-epochs",
- "sc-consensus-manual-seal",
- "sc-finality-grandpa",
- "sc-finality-grandpa-rpc",
- "sc-rpc",
- "sc-rpc-api",
- "sc-sync-state-rpc",
- "sc-transaction-pool-api",
- "sp-api",
- "sp-block-builder",
- "sp-blockchain",
- "sp-consensus",
- "sp-consensus-babe",
- "sp-keystore",
- "sp-runtime",
- "substrate-frame-rpc-system",
- "substrate-state-trie-migration-rpc",
-]
-
-[[package]]
-name = "acala-service"
-version = "0.1.0"
-dependencies = [
- "acala-primitives",
- "acala-rpc",
- "async-trait",
- "coins-bip32",
- "coins-bip39",
- "elliptic-curve",
- "frame-benchmarking",
- "frame-system-rpc-runtime-api",
- "futures",
- "hex",
- "hex-literal",
- "jsonrpsee",
- "k256",
- "log",
- "mandala-runtime",
- "module-evm",
- "module-evm-rpc-runtime-api",
- "module-nft",
- "orml-oracle-rpc",
- "orml-tokens-rpc",
- "pallet-im-online",
- "pallet-transaction-payment-rpc-runtime-api",
- "parity-scale-codec",
- "rand 0.8.5",
- "runtime-common",
- "sc-authority-discovery",
- "sc-basic-authorship",
- "sc-chain-spec",
- "sc-cli",
- "sc-client-api",
- "sc-consensus",
- "sc-consensus-babe",
- "sc-consensus-manual-seal",
- "sc-consensus-slots",
- "sc-consensus-uncles",
- "sc-executor",
- "sc-finality-grandpa",
- "sc-network",
- "sc-offchain",
- "sc-rpc",
- "sc-service",
- "sc-sync-state-rpc",
- "sc-sysinfo",
- "sc-telemetry",
- "sc-tracing",
- "sc-transaction-pool",
- "serde",
- "serde_json",
- "sp-api",
- "sp-authority-discovery",
- "sp-authorship",
- "sp-block-builder",
- "sp-blockchain",
- "sp-consensus",
- "sp-consensus-babe",
- "sp-core",
- "sp-finality-grandpa",
- "sp-inherents",
- "sp-io",
- "sp-keystore",
- "sp-offchain",
- "sp-runtime",
- "sp-session",
- "sp-std",
- "sp-storage",
- "sp-timestamp",
- "sp-transaction-pool",
- "sp-transaction-storage-proof",
- "sp-trie",
- "substrate-prometheus-endpoint",
- "tiny-keccak",
-]
-
-[[package]]
 name = "addr2line"
 version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2158,9 +1979,8 @@ dependencies = [
 
 [[package]]
 name = "evm-rpc"
-version = "2.8.2"
+version = "0.1.0"
 dependencies = [
- "acala-primitives",
  "frame-support",
  "jsonrpsee",
  "module-evm",
@@ -2168,6 +1988,7 @@ dependencies = [
  "pallet-transaction-payment-rpc-runtime-api",
  "rustc-hex",
  "sc-rpc-api",
+ "selendra-primitives",
  "serde",
  "serde_json",
  "sp-api",
@@ -4260,14 +4081,14 @@ dependencies = [
 
 [[package]]
 name = "mandala-module-idle-scheduler"
-version = "2.8.2"
+version = "0.1.0"
 dependencies = [
- "acala-primitives",
  "frame-support",
  "frame-system",
  "module-support",
  "parity-scale-codec",
  "scale-info",
+ "selendra-primitives",
  "serde",
  "sp-core",
  "sp-io",
@@ -4277,9 +4098,8 @@ dependencies = [
 
 [[package]]
 name = "mandala-runtime"
-version = "2.8.2"
+version = "0.1.0"
 dependencies = [
- "acala-primitives",
  "frame-benchmarking",
  "frame-election-provider-support",
  "frame-executive",
@@ -4361,6 +4181,7 @@ dependencies = [
  "parity-scale-codec",
  "runtime-common",
  "scale-info",
+ "selendra-primitives",
  "serde",
  "serde_json",
  "smallvec",
@@ -4540,9 +4361,8 @@ dependencies = [
 
 [[package]]
 name = "module-aggregated-dex"
-version = "2.8.2"
+version = "0.1.0"
 dependencies = [
- "acala-primitives",
  "frame-support",
  "frame-system",
  "module-dex",
@@ -4553,6 +4373,7 @@ dependencies = [
  "pallet-balances",
  "parity-scale-codec",
  "scale-info",
+ "selendra-primitives",
  "serde",
  "sp-core",
  "sp-io",
@@ -4562,9 +4383,8 @@ dependencies = [
 
 [[package]]
 name = "module-asset-registry"
-version = "2.8.2"
+version = "0.1.0"
 dependencies = [
- "acala-primitives",
  "frame-support",
  "frame-system",
  "hex",
@@ -4577,6 +4397,7 @@ dependencies = [
  "pallet-timestamp",
  "parity-scale-codec",
  "scale-info",
+ "selendra-primitives",
  "serde",
  "serde_json",
  "sp-core",
@@ -4587,9 +4408,8 @@ dependencies = [
 
 [[package]]
 name = "module-auction-manager"
-version = "2.8.2"
+version = "0.1.0"
 dependencies = [
- "acala-primitives",
  "frame-support",
  "frame-system",
  "module-cdp-treasury",
@@ -4602,6 +4422,7 @@ dependencies = [
  "pallet-balances",
  "parity-scale-codec",
  "scale-info",
+ "selendra-primitives",
  "serde",
  "sp-core",
  "sp-io",
@@ -4611,9 +4432,8 @@ dependencies = [
 
 [[package]]
 name = "module-cdp-engine"
-version = "2.8.2"
+version = "0.1.0"
 dependencies = [
- "acala-primitives",
  "frame-support",
  "frame-system",
  "module-cdp-treasury",
@@ -4630,6 +4450,7 @@ dependencies = [
  "parity-scale-codec",
  "rand_chacha 0.2.2",
  "scale-info",
+ "selendra-primitives",
  "serde",
  "sp-application-crypto",
  "sp-core",
@@ -4640,9 +4461,8 @@ dependencies = [
 
 [[package]]
 name = "module-cdp-treasury"
-version = "2.8.2"
+version = "0.1.0"
 dependencies = [
- "acala-primitives",
  "frame-support",
  "frame-system",
  "module-dex",
@@ -4655,6 +4475,7 @@ dependencies = [
  "pallet-balances",
  "parity-scale-codec",
  "scale-info",
+ "selendra-primitives",
  "serde",
  "sp-core",
  "sp-io",
@@ -4664,9 +4485,8 @@ dependencies = [
 
 [[package]]
 name = "module-currencies"
-version = "2.8.2"
+version = "0.1.0"
 dependencies = [
- "acala-primitives",
  "frame-support",
  "frame-system",
  "hex",
@@ -4681,6 +4501,7 @@ dependencies = [
  "pallet-timestamp",
  "parity-scale-codec",
  "scale-info",
+ "selendra-primitives",
  "serde",
  "serde_json",
  "sp-core",
@@ -4691,9 +4512,8 @@ dependencies = [
 
 [[package]]
 name = "module-dex"
-version = "2.8.2"
+version = "0.1.0"
 dependencies = [
- "acala-primitives",
  "frame-support",
  "frame-system",
  "module-support",
@@ -4702,6 +4522,7 @@ dependencies = [
  "pallet-balances",
  "parity-scale-codec",
  "scale-info",
+ "selendra-primitives",
  "serde",
  "sp-core",
  "sp-io",
@@ -4711,9 +4532,8 @@ dependencies = [
 
 [[package]]
 name = "module-dex-oracle"
-version = "2.8.2"
+version = "0.1.0"
 dependencies = [
- "acala-primitives",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
@@ -4722,6 +4542,7 @@ dependencies = [
  "pallet-timestamp",
  "parity-scale-codec",
  "scale-info",
+ "selendra-primitives",
  "serde",
  "sp-core",
  "sp-io",
@@ -4731,9 +4552,8 @@ dependencies = [
 
 [[package]]
 name = "module-emergency-shutdown"
-version = "2.8.2"
+version = "0.1.0"
 dependencies = [
- "acala-primitives",
  "frame-support",
  "frame-system",
  "module-cdp-treasury",
@@ -4745,6 +4565,7 @@ dependencies = [
  "pallet-balances",
  "parity-scale-codec",
  "scale-info",
+ "selendra-primitives",
  "serde",
  "sp-core",
  "sp-io",
@@ -4754,9 +4575,8 @@ dependencies = [
 
 [[package]]
 name = "module-evm"
-version = "2.8.2"
+version = "0.1.0"
 dependencies = [
- "acala-primitives",
  "env_logger",
  "frame-support",
  "frame-system",
@@ -4779,6 +4599,7 @@ dependencies = [
  "ripemd160",
  "rlp",
  "scale-info",
+ "selendra-primitives",
  "serde",
  "serde_json",
  "sha3 0.9.1",
@@ -4792,9 +4613,8 @@ dependencies = [
 
 [[package]]
 name = "module-evm-accounts"
-version = "2.8.2"
+version = "0.1.0"
 dependencies = [
- "acala-primitives",
  "frame-support",
  "frame-system",
  "libsecp256k1",
@@ -4806,6 +4626,7 @@ dependencies = [
  "pallet-balances",
  "parity-scale-codec",
  "scale-info",
+ "selendra-primitives",
  "serde",
  "sp-core",
  "sp-io",
@@ -4815,9 +4636,8 @@ dependencies = [
 
 [[package]]
 name = "module-evm-bridge"
-version = "2.8.2"
+version = "0.1.0"
 dependencies = [
- "acala-primitives",
  "ethereum-types",
  "frame-support",
  "frame-system",
@@ -4832,6 +4652,7 @@ dependencies = [
  "parity-scale-codec",
  "primitive-types",
  "scale-info",
+ "selendra-primitives",
  "serde",
  "serde_json",
  "sp-core",
@@ -4842,9 +4663,9 @@ dependencies = [
 
 [[package]]
 name = "module-evm-rpc-runtime-api"
-version = "2.8.2"
+version = "0.1.0"
 dependencies = [
- "acala-primitives",
+ "selendra-primitives",
  "sp-api",
  "sp-core",
  "sp-runtime",
@@ -4853,7 +4674,7 @@ dependencies = [
 
 [[package]]
 name = "module-evm-utility"
-version = "2.8.2"
+version = "0.1.0"
 dependencies = [
  "ethereum",
  "evm",
@@ -4865,7 +4686,7 @@ dependencies = [
 
 [[package]]
 name = "module-evm-utility-macro"
-version = "2.8.2"
+version = "0.1.0"
 dependencies = [
  "module-evm-utility",
  "proc-macro2",
@@ -4875,9 +4696,8 @@ dependencies = [
 
 [[package]]
 name = "module-honzon"
-version = "2.8.2"
+version = "0.1.0"
 dependencies = [
- "acala-primitives",
  "frame-support",
  "frame-system",
  "module-cdp-engine",
@@ -4891,6 +4711,7 @@ dependencies = [
  "pallet-timestamp",
  "parity-scale-codec",
  "scale-info",
+ "selendra-primitives",
  "serde",
  "sp-core",
  "sp-io",
@@ -4900,14 +4721,14 @@ dependencies = [
 
 [[package]]
 name = "module-idle-scheduler"
-version = "2.8.2"
+version = "0.1.0"
 dependencies = [
- "acala-primitives",
  "frame-support",
  "frame-system",
  "module-support",
  "parity-scale-codec",
  "scale-info",
+ "selendra-primitives",
  "serde",
  "sp-core",
  "sp-io",
@@ -4917,9 +4738,8 @@ dependencies = [
 
 [[package]]
 name = "module-incentives"
-version = "2.8.2"
+version = "0.1.0"
 dependencies = [
- "acala-primitives",
  "frame-support",
  "frame-system",
  "module-support",
@@ -4929,6 +4749,7 @@ dependencies = [
  "pallet-balances",
  "parity-scale-codec",
  "scale-info",
+ "selendra-primitives",
  "serde",
  "sp-core",
  "sp-io",
@@ -4938,9 +4759,8 @@ dependencies = [
 
 [[package]]
 name = "module-loans"
-version = "2.8.2"
+version = "0.1.0"
 dependencies = [
- "acala-primitives",
  "frame-support",
  "frame-system",
  "module-cdp-treasury",
@@ -4951,6 +4771,7 @@ dependencies = [
  "pallet-balances",
  "parity-scale-codec",
  "scale-info",
+ "selendra-primitives",
  "serde",
  "sp-core",
  "sp-io",
@@ -4960,9 +4781,8 @@ dependencies = [
 
 [[package]]
 name = "module-nft"
-version = "2.8.2"
+version = "0.1.0"
 dependencies = [
- "acala-primitives",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
@@ -4976,6 +4796,7 @@ dependencies = [
  "pallet-utility",
  "parity-scale-codec",
  "scale-info",
+ "selendra-primitives",
  "serde",
  "sp-core",
  "sp-io",
@@ -4985,9 +4806,8 @@ dependencies = [
 
 [[package]]
 name = "module-prices"
-version = "2.8.2"
+version = "0.1.0"
 dependencies = [
- "acala-primitives",
  "frame-support",
  "frame-system",
  "module-support",
@@ -4995,6 +4815,7 @@ dependencies = [
  "orml-traits",
  "parity-scale-codec",
  "scale-info",
+ "selendra-primitives",
  "serde",
  "sp-core",
  "sp-io",
@@ -5020,15 +4841,15 @@ dependencies = [
 
 [[package]]
 name = "module-support"
-version = "2.8.2"
+version = "0.1.0"
 dependencies = [
- "acala-primitives",
  "frame-support",
  "impl-trait-for-tuples",
  "module-stable-asset",
  "orml-tokens",
  "parity-scale-codec",
  "scale-info",
+ "selendra-primitives",
  "sp-core",
  "sp-io",
  "sp-runtime",
@@ -5037,9 +4858,8 @@ dependencies = [
 
 [[package]]
 name = "module-transaction-pause"
-version = "2.8.2"
+version = "0.1.0"
 dependencies = [
- "acala-primitives",
  "frame-support",
  "frame-system",
  "orml-tokens",
@@ -5047,6 +4867,7 @@ dependencies = [
  "pallet-balances",
  "parity-scale-codec",
  "scale-info",
+ "selendra-primitives",
  "smallvec",
  "sp-core",
  "sp-io",
@@ -5056,9 +4877,8 @@ dependencies = [
 
 [[package]]
 name = "module-transaction-payment"
-version = "2.8.2"
+version = "0.1.0"
 dependencies = [
- "acala-primitives",
  "frame-support",
  "frame-system",
  "module-currencies",
@@ -5071,6 +4891,7 @@ dependencies = [
  "pallet-transaction-payment-rpc-runtime-api",
  "parity-scale-codec",
  "scale-info",
+ "selendra-primitives",
  "serde",
  "smallvec",
  "sp-core",
@@ -8622,9 +8443,8 @@ dependencies = [
 
 [[package]]
 name = "runtime-common"
-version = "2.8.2"
+version = "0.1.0"
 dependencies = [
- "acala-primitives",
  "cumulus-pallet-parachain-system",
  "ethabi",
  "frame-support",
@@ -8667,6 +8487,7 @@ dependencies = [
  "pallet-utility",
  "parity-scale-codec",
  "scale-info",
+ "selendra-primitives",
  "serde",
  "serde_json",
  "sp-core",
@@ -9984,9 +9805,188 @@ dependencies = [
 name = "selendra"
 version = "0.1.0"
 dependencies = [
- "acala-cli",
  "futures",
  "parity-util-mem",
+ "selendra-cli",
+]
+
+[[package]]
+name = "selendra-cli"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "frame-benchmarking-cli",
+ "log",
+ "mandala-runtime",
+ "parity-scale-codec",
+ "sc-cli",
+ "sc-consensus-babe",
+ "sc-finality-grandpa",
+ "sc-service",
+ "sc-telemetry",
+ "sc-tracing",
+ "selendra-inspect",
+ "selendra-primitives",
+ "selendra-service",
+ "sp-core",
+ "sp-runtime",
+ "substrate-build-script-utils",
+ "try-runtime-cli",
+]
+
+[[package]]
+name = "selendra-inspect"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "derive_more",
+ "log",
+ "parity-scale-codec",
+ "sc-cli",
+ "sc-client-api",
+ "sc-executor",
+ "sc-service",
+ "sp-blockchain",
+ "sp-core",
+ "sp-runtime",
+]
+
+[[package]]
+name = "selendra-primitives"
+version = "0.1.0"
+dependencies = [
+ "bstringify",
+ "enumflags2 0.6.4",
+ "frame-support",
+ "hex-literal",
+ "module-evm-utility",
+ "module-evm-utility-macro",
+ "module-stable-asset",
+ "num_enum",
+ "orml-traits",
+ "parity-scale-codec",
+ "parity-util-mem",
+ "paste",
+ "scale-info",
+ "serde",
+ "serde_json",
+ "sp-api",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "selendra-rpc"
+version = "0.1.0"
+dependencies = [
+ "evm-rpc",
+ "futures",
+ "jsonrpsee",
+ "orml-oracle-rpc",
+ "orml-tokens-rpc",
+ "pallet-transaction-payment-rpc",
+ "runtime-common",
+ "sc-chain-spec",
+ "sc-client-api",
+ "sc-consensus-babe",
+ "sc-consensus-babe-rpc",
+ "sc-consensus-epochs",
+ "sc-consensus-manual-seal",
+ "sc-finality-grandpa",
+ "sc-finality-grandpa-rpc",
+ "sc-rpc",
+ "sc-rpc-api",
+ "sc-sync-state-rpc",
+ "sc-transaction-pool-api",
+ "selendra-primitives",
+ "sp-api",
+ "sp-block-builder",
+ "sp-blockchain",
+ "sp-consensus",
+ "sp-consensus-babe",
+ "sp-keystore",
+ "sp-runtime",
+ "substrate-frame-rpc-system",
+ "substrate-state-trie-migration-rpc",
+]
+
+[[package]]
+name = "selendra-service"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "coins-bip32",
+ "coins-bip39",
+ "elliptic-curve",
+ "frame-benchmarking",
+ "frame-system-rpc-runtime-api",
+ "futures",
+ "hex",
+ "hex-literal",
+ "jsonrpsee",
+ "k256",
+ "log",
+ "mandala-runtime",
+ "module-evm",
+ "module-evm-rpc-runtime-api",
+ "module-nft",
+ "orml-oracle-rpc",
+ "orml-tokens-rpc",
+ "pallet-im-online",
+ "pallet-transaction-payment-rpc-runtime-api",
+ "parity-scale-codec",
+ "rand 0.8.5",
+ "runtime-common",
+ "sc-authority-discovery",
+ "sc-basic-authorship",
+ "sc-chain-spec",
+ "sc-cli",
+ "sc-client-api",
+ "sc-consensus",
+ "sc-consensus-babe",
+ "sc-consensus-manual-seal",
+ "sc-consensus-slots",
+ "sc-consensus-uncles",
+ "sc-executor",
+ "sc-finality-grandpa",
+ "sc-network",
+ "sc-offchain",
+ "sc-rpc",
+ "sc-service",
+ "sc-sync-state-rpc",
+ "sc-sysinfo",
+ "sc-telemetry",
+ "sc-tracing",
+ "sc-transaction-pool",
+ "selendra-primitives",
+ "selendra-rpc",
+ "serde",
+ "serde_json",
+ "sp-api",
+ "sp-authority-discovery",
+ "sp-authorship",
+ "sp-block-builder",
+ "sp-blockchain",
+ "sp-consensus",
+ "sp-consensus-babe",
+ "sp-core",
+ "sp-finality-grandpa",
+ "sp-inherents",
+ "sp-io",
+ "sp-keystore",
+ "sp-offchain",
+ "sp-runtime",
+ "sp-session",
+ "sp-std",
+ "sp-storage",
+ "sp-timestamp",
+ "sp-transaction-pool",
+ "sp-transaction-storage-proof",
+ "sp-trie",
+ "substrate-prometheus-endpoint",
+ "tiny-keccak",
 ]
 
 [[package]]
