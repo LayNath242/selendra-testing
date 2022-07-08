@@ -179,7 +179,7 @@ create_currency_id! {
 		// 0 - 19: Selendra & Polkadot native tokens
 		ACA("Selendra", 12) = 0,
 		AUSD("Selendra Dollar", 12) = 1,
-		LACA("Liquid Selendra", 10) = 2,
+		LACA("Liquid Selendra", 12) = 2,
 
 		// 20 - 39: External tokens (e.g. bridged)
 		RENBTC("Ren Protocol BTC", 8) = 20,

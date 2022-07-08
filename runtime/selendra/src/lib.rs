@@ -52,7 +52,7 @@ use module_cdp_engine::CollateralCurrencyIds;
 use module_currencies::BasicCurrencyAdapter;
 use module_evm::{runner::RunnerExtended, CallInfo, CreateInfo};
 use module_evm_accounts::EvmAddressMapping;
-use module_support::{AssetIdMapping, DispatchableTask, PoolId};
+use module_support::{AssetIdMapping, DispatchableTask, PoolId, ExchangeRateProvider};
 use module_transaction_payment::TargetedFeeAdjustment;
 
 use orml_tokens::CurrencyAdapter;
@@ -113,7 +113,7 @@ pub use runtime_common::{
 	OffchainSolutionWeightLimit, OperationalFeeMultiplier, OperatorMembershipInstanceSelendra, Price, ProxyType, Rate,
 	Ratio, RuntimeBlockLength, RuntimeBlockWeights, SystemContractsFilter, TechnicalCommitteeInstance,
 	TechnicalCommitteeMembershipInstance, TimeStampedPrice, TipPerWeightStep, ACA, AUSD, DOT, LACA, KSM, RENBTC,
-	DAI
+	DAI,
 };
 
 /// Import the stable_asset pallet.
@@ -747,7 +747,7 @@ impl orml_tokens::Config for Runtime {
 
 parameter_types! {
 	pub StableCurrencyFixedPrice: Price = Price::saturating_from_rational(1, 1);
-	pub RewardRatePerRelaychainBlock: Rate = Rate::saturating_from_rational(2_492, 100_000_000_000u128);	// 14% annual staking reward rate of Polkadot
+	pub RewardRatePerRelaychainBlock: Rate = Rate::saturating_from_rational(2_492, 100_000_000_000u128);
 }
 
 parameter_type_with_key! {
@@ -756,11 +756,21 @@ parameter_type_with_key! {
 	};
 }
 
+pub struct LiquidNativeExchangeProvider;
+impl ExchangeRateProvider for LiquidNativeExchangeProvider {
+	fn get_exchange_rate() -> ExchangeRate {
+		ExchangeRate::saturating_from_rational(1, 10)
+	}
+}
+
 impl module_prices::Config for Runtime {
 	type Event = Event;
 	type Source = AggregatedDataProvider;
 	type GetStableCurrencyId = GetStableCurrencyId;
 	type StableCurrencyFixedPrice = StableCurrencyFixedPrice;
+	type GetNativeCurrencyId = GetNativeCurrencyId;
+	type GetLiquidCurrencyId = GetLiquidCurrencyId;
+	type LiquidNativeExchangeRateProvider = LiquidNativeExchangeProvider;
 	type LockOrigin = EnsureRootOrTwoThirdsCouncil;
 	type DEX = Dex;
 	type Currency = Currencies;

@@ -1,6 +1,6 @@
-// This file is part of Selendra.
+// This file is part of Acala.
 
-// Copyright (C) 2021-2022 Selendra.
+// Copyright (C) 2020-2022 Acala Foundation.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -136,23 +136,23 @@ fn access_price_of_stable_currency() {
 fn access_price_of_liquid_currency() {
 	ExtBuilder::default().build().execute_with(|| {
 		assert_eq!(
-			PricesModule::access_price(DOT),
-			Some(Price::saturating_from_integer(10000000000u128))
+			PricesModule::access_price(ACA),
+			Some(Price::saturating_from_integer(100000000u128))
 		); // 100 USD, right shift the decimal point (18-12) places
 		assert_eq!(
 			PricesModule::access_price(LACA),
-			Some(Price::saturating_from_integer(5000000000u128))
-		); // dot_price * 1/2
+			Some(Price::saturating_from_integer(50000000u128))
+		); // sel_price * 1/2
 
 		mock_oracle_update();
 		assert_eq!(
-			PricesModule::access_price(DOT),
-			Some(Price::saturating_from_integer(1000000000u128))
+			PricesModule::access_price(ACA),
+			Some(Price::saturating_from_integer(10000000u128))
 		); // 10 USD, right shift the decimal point (18-12) places
 		assert_eq!(
 			PricesModule::access_price(LACA),
-			Some(Price::saturating_from_integer(600000000u128))
-		); // dot_price * 3/5
+			Some(Price::saturating_from_integer(6000000u128))
+		); // sel_price * 3/5
 	});
 }
 
@@ -160,8 +160,8 @@ fn access_price_of_liquid_currency() {
 fn access_price_of_dex_share_currency() {
 	ExtBuilder::default().build().execute_with(|| {
 		assert_eq!(
-			PricesModule::access_price(DOT),
-			Some(Price::saturating_from_integer(10000000000u128))
+			PricesModule::access_price(ACA),
+			Some(Price::saturating_from_integer(100000000u128))
 		); // 100 USD, right shift the decimal point (18-12) places
 		assert_eq!(
 			PricesModule::access_price(AUSD),
@@ -215,14 +215,14 @@ fn access_price_of_dex_share_currency() {
 #[test]
 fn access_price_of_other_currency() {
 	ExtBuilder::default().build().execute_with(|| {
-		assert_eq!(PricesModule::access_price(ACA), Some(Price::saturating_from_integer(0)));
+		assert_eq!(PricesModule::access_price(DOT), Some(Price::saturating_from_integer(0)));
 		assert_eq!(PricesModule::access_price(KSM), None);
 
 		mock_oracle_update();
 
 		assert_eq!(
-			PricesModule::access_price(ACA),
-			Some(Price::saturating_from_integer(30000000u128))
+			PricesModule::access_price(DOT),
+			Some(Price::saturating_from_integer(3000000000u128))
 		); // 30 USD, right shift the decimal point (18-12) places
 		assert_eq!(
 			PricesModule::access_price(KSM),
@@ -349,7 +349,7 @@ fn price_providers_work() {
 		);
 		assert_eq!(
 			RealTimePriceProvider::<Runtime>::get_price(LACA),
-			Some(Price::saturating_from_integer(5000000000u128))
+			Some(Price::saturating_from_integer(50000000u128))
 		);
 		assert_eq!(RealTimePriceProvider::<Runtime>::get_price(KSM), None);
 		assert_eq!(RealTimePriceProvider::<Runtime>::get_price(LP_AUSD_DOT), lp_price_1);
@@ -365,7 +365,7 @@ fn price_providers_work() {
 		);
 		assert_eq!(
 			PriorityLockedPriceProvider::<Runtime>::get_price(LACA),
-			Some(Price::saturating_from_integer(5000000000u128))
+			Some(Price::saturating_from_integer(50000000u128))
 		);
 		assert_eq!(PriorityLockedPriceProvider::<Runtime>::get_price(KSM), None);
 		assert_eq!(
@@ -404,7 +404,7 @@ fn price_providers_work() {
 		);
 		assert_eq!(
 			LockedPriceProvider::<Runtime>::get_price(LACA),
-			Some(Price::saturating_from_integer(5000000000u128))
+			Some(Price::saturating_from_integer(50000000u128))
 		);
 		assert_eq!(LockedPriceProvider::<Runtime>::get_price(KSM), None);
 		assert_eq!(LockedPriceProvider::<Runtime>::get_price(LP_AUSD_DOT), lp_price_1);
@@ -430,7 +430,7 @@ fn price_providers_work() {
 		);
 		assert_eq!(
 			RealTimePriceProvider::<Runtime>::get_price(LACA),
-			Some(Price::saturating_from_integer(600000000u128))
+			Some(Price::saturating_from_integer(6000000u128))
 		);
 		assert_eq!(
 			RealTimePriceProvider::<Runtime>::get_price(KSM),
@@ -452,7 +452,7 @@ fn price_providers_work() {
 		);
 		assert_eq!(
 			PriorityLockedPriceProvider::<Runtime>::get_price(LACA),
-			Some(Price::saturating_from_integer(5000000000u128))
+			Some(Price::saturating_from_integer(50000000u128))
 		);
 		assert_eq!(
 			PriorityLockedPriceProvider::<Runtime>::get_price(KSM),
@@ -477,7 +477,7 @@ fn price_providers_work() {
 		);
 		assert_eq!(
 			LockedPriceProvider::<Runtime>::get_price(LACA),
-			Some(Price::saturating_from_integer(5000000000u128))
+			Some(Price::saturating_from_integer(50000000u128))
 		);
 		assert_eq!(LockedPriceProvider::<Runtime>::get_price(KSM), None);
 		assert_eq!(LockedPriceProvider::<Runtime>::get_price(LP_AUSD_DOT), lp_price_1);
@@ -503,7 +503,7 @@ fn price_providers_work() {
 		);
 		assert_eq!(
 			PriorityLockedPriceProvider::<Runtime>::get_price(LACA),
-			Some(Price::saturating_from_integer(600000000u128))
+			Some(Price::saturating_from_integer(6000000u128))
 		);
 		assert_eq!(
 			PriorityLockedPriceProvider::<Runtime>::get_price(KSM),

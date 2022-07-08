@@ -1690,7 +1690,7 @@ fn initialize_added_liquidity_pools_genesis_work() {
 
 			assert_eq!(DexModule::get_liquidity(AUSD, DOT), (1000000, 2000000));
 			assert_eq!(Tokens::free_balance(AUSD, &DexModule::account_id()), 2000000);
-			assert_eq!(Tokens::free_balance(DOT, &DexModule::account_id()), 3000000);
+			assert_eq!(Tokens::free_balance(DOT, &DexModule::account_id()), 4000000);
 			assert_eq!(
 				Tokens::free_balance(AUSDDOTPair::get().dex_share_currency_id(), &ALICE),
 				2000000
@@ -1893,7 +1893,7 @@ fn get_liquidity_token_address_work() {
 		);
 		assert_eq!(
 			DexModule::get_liquidity_token_address(AUSD, DOT),
-			Some(H160::from_str("0x0000000000000000000200000000010000000002").unwrap())
+			Some(H160::from_str("0x0000000000000000000200000000010000000083").unwrap())
 		);
 
 		assert_ok!(DexModule::enable_trading_pair(
@@ -1907,7 +1907,7 @@ fn get_liquidity_token_address_work() {
 		);
 		assert_eq!(
 			DexModule::get_liquidity_token_address(AUSD, DOT),
-			Some(H160::from_str("0x0000000000000000000200000000010000000002").unwrap())
+			Some(H160::from_str("0x0000000000000000000200000000010000000083").unwrap())
 		);
 	});
 }

@@ -1,6 +1,6 @@
-// This file is part of Selendra.
+// This file is part of Acala.
 
-// Copyright (C) 2021-2022 Selendra.
+// Copyright (C) 2020-2022 Acala Foundation.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -35,7 +35,7 @@ use sp_runtime::{
 	DispatchError, FixedPointNumber,
 };
 use sp_std::cell::RefCell;
-use support::{mocks::MockErc20InfoMapping, SwapLimit};
+use support::{mocks::MockErc20InfoMapping, ExchangeRate, SwapLimit};
 
 pub type AccountId = u128;
 pub type BlockNumber = u64;
@@ -96,8 +96,8 @@ impl DataProvider<CurrencyId, Price> for MockDataProvider {
 			match *currency_id {
 				AUSD => None,
 				BTC => Some(Price::saturating_from_integer(40000)),
-				DOT => Some(Price::saturating_from_integer(10)),
-				ACA => Some(Price::saturating_from_integer(30)),
+				DOT => Some(Price::saturating_from_integer(30)),
+				ACA => Some(Price::saturating_from_integer(10)),
 				KSM => Some(Price::saturating_from_integer(200)),
 				_ => None,
 			}
@@ -105,8 +105,8 @@ impl DataProvider<CurrencyId, Price> for MockDataProvider {
 			match *currency_id {
 				AUSD => Some(Price::saturating_from_rational(99, 100)),
 				BTC => Some(Price::saturating_from_integer(50000)),
-				DOT => Some(Price::saturating_from_integer(100)),
-				ACA => Some(Price::zero()),
+				ACA => Some(Price::saturating_from_integer(100)),
+				DOT => Some(Price::zero()),
 				KSM => None,
 				_ => None,
 			}
@@ -117,6 +117,17 @@ impl DataProvider<CurrencyId, Price> for MockDataProvider {
 impl DataFeeder<CurrencyId, Price, AccountId> for MockDataProvider {
 	fn feed_value(_: AccountId, _: CurrencyId, _: Price) -> sp_runtime::DispatchResult {
 		Ok(())
+	}
+}
+
+pub struct MockLiquidNativeExchangeProvider;
+impl ExchangeRateProvider for MockLiquidNativeExchangeProvider {
+	fn get_exchange_rate() -> ExchangeRate {
+		if CHANGED.with(|v| *v.borrow_mut()) {
+			ExchangeRate::saturating_from_rational(3, 5)
+		} else {
+			ExchangeRate::saturating_from_rational(1, 2)
+		}
 	}
 }
 
@@ -217,10 +228,9 @@ ord_parameter_types! {
 
 parameter_types! {
 	pub const GetStableCurrencyId: CurrencyId = AUSD;
-	pub const GetStakingCurrencyId: CurrencyId = DOT;
+	pub const GetNativeCurrencyId: CurrencyId = ACA;
 	pub const GetLiquidCurrencyId: CurrencyId = LACA;
 	pub StableCurrencyFixedPrice: Price = Price::one();
-	pub static MockRelayBlockNumberProvider: BlockNumber = 0;
 }
 
 impl Config for Runtime {
@@ -228,7 +238,10 @@ impl Config for Runtime {
 	type Source = MockDataProvider;
 	type GetStableCurrencyId = GetStableCurrencyId;
 	type StableCurrencyFixedPrice = StableCurrencyFixedPrice;
+	type GetNativeCurrencyId = GetNativeCurrencyId;
+	type GetLiquidCurrencyId = GetLiquidCurrencyId;
 	type LockOrigin = EnsureSignedBy<One, AccountId>;
+	type LiquidNativeExchangeRateProvider = MockLiquidNativeExchangeProvider;
 	type DEX = MockDEX;
 	type Currency = Tokens;
 	type Erc20InfoMapping = MockErc20InfoMapping;

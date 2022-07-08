@@ -1,6 +1,6 @@
-// This file is part of Selendra.
+// This file is part of Acala.
 
-// Copyright (C) 2021-2022 Selendra.
+// Copyright (C) 2020-2022 Acala Foundation.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 //! ## Overview
 //!
 //! The data from Oracle cannot be used in business, prices module will do some
-//! process and feed prices for Selendra. Process include:
+//! process and feed prices for Acala. Process include:
 //!   - specify a fixed price for stable currency
 //!   - feed price in USD or related price bewteen two currencies
 //!   - lock/unlock the price data get from oracle
@@ -35,10 +35,11 @@ use orml_traits::{DataFeeder, DataProvider, GetByKey, MultiCurrency};
 use primitives::{Balance, CurrencyId};
 use sp_core::U256;
 use sp_runtime::{
+	traits::CheckedMul,
 	FixedPointNumber,
 };
 use sp_std::marker::PhantomData;
-use support::{DEXManager, Erc20InfoMapping, LockablePrice, Price, PriceProvider};
+use support::{DEXManager, Erc20InfoMapping, ExchangeRateProvider, LockablePrice, Price, PriceProvider};
 
 mod mock;
 mod tests;
@@ -58,16 +59,28 @@ pub mod module {
 		/// The data source, such as Oracle.
 		type Source: DataProvider<CurrencyId, Price> + DataFeeder<CurrencyId, Price, Self::AccountId>;
 
-		/// The stable currency id, it should be AUSD in Selendra.
+		/// The stable currency id, it should be AUSD in Acala.
 		#[pallet::constant]
 		type GetStableCurrencyId: Get<CurrencyId>;
 
-		/// The fixed prices of stable currency, it should be 1 USD in Selendra.
+		/// The fixed prices of stable currency, it should be 1 USD in Acala.
 		#[pallet::constant]
 		type StableCurrencyFixedPrice: Get<Price>;
 
+		/// The Native currency id, it should be ACA in Selendra.
+		#[pallet::constant]
+		type GetNativeCurrencyId: Get<CurrencyId>;
+
+		/// The liquid currency id, it should be LACA in Selendra.
+		#[pallet::constant]
+		type GetLiquidCurrencyId: Get<CurrencyId>;
+
 		/// The origin which may lock and unlock prices feed to system.
 		type LockOrigin: EnsureOrigin<Self::Origin>;
+
+		/// The provider of the exchange rate between liquid currency and
+		/// staking currency.
+		type LiquidNativeExchangeRateProvider: ExchangeRateProvider;
 
 		/// DEX provide liquidity info.
 		type DEX: DEXManager<Self::AccountId, Balance, CurrencyId>;
@@ -165,6 +178,10 @@ impl<T: Config> Pallet<T> {
 		let maybe_price = if currency_id == T::GetStableCurrencyId::get() {
 			// if is stable currency, use fixed price
 			Some(T::StableCurrencyFixedPrice::get())
+		} else if currency_id == T::GetLiquidCurrencyId::get() {
+			// directly return real-time the multiple of the price of StakingCurrencyId and the exchange rate
+			return Self::access_price(T::GetNativeCurrencyId::get())
+				.and_then(|n| n.checked_mul(&T::LiquidNativeExchangeRateProvider::get_exchange_rate()));
 		} else if let CurrencyId::DexShare(dex_share_0, dex_share_1) = currency_id {
 			let token_0: CurrencyId = dex_share_0.into();
 			let token_1: CurrencyId = dex_share_1.into();

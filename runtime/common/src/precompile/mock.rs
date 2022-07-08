@@ -588,25 +588,11 @@ impl module_evm_accounts::Config for Test {
 	type WeightInfo = ();
 }
 
-pub struct MockLiquidStakingExchangeProvider;
-impl ExchangeRateProvider for MockLiquidStakingExchangeProvider {
+pub struct MockLiquidNativeExchangeProvider;
+impl ExchangeRateProvider for MockLiquidNativeExchangeProvider {
 	fn get_exchange_rate() -> ExchangeRate {
 		ExchangeRate::saturating_from_rational(1, 2)
 	}
-}
-
-impl BlockNumberProvider for MockRelayBlockNumberProvider {
-	type BlockNumber = BlockNumber;
-
-	fn current_block_number() -> Self::BlockNumber {
-		Self::get()
-	}
-}
-
-parameter_type_with_key! {
-	pub LiquidCrowdloanLeaseBlockNumber: |_lease: Lease| -> Option<BlockNumber> {
-		None
-	};
 }
 
 parameter_type_with_key! {
@@ -617,10 +603,7 @@ parameter_type_with_key! {
 
 parameter_types! {
 	pub StableCurrencyFixedPrice: Price = Price::saturating_from_rational(1, 1);
-	pub const GetStakingCurrencyId: CurrencyId = DOT;
 	pub const GetLiquidCurrencyId: CurrencyId = LACA;
-	pub MockRelayBlockNumberProvider: BlockNumber = 0;
-	pub RewardRatePerRelaychainBlock: Rate = Rate::zero();
 }
 
 ord_parameter_types! {
@@ -632,7 +615,10 @@ impl module_prices::Config for Test {
 	type Source = Oracle;
 	type GetStableCurrencyId = GetStableCurrencyId;
 	type StableCurrencyFixedPrice = StableCurrencyFixedPrice;
+	type GetNativeCurrencyId = GetNativeCurrencyId;
+	type GetLiquidCurrencyId = GetLiquidCurrencyId;
 	type LockOrigin = EnsureSignedBy<One, AccountId>;
+	type LiquidNativeExchangeRateProvider = MockLiquidNativeExchangeProvider;
 	type DEX = DexModule;
 	type Currency = Currencies;
 	type Erc20InfoMapping = EvmErc20InfoMapping;

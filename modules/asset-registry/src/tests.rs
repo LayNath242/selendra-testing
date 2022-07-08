@@ -693,7 +693,7 @@ fn encode_evm_address_works() {
 			// ForeignAsset
 			assert_eq!(
 				EvmErc20InfoMapping::<Runtime>::encode_evm_address(CurrencyId::ForeignAsset(1)),
-				H160::from_str("0x0000000000000000000500000000000000000001").ok()
+				H160::from_str("0x0000000000000000000400000000000000000001").ok()
 			);
 		});
 }
