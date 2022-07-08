@@ -13,15 +13,15 @@ sp-runtime = { git = "https://github.com/paritytech/substrate", branch = "polkad
 frame-support = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 frame-system = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 sp-std = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
-orml-traits = { path = "https://github.com/AcalaNetwork/predeploy-contracts", rev = "c3d63f524ddbe75f4c22ba0e06ae3bf57300b402", default-features = false }
+orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false }
 support = { package = "module-support", path = "../support", default-features = false }
 primitives = { package = "selendra-primitives", path = "../../primitives", default-features = false }
 module-stable-asset = { path = "../stable-asset", version = "0.1.0", default-features = false }
 module-dex = { package = "module-dex", path = "../dex", default-features = false }
-orml-tokens = { path = "https://github.com/AcalaNetwork/predeploy-contracts", rev = "c3d63f524ddbe75f4c22ba0e06ae3bf57300b402" , default-features = false }
+orml-tokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5" , default-features = false }
 
 [dev-dependencies]
-orml-tokens = { path = "https://github.com/AcalaNetwork/predeploy-contracts", rev = "c3d63f524ddbe75f4c22ba0e06ae3bf57300b402" }
+orml-tokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5" }
 sp-core = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }
 sp-io = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }
 pallet-balances = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }
