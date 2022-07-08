@@ -45,7 +45,7 @@ pub fn deploy_contract() {
 	set_balance(NATIVE, &alice(), 1_000_000 * dollar(NATIVE));
 
 	let json: serde_json::Value =
-		serde_json::from_str(include_str!("../../../../ts-tests/build/Erc20DemoContract2.json")).unwrap();
+		serde_json::from_str(include_str!("../../../../modules/evm/ts-tests/Erc20DemoContract2.json")).unwrap();
 	let code = hex::decode(json.get("bytecode").unwrap().as_str().unwrap()).unwrap();
 
 	assert_ok!(EVM::create(

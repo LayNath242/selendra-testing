@@ -254,7 +254,7 @@ pub const ALICE_BALANCE: u128 = 100_000_000_000_000_000_000_000u128;
 
 pub fn deploy_contracts() {
 	let json: serde_json::Value =
-		serde_json::from_str(include_str!("../../../ts-tests/build/Erc20DemoContract2.json")).unwrap();
+		serde_json::from_str(include_str!("../../evm/ts-tests/Erc20DemoContract2.json")).unwrap();
 	let code = hex::decode(json.get("bytecode").unwrap().as_str().unwrap()).unwrap();
 	assert_ok!(EVM::create(Origin::signed(alice()), code, 0, 2_100_000, 10000, vec![]));
 
