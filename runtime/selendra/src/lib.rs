@@ -113,6 +113,7 @@ pub use runtime_common::{
 	OffchainSolutionWeightLimit, OperationalFeeMultiplier, OperatorMembershipInstanceSelendra, Price, ProxyType, Rate,
 	Ratio, RuntimeBlockLength, RuntimeBlockWeights, SystemContractsFilter, TechnicalCommitteeInstance,
 	TechnicalCommitteeMembershipInstance, TimeStampedPrice, TipPerWeightStep, ACA, AUSD, DOT, LACA, KSM, RENBTC,
+	DAI
 };
 
 /// Import the stable_asset pallet.
@@ -693,6 +694,7 @@ parameter_type_with_key! {
 				TokenSymbol::LACA |
 				TokenSymbol::DOT |
 				TokenSymbol::KSM |
+				TokenSymbol::DAI |
 				TokenSymbol::RENBTC => Balance::max_value() // unsupported
 			},
 			CurrencyId::DexShare(dex_share_0, _) => {

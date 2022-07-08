@@ -183,6 +183,7 @@ create_currency_id! {
 
 		// 20 - 39: External tokens (e.g. bridged)
 		RENBTC("Ren Protocol BTC", 8) = 20,
+		DAI("Dai Stable coin", 18) = 21,
 
 		// 130 - 147: Polkadot & Kumasam bridged tokens
 		KSM("Kusama", 12) = 130,
