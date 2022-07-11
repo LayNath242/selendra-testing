@@ -45,12 +45,12 @@ pub type AuctionId = u32;
 pub const ALICE: AccountId = 1;
 pub const BOB: AccountId = 2;
 pub const CAROL: AccountId = 3;
-pub const ACA: CurrencyId = CurrencyId::Token(TokenSymbol::ACA);
-pub const AUSD: CurrencyId = CurrencyId::Token(TokenSymbol::AUSD);
+pub const SEL: CurrencyId = CurrencyId::Token(TokenSymbol::SEL);
+pub const KUSD: CurrencyId = CurrencyId::Token(TokenSymbol::KUSD);
 pub const BTC: CurrencyId = CurrencyId::Token(TokenSymbol::RENBTC);
 pub const DOT: CurrencyId = CurrencyId::Token(TokenSymbol::DOT);
-pub const LP_AUSD_DOT: CurrencyId =
-	CurrencyId::DexShare(DexShare::Token(TokenSymbol::AUSD), DexShare::Token(TokenSymbol::DOT));
+pub const LP_KUSD_DOT: CurrencyId =
+	CurrencyId::DexShare(DexShare::Token(TokenSymbol::KUSD), DexShare::Token(TokenSymbol::DOT));
 pub const LP_DOT_BTC: CurrencyId =
 	CurrencyId::DexShare(DexShare::Token(TokenSymbol::RENBTC), DexShare::Token(TokenSymbol::DOT));
 
@@ -121,7 +121,7 @@ impl pallet_balances::Config for Runtime {
 pub type AdaptedBasicCurrency = orml_currencies::BasicCurrencyAdapter<Runtime, PalletBalances, Amount, BlockNumber>;
 
 parameter_types! {
-	pub const GetNativeCurrencyId: CurrencyId = ACA;
+	pub const GetNativeCurrencyId: CurrencyId = SEL;
 }
 
 impl orml_currencies::Config for Runtime {
@@ -132,7 +132,7 @@ impl orml_currencies::Config for Runtime {
 }
 
 parameter_types! {
-	pub const LoansPalletId: PalletId = PalletId(*b"aca/loan");
+	pub const LoansPalletId: PalletId = PalletId(*b"sel/loan");
 }
 
 impl loans::Config for Runtime {
@@ -147,7 +147,7 @@ impl loans::Config for Runtime {
 thread_local! {
 	static BTC_PRICE: RefCell<Option<Price>> = RefCell::new(Some(Price::one()));
 	static DOT_PRICE: RefCell<Option<Price>> = RefCell::new(Some(Price::one()));
-	static LP_AUSD_DOT_PRICE: RefCell<Option<Price>> = RefCell::new(Some(Price::one()));
+	static LP_KUSD_DOT_PRICE: RefCell<Option<Price>> = RefCell::new(Some(Price::one()));
 	static LP_DOT_BTC_PRICE: RefCell<Option<Price>> = RefCell::new(Some(Price::one()));
 }
 
@@ -157,7 +157,7 @@ impl MockPriceSource {
 		match currency_id {
 			BTC => BTC_PRICE.with(|v| *v.borrow_mut() = price),
 			DOT => DOT_PRICE.with(|v| *v.borrow_mut() = price),
-			LP_AUSD_DOT => LP_AUSD_DOT_PRICE.with(|v| *v.borrow_mut() = price),
+			LP_KUSD_DOT => LP_KUSD_DOT_PRICE.with(|v| *v.borrow_mut() = price),
 			LP_DOT_BTC => LP_DOT_BTC_PRICE.with(|v| *v.borrow_mut() = price),
 			_ => {}
 		}
@@ -168,8 +168,8 @@ impl PriceProvider<CurrencyId> for MockPriceSource {
 		match currency_id {
 			BTC => BTC_PRICE.with(|v| *v.borrow()),
 			DOT => DOT_PRICE.with(|v| *v.borrow()),
-			AUSD => Some(Price::one()),
-			LP_AUSD_DOT => LP_AUSD_DOT_PRICE.with(|v| *v.borrow()),
+			KUSD => Some(Price::one()),
+			LP_KUSD_DOT => LP_KUSD_DOT_PRICE.with(|v| *v.borrow()),
 			LP_DOT_BTC => LP_DOT_BTC_PRICE.with(|v| *v.borrow()),
 			_ => None,
 		}
@@ -217,11 +217,11 @@ impl AuctionManager<AccountId> for MockAuctionManager {
 }
 
 parameter_types! {
-	pub const GetStableCurrencyId: CurrencyId = AUSD;
-	pub const CDPTreasuryPalletId: PalletId = PalletId(*b"aca/cdpt");
-	pub TreasuryAccount: AccountId = PalletId(*b"aca/hztr").into_account_truncating();
+	pub const GetStableCurrencyId: CurrencyId = KUSD;
+	pub const CDPTreasuryPalletId: PalletId = PalletId(*b"sel/cdpt");
+	pub TreasuryAccount: AccountId = PalletId(*b"sel/hztr").into_account_truncating();
 	pub AlternativeSwapPathJointList: Vec<Vec<CurrencyId>> = vec![
-		vec![ACA],
+		vec![SEL],
 	];
 }
 
@@ -241,14 +241,14 @@ impl cdp_treasury::Config for Runtime {
 }
 
 parameter_types! {
-	pub const DEXPalletId: PalletId = PalletId(*b"aca/dexm");
+	pub const DEXPalletId: PalletId = PalletId(*b"sel/dexm");
 	pub const GetExchangeFee: (u32, u32) = (0, 100);
 	pub EnabledTradingPairs: Vec<TradingPair> = vec![
-		TradingPair::from_currency_ids(AUSD, BTC).unwrap(),
-		TradingPair::from_currency_ids(AUSD, DOT).unwrap(),
-		TradingPair::from_currency_ids(ACA, BTC).unwrap(),
-		TradingPair::from_currency_ids(ACA, DOT).unwrap(),
-		TradingPair::from_currency_ids(ACA, AUSD).unwrap(),
+		TradingPair::from_currency_ids(KUSD, BTC).unwrap(),
+		TradingPair::from_currency_ids(KUSD, DOT).unwrap(),
+		TradingPair::from_currency_ids(SEL, BTC).unwrap(),
+		TradingPair::from_currency_ids(SEL, DOT).unwrap(),
+		TradingPair::from_currency_ids(SEL, KUSD).unwrap(),
 	];
 }
 
@@ -372,7 +372,7 @@ impl Default for ExtBuilder {
 				(ALICE, DOT, 1000),
 				(BOB, DOT, 1000),
 				(CAROL, DOT, 10000),
-				(CAROL, AUSD, 10000),
+				(CAROL, KUSD, 10000),
 			],
 		}
 	}

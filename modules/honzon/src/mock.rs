@@ -51,8 +51,8 @@ pub type AuctionId = u32;
 pub const ALICE: AccountId = 1;
 pub const BOB: AccountId = 2;
 pub const CAROL: AccountId = 3;
-pub const ACA: CurrencyId = CurrencyId::Token(TokenSymbol::ACA);
-pub const AUSD: CurrencyId = CurrencyId::Token(TokenSymbol::AUSD);
+pub const SEL: CurrencyId = CurrencyId::Token(TokenSymbol::SEL);
+pub const KUSD: CurrencyId = CurrencyId::Token(TokenSymbol::KUSD);
 pub const BTC: CurrencyId = CurrencyId::Token(TokenSymbol::RENBTC);
 pub const DOT: CurrencyId = CurrencyId::Token(TokenSymbol::DOT);
 
@@ -119,7 +119,7 @@ impl pallet_balances::Config for Runtime {
 pub type AdaptedBasicCurrency = orml_currencies::BasicCurrencyAdapter<Runtime, PalletBalances, Amount, BlockNumber>;
 
 parameter_types! {
-	pub const GetNativeCurrencyId: CurrencyId = ACA;
+	pub const GetNativeCurrencyId: CurrencyId = SEL;
 }
 
 impl orml_currencies::Config for Runtime {
@@ -130,7 +130,7 @@ impl orml_currencies::Config for Runtime {
 }
 
 parameter_types! {
-	pub const LoansPalletId: PalletId = PalletId(*b"aca/loan");
+	pub const LoansPalletId: PalletId = PalletId(*b"sel/loan");
 }
 
 impl loans::Config for Runtime {
@@ -201,11 +201,11 @@ ord_parameter_types! {
 }
 
 parameter_types! {
-	pub const GetStableCurrencyId: CurrencyId = AUSD;
-	pub const CDPTreasuryPalletId: PalletId = PalletId(*b"aca/cdpt");
-	pub TreasuryAccount: AccountId = PalletId(*b"aca/hztr").into_account_truncating();
+	pub const GetStableCurrencyId: CurrencyId = KUSD;
+	pub const CDPTreasuryPalletId: PalletId = PalletId(*b"sel/cdpt");
+	pub TreasuryAccount: AccountId = PalletId(*b"sel/hztr").into_account_truncating();
 	pub AlternativeSwapPathJointList: Vec<Vec<CurrencyId>> = vec![
-		vec![AUSD],
+		vec![KUSD],
 	];
 }
 

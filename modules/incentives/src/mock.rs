@@ -39,15 +39,15 @@ pub use support::{CDPTreasury, DEXManager, Price, Ratio, SwapLimit};
 pub type AccountId = AccountId32;
 pub type BlockNumber = u64;
 
-pub const ACA: CurrencyId = CurrencyId::Token(TokenSymbol::ACA);
-pub const AUSD: CurrencyId = CurrencyId::Token(TokenSymbol::AUSD);
-pub const LACA: CurrencyId = CurrencyId::Token(TokenSymbol::LACA);
+pub const SEL: CurrencyId = CurrencyId::Token(TokenSymbol::SEL);
+pub const KUSD: CurrencyId = CurrencyId::Token(TokenSymbol::KUSD);
+pub const LSEL: CurrencyId = CurrencyId::Token(TokenSymbol::LSEL);
 pub const BTC: CurrencyId = CurrencyId::Token(TokenSymbol::RENBTC);
 pub const DOT: CurrencyId = CurrencyId::Token(TokenSymbol::DOT);
-pub const BTC_AUSD_LP: CurrencyId =
-	CurrencyId::DexShare(DexShare::Token(TokenSymbol::RENBTC), DexShare::Token(TokenSymbol::AUSD));
-pub const DOT_AUSD_LP: CurrencyId =
-	CurrencyId::DexShare(DexShare::Token(TokenSymbol::DOT), DexShare::Token(TokenSymbol::AUSD));
+pub const BTC_KUSD_LP: CurrencyId =
+	CurrencyId::DexShare(DexShare::Token(TokenSymbol::RENBTC), DexShare::Token(TokenSymbol::KUSD));
+pub const DOT_KUSD_LP: CurrencyId =
+	CurrencyId::DexShare(DexShare::Token(TokenSymbol::DOT), DexShare::Token(TokenSymbol::KUSD));
 
 mod incentives {
 	pub use super::super::*;
@@ -92,7 +92,7 @@ parameter_type_with_key! {
 	pub ExistentialDeposits: |currency_id: CurrencyId| -> Balance {
 
 		match currency_id {
-			CurrencyId::Token(TokenSymbol::AUSD) => 10,
+			CurrencyId::Token(TokenSymbol::KUSD) => 10,
 			_ => Default::default()
 		}
 	};
@@ -144,7 +144,7 @@ impl CDPTreasury<AccountId> for MockCDPTreasury {
 	}
 
 	fn issue_debit(who: &AccountId, debit: Balance, _: bool) -> DispatchResult {
-		TokensModule::deposit(AUSD, who, debit)
+		TokensModule::deposit(KUSD, who, debit)
 	}
 
 	fn burn_debit(_: &AccountId, _: Balance) -> DispatchResult {
@@ -172,10 +172,10 @@ pub struct MockDEX;
 impl DEXManager<AccountId, Balance, CurrencyId> for MockDEX {
 	fn get_liquidity_pool(currency_id_a: CurrencyId, currency_id_b: CurrencyId) -> (Balance, Balance) {
 		match (currency_id_a, currency_id_b) {
-			(AUSD, BTC) => (500, 100),
-			(AUSD, DOT) => (400, 100),
-			(BTC, AUSD) => (100, 500),
-			(DOT, AUSD) => (100, 400),
+			(KUSD, BTC) => (500, 100),
+			(KUSD, DOT) => (400, 100),
+			(BTC, KUSD) => (100, 500),
+			(DOT, KUSD) => (100, 400),
 			_ => (0, 0),
 		}
 	}
@@ -254,9 +254,9 @@ impl orml_rewards::Config for Runtime {
 }
 
 parameter_types! {
-	pub const StableCurrencyId: CurrencyId = AUSD;
-	pub const GetNativeCurrencyId: CurrencyId = ACA;
-	pub const IncentivesPalletId: PalletId = PalletId(*b"aca/inct");
+	pub const StableCurrencyId: CurrencyId = KUSD;
+	pub const GetNativeCurrencyId: CurrencyId = SEL;
+	pub const IncentivesPalletId: PalletId = PalletId(*b"sel/inct");
 }
 
 ord_parameter_types! {

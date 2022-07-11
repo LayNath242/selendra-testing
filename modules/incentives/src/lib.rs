@@ -34,7 +34,7 @@
 //! 1. Incentives: periodicly(AccumulatePeriod), accumulate fixed amount according to Incentive.
 //! Rewards come from RewardsSource, please transfer enough tokens to RewardsSource before
 //! start incentive plan.
-//! 2. DexSaving: periodicly(AccumulatePeriod), the reward currency is Stable(KUSD/AUSD),
+//! 2. DexSaving: periodicly(AccumulatePeriod), the reward currency is Stable(KUSD/KUSD),
 //! the accumulation amount is the multiplier of DexSavingRewardRates and the stable amount of
 //! corresponding liquidity pool. CDPTreasury will issue the stable currency to RewardsSource.
 

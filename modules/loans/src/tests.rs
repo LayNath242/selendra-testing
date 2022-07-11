@@ -95,7 +95,7 @@ fn adjust_position_should_work() {
 		assert_eq!(LoansModule::total_positions(BTC).collateral, 0);
 		assert_eq!(LoansModule::positions(BTC, &ALICE).debit, 0);
 		assert_eq!(LoansModule::positions(BTC, &ALICE).collateral, 0);
-		assert_eq!(Currencies::free_balance(AUSD, &ALICE), 0);
+		assert_eq!(Currencies::free_balance(KUSD, &ALICE), 0);
 
 		// success
 		assert_ok!(LoansModule::adjust_position(&ALICE, BTC, 500, 300));
@@ -105,7 +105,7 @@ fn adjust_position_should_work() {
 		assert_eq!(LoansModule::total_positions(BTC).collateral, 500);
 		assert_eq!(LoansModule::positions(BTC, &ALICE).debit, 300);
 		assert_eq!(LoansModule::positions(BTC, &ALICE).collateral, 500);
-		assert_eq!(Currencies::free_balance(AUSD, &ALICE), 150);
+		assert_eq!(Currencies::free_balance(KUSD, &ALICE), 150);
 		System::assert_has_event(Event::LoansModule(crate::Event::PositionUpdated {
 			owner: ALICE,
 			collateral_type: BTC,

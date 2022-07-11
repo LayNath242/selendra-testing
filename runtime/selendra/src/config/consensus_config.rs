@@ -2,7 +2,7 @@ use crate::{
 	constants::election::{ElectionBenchmarkConfig, MinerMaxLength, MinerMaxWeight},
 	voter_bags, Babe, Balances, Call, ElectionProviderMultiPhase, Event, Historical,
 	ImOnline, Offences, Runtime, Session, SessionKeys, Staking, Timestamp, TransactionPayment,
-	Treasury, VoterList, Weight, ACA,
+	Treasury, VoterList, Weight, SEL,
 };
 use codec::Decode;
 
@@ -185,7 +185,7 @@ parameter_types! {
 	pub OffchainRepeat: BlockNumber = UnsignedPhase::get() / 32;
 
 	// signed config
-	pub SignedRewardBase: Balance = 1 * dollar(ACA);
+	pub SignedRewardBase: Balance = 1 * dollar(SEL);
 	pub SignedDepositBase: Balance = deposit(2, 0);
 	pub SignedDepositByte: Balance = deposit(0, 10) / 1024;
 	pub const SignedMaxSubmissions: u32 = 16;

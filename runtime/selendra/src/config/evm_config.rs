@@ -3,7 +3,7 @@ use crate::{
 	dollar, parameter_types, weights, AllPrecompiles, Babe, Balances, Currencies, DispatchableTask,
 	EnsureRootOrHalfCouncil, EnsureRootOrTwoThirdsTechnicalCommittee, Event, GasToWeight,
 	IdleScheduler, Runtime, RuntimeBlockWeights, RuntimeDebug, TreasuryAccount, Weight,
-	EVM, H160, ACA,
+	EVM, H160, SEL,
 };
 
 use codec::{Decode, Encode};
@@ -39,8 +39,8 @@ parameter_types! {
 #[cfg(not(feature = "with-ethereum-compatibility"))]
 parameter_types! {
 	pub const NewContractExtraBytes: u32 = 10_000;
-	pub DeveloperDeposit: Balance = dollar(ACA);
-	pub PublicationFee: Balance = 10 * dollar(ACA);
+	pub DeveloperDeposit: Balance = dollar(SEL);
+	pub PublicationFee: Balance = 10 * dollar(SEL);
 }
 
 #[derive(Clone, Encode, Decode, PartialEq, Eq, RuntimeDebug, TypeInfo)]
@@ -48,8 +48,8 @@ pub struct StorageDepositPerByte;
 impl<I: From<Balance>> frame_support::traits::Get<I> for StorageDepositPerByte {
 	fn get() -> I {
 		#[cfg(not(feature = "with-ethereum-compatibility"))]
-		// NOTE: ACA decimals is 12, convert to 18.
-		// 10 * millicent(ACA) * 10^6
+		// NOTE: SEL decimals is 12, convert to 18.
+		// 10 * millicent(SEL) * 10^6
 		return I::from(100_000_000_000_000);
 		#[cfg(feature = "with-ethereum-compatibility")]
 		return I::from(0);

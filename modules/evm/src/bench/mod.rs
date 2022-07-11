@@ -136,7 +136,7 @@ fn whitelist_keys(b: &mut Bencher, from: H160, code: Vec<u8>) -> H160 {
 
 	// System::Number
 	b.whitelist(
-		hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef702a5c1b19ab7a04f536c519aca4983ac").to_vec(),
+		hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef702a5c1b19ab7a04f536c519sel4983ac").to_vec(),
 		true,
 		true,
 	);

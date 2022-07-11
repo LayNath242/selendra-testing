@@ -281,7 +281,7 @@ mod tests {
 	use super::*;
 
 	use crate::precompile::mock::{
-		aca_evm_address, alice, ausd_evm_address, bob, erc20_address_not_exists, lp_aca_ausd_evm_address, new_test_ext,
+		sel_evm_address, alice, kusd_evm_address, bob, erc20_address_not_exists, lp_sel_kusd_evm_address, new_test_ext,
 		Balances, Test,
 	};
 	use frame_support::assert_noop;
@@ -330,12 +330,12 @@ mod tests {
 			"};
 
 			// Token
-			context.caller = aca_evm_address();
+			context.caller = sel_evm_address();
 
 			let expected_output = hex! {"
 				0000000000000000000000000000000000000000000000000000000000000020
-				0000000000000000000000000000000000000000000000000000000000000005
-				4163616c61000000000000000000000000000000000000000000000000000000
+				0000000000000000000000000000000000000000000000000000000000000008
+				53656c656e647261000000000000000000000000000000000000000000000000
 			"};
 
 			let resp = MultiCurrencyPrecompile::execute(&input, None, &context, false).unwrap();
@@ -343,12 +343,12 @@ mod tests {
 			assert_eq!(resp.output, expected_output.to_vec());
 
 			// DexShare
-			context.caller = lp_aca_ausd_evm_address();
+			context.caller = lp_sel_kusd_evm_address();
 
 			let expected_output = hex! {"
 				0000000000000000000000000000000000000000000000000000000000000020
-				0000000000000000000000000000000000000000000000000000000000000017
-				4c50204163616c61202d204163616c6120446f6c6c6172000000000000000000
+				000000000000000000000000000000000000000000000000000000000000001a
+				4c502053656c656e647261202d204b686d657220446f6C6C6172000000000000
 			"};
 
 			let resp = MultiCurrencyPrecompile::execute(&input, None, &context, false).unwrap();
@@ -372,12 +372,12 @@ mod tests {
 			"};
 
 			// Token
-			context.caller = aca_evm_address();
+			context.caller = sel_evm_address();
 
 			let expected_output = hex! {"
 				0000000000000000000000000000000000000000000000000000000000000020
 				0000000000000000000000000000000000000000000000000000000000000003
-				4143410000000000000000000000000000000000000000000000000000000000
+				53454c0000000000000000000000000000000000000000000000000000000000
 			"};
 
 			let resp = MultiCurrencyPrecompile::execute(&input, None, &context, false).unwrap();
@@ -385,12 +385,12 @@ mod tests {
 			assert_eq!(resp.output, expected_output.to_vec());
 
 			// DexShare
-			context.caller = lp_aca_ausd_evm_address();
+			context.caller = lp_sel_kusd_evm_address();
 
 			let expected_output = hex! {"
 				0000000000000000000000000000000000000000000000000000000000000020
 				000000000000000000000000000000000000000000000000000000000000000b
-				4c505f4143415f41555344000000000000000000000000000000000000000000
+				4c505f53454c5f4b555344000000000000000000000000000000000000000000
 			"};
 
 			let resp = MultiCurrencyPrecompile::execute(&input, None, &context, false).unwrap();
@@ -414,7 +414,7 @@ mod tests {
 			"};
 
 			// Token
-			context.caller = aca_evm_address();
+			context.caller = sel_evm_address();
 
 			let expected_output = hex! {"
 				00000000000000000000000000000000 0000000000000000000000000000000c
@@ -425,7 +425,7 @@ mod tests {
 			assert_eq!(resp.output, expected_output.to_vec());
 
 			// DexShare
-			context.caller = lp_aca_ausd_evm_address();
+			context.caller = lp_sel_kusd_evm_address();
 
 			let resp = MultiCurrencyPrecompile::execute(&input, None, &context, false).unwrap();
 			assert_eq!(resp.exit_status, ExitSucceed::Returned);
@@ -448,7 +448,7 @@ mod tests {
 			"};
 
 			// Token
-			context.caller = ausd_evm_address();
+			context.caller = kusd_evm_address();
 
 			// 2_000_000_000
 			let expected_output = hex! {"
@@ -460,7 +460,7 @@ mod tests {
 			assert_eq!(resp.output, expected_output.to_vec());
 
 			// DexShare
-			context.caller = lp_aca_ausd_evm_address();
+			context.caller = lp_sel_kusd_evm_address();
 
 			let expected_output = hex! {"
 				00000000000000000000000000000000 00000000000000000000000000000000
@@ -489,7 +489,7 @@ mod tests {
 			"};
 
 			// Token
-			context.caller = aca_evm_address();
+			context.caller = sel_evm_address();
 
 			// INITIAL_BALANCE = 1_000_000_000_000
 			let expected_output = hex! {"
@@ -501,7 +501,7 @@ mod tests {
 			assert_eq!(resp.output, expected_output.to_vec());
 
 			// DexShare
-			context.caller = lp_aca_ausd_evm_address();
+			context.caller = lp_sel_kusd_evm_address();
 
 			let expected_output = hex! {"
 				00000000000000000000000000000000 00000000000000000000000000000000
@@ -537,7 +537,7 @@ mod tests {
 			let to_balance = Balances::free_balance(bob());
 
 			// Token
-			context.caller = aca_evm_address();
+			context.caller = sel_evm_address();
 
 			let resp = MultiCurrencyPrecompile::execute(&input, None, &context, false).unwrap();
 			assert_eq!(resp.exit_status, ExitSucceed::Returned);
@@ -547,7 +547,7 @@ mod tests {
 			assert_eq!(Balances::free_balance(bob()), to_balance + 1);
 
 			// DexShare
-			context.caller = lp_aca_ausd_evm_address();
+			context.caller = lp_sel_kusd_evm_address();
 			assert_noop!(
 				MultiCurrencyPrecompile::execute(&input, Some(100_000), &context, false),
 				PrecompileFailure::Revert {

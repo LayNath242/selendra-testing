@@ -54,7 +54,7 @@ fn whitelist_keys(b: &mut Bencher, caller: Option<H160>) {
 
 	// System::Number
 	b.whitelist(
-		hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef702a5c1b19ab7a04f536c519aca4983ac").to_vec(),
+		hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef702a5c1b19ab7a04f536c519sel4983ac").to_vec(),
 		true,
 		true,
 	);
@@ -64,15 +64,15 @@ fn whitelist_keys(b: &mut Bencher, caller: Option<H160>) {
 fn setup_liquidity() {
 	// faucet alice
 	assert_ok!(Currencies::update_balance(Origin::root(), ALICE, RENBTC, 1_000_000));
-	assert_ok!(Currencies::update_balance(Origin::root(), ALICE, AUSD, 1_000_000_000));
+	assert_ok!(Currencies::update_balance(Origin::root(), ALICE, KUSD, 1_000_000_000));
 
-	// enable RENBTC/AUSD
-	assert_ok!(DexModule::enable_trading_pair(Origin::signed(ALICE), RENBTC, AUSD,));
+	// enable RENBTC/KUSD
+	assert_ok!(DexModule::enable_trading_pair(Origin::signed(ALICE), RENBTC, KUSD,));
 
 	assert_ok!(DexModule::add_liquidity(
 		Origin::signed(ALICE),
 		RENBTC,
-		AUSD,
+		KUSD,
 		1_000,
 		1_000_000,
 		0,
@@ -234,7 +234,7 @@ fn evm_query_developer_deposit(b: &mut Bencher) {
 
 	// 1_000_000_000
 	let expected_output = hex! {"
-		00000000000000000000000000000000 0000000000000000000000003b9aca00
+		00000000000000000000000000000000 0000000000000000000000003b9sel00
 	"};
 
 	let resp = b

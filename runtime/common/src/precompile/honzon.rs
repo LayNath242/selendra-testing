@@ -307,7 +307,7 @@ mod tests {
 	use super::*;
 
 	use crate::precompile::mock::{
-		alice, alice_evm_addr, new_test_ext, CDPEngine, Currencies, DexModule, Honzon, Loans, One, Origin, Test, AUSD,
+		alice, alice_evm_addr, new_test_ext, CDPEngine, Currencies, DexModule, Honzon, Loans, One, Origin, Test, KUSD,
 		BOB, DOT,
 	};
 	use frame_support::assert_ok;
@@ -350,7 +350,7 @@ mod tests {
 			let input = hex! {"
 				d20a1c87
 				000000000000000000000000 1000000000000000000000000000000000000001
-				000000000000000000000000 0000000000000000000100000000000000000002
+				000000000000000000000000 0000000000000000000100000000000000000083
 				00000000000000000000000000000000 00000000000000000000000010000000
 				00000000000000000000000000000000 00000000000000000000000000001000
 			"};
@@ -387,13 +387,13 @@ mod tests {
 				1_000_000
 			));
 
-			assert_ok!(DexModule::enable_trading_pair(Origin::signed(One::get()), DOT, AUSD));
-			assert_ok!(Currencies::update_balance(Origin::root(), BOB, AUSD, 1_000_000_000_000));
+			assert_ok!(DexModule::enable_trading_pair(Origin::signed(One::get()), DOT, KUSD));
+			assert_ok!(Currencies::update_balance(Origin::root(), BOB, KUSD, 1_000_000_000_000));
 			assert_ok!(Currencies::update_balance(Origin::root(), BOB, DOT, 1_000_000_000_000));
 			assert_ok!(DexModule::add_liquidity(
 				Origin::signed(BOB),
 				DOT,
-				AUSD,
+				KUSD,
 				1_000_000_000,
 				1_000_000_000,
 				0,
@@ -415,7 +415,7 @@ mod tests {
 			let input = hex! {"
 				bf0ea731
 				000000000000000000000000 1000000000000000000000000000000000000001
-				000000000000000000000000 0000000000000000000100000000000000000002
+				000000000000000000000000 0000000000000000000100000000000000000083
 				00000000000000000000000000000000 00000000000000000000000100000000
 			"};
 
@@ -463,7 +463,7 @@ mod tests {
 			let input = hex! {"
 				b33dc190
 				000000000000000000000000 1000000000000000000000000000000000000001
-				000000000000000000000000 0000000000000000000100000000000000000002
+				000000000000000000000000 0000000000000000000100000000000000000083
 			"};
 
 			// 100_000_000_000
@@ -500,17 +500,17 @@ mod tests {
 			// currency_id
 			let input = hex! {"
 				c4ba4c3a
-				000000000000000000000000 0000000000000000000100000000000000000002
+				000000000000000000000000 0000000000000000000100000000000000000083
 			"};
 
 			// Hex value of `FixedU128` for 3/2
-			// let expected_output = hex! {"
-			// 	00000000000000000000000000000000 000000000000000014d1120d7b160000
-			// "};
+			let expected_output = hex! {"
+				00000000000000000000000000000000 000000000000000014d1120d7b160000
+			"};
 
 			let res = HonzonPrecompile::execute(&input, None, &context, false).unwrap();
 			assert_eq!(res.exit_status, ExitSucceed::Returned);
-			// assert_eq!(res.output, expected_output.to_vec());
+			assert_eq!(res.output, expected_output.to_vec());
 		});
 	}
 
@@ -550,7 +550,7 @@ mod tests {
 			let input = hex! {"
 				1384ed17
 				000000000000000000000000 1000000000000000000000000000000000000001
-				000000000000000000000000 0000000000000000000100000000000000000002
+				000000000000000000000000 0000000000000000000100000000000000000083
 			"};
 
 			// value for FixedU128 of 100_000

@@ -448,12 +448,12 @@ mod tests {
 			00000000
 			000000000000000000000000 0000000000000000000100000000000000000000
 			000000000000000000000000 0000000000000000000100000000000000000001
-			ffffffffffffffffffffffff 0000000000000000000100000000000000000002
+			ffffffffffffffffffffffff 0000000000000000000100000000000000000083
 		"};
 
 		let input = TestInput::new(&data[..], None);
-		assert_ok!(input.currency_id_at(1), CurrencyId::Token(TokenSymbol::ACA));
-		assert_ok!(input.currency_id_at(2), CurrencyId::Token(TokenSymbol::AUSD));
+		assert_ok!(input.currency_id_at(1), CurrencyId::Token(TokenSymbol::SEL));
+		assert_ok!(input.currency_id_at(2), CurrencyId::Token(TokenSymbol::KUSD));
 		assert_ok!(input.currency_id_at(3), CurrencyId::Token(TokenSymbol::DOT));
 	}
 

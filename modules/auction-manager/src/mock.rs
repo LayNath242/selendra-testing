@@ -46,7 +46,7 @@ pub type Amount = i64;
 pub const ALICE: AccountId = 1;
 pub const BOB: AccountId = 2;
 pub const CAROL: AccountId = 3;
-pub const AUSD: CurrencyId = CurrencyId::Token(TokenSymbol::AUSD);
+pub const KUSD: CurrencyId = CurrencyId::Token(TokenSymbol::KUSD);
 pub const BTC: CurrencyId = CurrencyId::Token(TokenSymbol::RENBTC);
 pub const DOT: CurrencyId = CurrencyId::Token(TokenSymbol::DOT);
 
@@ -116,10 +116,10 @@ ord_parameter_types! {
 }
 
 parameter_types! {
-	pub const GetStableCurrencyId: CurrencyId = AUSD;
+	pub const GetStableCurrencyId: CurrencyId = KUSD;
 	pub const MaxAuctionsCount: u32 = 10_000;
-	pub const CDPTreasuryPalletId: PalletId = PalletId(*b"aca/cdpt");
-	pub TreasuryAccount: AccountId = PalletId(*b"aca/hztr").into_account_truncating();
+	pub const CDPTreasuryPalletId: PalletId = PalletId(*b"sel/cdpt");
+	pub TreasuryAccount: AccountId = PalletId(*b"sel/hztr").into_account_truncating();
 	pub AlternativeSwapPathJointList: Vec<Vec<CurrencyId>> = vec![
 		vec![DOT],
 	];
@@ -161,12 +161,12 @@ impl PriceProvider<CurrencyId> for MockPriceSource {
 }
 
 parameter_types! {
-	pub const DEXPalletId: PalletId = PalletId(*b"aca/dexm");
+	pub const DEXPalletId: PalletId = PalletId(*b"sel/dexm");
 	pub const GetExchangeFee: (u32, u32) = (0, 100);
 	pub EnabledTradingPairs: Vec<TradingPair> = vec![
-		TradingPair::from_currency_ids(AUSD, BTC).unwrap(),
+		TradingPair::from_currency_ids(KUSD, BTC).unwrap(),
 		TradingPair::from_currency_ids(DOT, BTC).unwrap(),
-		TradingPair::from_currency_ids(AUSD, DOT).unwrap()
+		TradingPair::from_currency_ids(KUSD, DOT).unwrap()
 	];
 }
 
@@ -254,9 +254,9 @@ impl Default for ExtBuilder {
 	fn default() -> Self {
 		Self {
 			balances: vec![
-				(ALICE, AUSD, 1000),
-				(BOB, AUSD, 1000),
-				(CAROL, AUSD, 1000),
+				(ALICE, KUSD, 1000),
+				(BOB, KUSD, 1000),
+				(CAROL, KUSD, 1000),
 				(ALICE, BTC, 1000),
 				(BOB, BTC, 1000),
 				(CAROL, BTC, 1000),

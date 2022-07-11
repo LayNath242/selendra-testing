@@ -39,19 +39,19 @@ use support::SwapLimit;
 pub type AccountId = u128;
 pub type BlockNumber = u64;
 
-pub const ACA: CurrencyId = CurrencyId::Token(TokenSymbol::ACA);
-pub const AUSD: CurrencyId = CurrencyId::Token(TokenSymbol::AUSD);
+pub const SEL: CurrencyId = CurrencyId::Token(TokenSymbol::SEL);
+pub const KUSD: CurrencyId = CurrencyId::Token(TokenSymbol::KUSD);
 pub const DOT: CurrencyId = CurrencyId::Token(TokenSymbol::DOT);
-pub const LP_AUSD_DOT: CurrencyId =
-	CurrencyId::DexShare(DexShare::Token(TokenSymbol::AUSD), DexShare::Token(TokenSymbol::DOT));
+pub const LP_KUSD_DOT: CurrencyId =
+	CurrencyId::DexShare(DexShare::Token(TokenSymbol::KUSD), DexShare::Token(TokenSymbol::DOT));
 
 mod dex_oracle {
 	pub use super::super::*;
 }
 
 parameter_types! {
-	pub static AUSDDOTPair: TradingPair = TradingPair::from_currency_ids(AUSD, DOT).unwrap();
-	pub static ACADOTPair: TradingPair = TradingPair::from_currency_ids(ACA, DOT).unwrap();
+	pub static KUSDDOTPair: TradingPair = TradingPair::from_currency_ids(KUSD, DOT).unwrap();
+	pub static SELDOTPair: TradingPair = TradingPair::from_currency_ids(SEL, DOT).unwrap();
 }
 
 impl frame_system::Config for Runtime {
@@ -89,15 +89,15 @@ impl pallet_timestamp::Config for Runtime {
 }
 
 thread_local! {
-	static AUSD_DOT_POOL: RefCell<(Balance, Balance)> = RefCell::new((Zero::zero(), Zero::zero()));
-	static ACA_DOT_POOL: RefCell<(Balance, Balance)> = RefCell::new((Zero::zero(), Zero::zero()));
+	static KUSD_DOT_POOL: RefCell<(Balance, Balance)> = RefCell::new((Zero::zero(), Zero::zero()));
+	static SEL_DOT_POOL: RefCell<(Balance, Balance)> = RefCell::new((Zero::zero(), Zero::zero()));
 }
 
 pub fn set_pool(trading_pair: &TradingPair, pool_0: Balance, pool_1: Balance) {
-	if *trading_pair == AUSDDOTPair::get() {
-		AUSD_DOT_POOL.with(|v| *v.borrow_mut() = (pool_0, pool_1));
-	} else if *trading_pair == ACADOTPair::get() {
-		ACA_DOT_POOL.with(|v| *v.borrow_mut() = (pool_0, pool_1));
+	if *trading_pair == KUSDDOTPair::get() {
+		KUSD_DOT_POOL.with(|v| *v.borrow_mut() = (pool_0, pool_1));
+	} else if *trading_pair == SELDOTPair::get() {
+		SEL_DOT_POOL.with(|v| *v.borrow_mut() = (pool_0, pool_1));
 	}
 }
 
@@ -106,10 +106,10 @@ impl DEXManager<AccountId, Balance, CurrencyId> for MockDEX {
 	fn get_liquidity_pool(currency_id_0: CurrencyId, currency_id_1: CurrencyId) -> (Balance, Balance) {
 		TradingPair::from_currency_ids(currency_id_0, currency_id_1)
 			.map(|trading_pair| {
-				if trading_pair == AUSDDOTPair::get() {
-					AUSD_DOT_POOL.with(|v| *v.borrow())
-				} else if trading_pair == ACADOTPair::get() {
-					ACA_DOT_POOL.with(|v| *v.borrow())
+				if trading_pair == KUSDDOTPair::get() {
+					KUSD_DOT_POOL.with(|v| *v.borrow())
+				} else if trading_pair == SELDOTPair::get() {
+					SEL_DOT_POOL.with(|v| *v.borrow())
 				} else {
 					(0, 0)
 				}

@@ -156,16 +156,16 @@ impl pallet_balances::Config for Test {
 	type ReserveIdentifier = ReserveIdentifier;
 }
 
-pub const ACA: CurrencyId = CurrencyId::Token(TokenSymbol::ACA);
+pub const SEL: CurrencyId = CurrencyId::Token(TokenSymbol::SEL);
 pub const RENBTC: CurrencyId = CurrencyId::Token(TokenSymbol::RENBTC);
-pub const AUSD: CurrencyId = CurrencyId::Token(TokenSymbol::AUSD);
+pub const KUSD: CurrencyId = CurrencyId::Token(TokenSymbol::KUSD);
 pub const DOT: CurrencyId = CurrencyId::Token(TokenSymbol::DOT);
-pub const LACA: CurrencyId = CurrencyId::Token(TokenSymbol::LACA);
-pub const LP_ACA_AUSD: CurrencyId =
-	CurrencyId::DexShare(DexShare::Token(TokenSymbol::ACA), DexShare::Token(TokenSymbol::AUSD));
+pub const LSEL: CurrencyId = CurrencyId::Token(TokenSymbol::LSEL);
+pub const LP_SEL_KUSD: CurrencyId =
+	CurrencyId::DexShare(DexShare::Token(TokenSymbol::SEL), DexShare::Token(TokenSymbol::KUSD));
 
 parameter_types! {
-	pub const GetNativeCurrencyId: CurrencyId = ACA;
+	pub const GetNativeCurrencyId: CurrencyId = SEL;
 	pub Erc20HoldingAccount: H160 = H160::from_low_u64_be(1);
 }
 
@@ -220,7 +220,7 @@ impl module_idle_scheduler::Config for Test {
 }
 
 parameter_types! {
-	pub const NftPalletId: PalletId = PalletId(*b"aca/aNFT");
+	pub const NftPalletId: PalletId = PalletId(*b"sel/aNFT");
 }
 impl module_nft::Config for Test {
 	type Event = Event;
@@ -243,14 +243,14 @@ impl orml_nft::Config for Test {
 }
 
 parameter_types! {
-	pub const GetStableCurrencyId: CurrencyId = AUSD;
+	pub const GetStableCurrencyId: CurrencyId = KUSD;
 	pub MaxSwapSlippageCompareToOracle: Ratio = Ratio::one();
-	pub const TreasuryPalletId: PalletId = PalletId(*b"aca/trsy");
-	pub const TransactionPaymentPalletId: PalletId = PalletId(*b"aca/fees");
+	pub const TreasuryPalletId: PalletId = PalletId(*b"sel/trsy");
+	pub const TransactionPaymentPalletId: PalletId = PalletId(*b"sel/fees");
 	pub KaruraTreasuryAccount: AccountId = TreasuryPalletId::get().into_account_truncating();
 	pub const CustomFeeSurplus: Percent = Percent::from_percent(50);
 	pub const AlternativeFeeSurplus: Percent = Percent::from_percent(25);
-	pub DefaultFeeTokens: Vec<CurrencyId> = vec![AUSD];
+	pub DefaultFeeTokens: Vec<CurrencyId> = vec![KUSD];
 }
 
 impl module_transaction_payment::Config for Test {
@@ -363,7 +363,7 @@ ord_parameter_types! {
 parameter_types! {
 	pub const GetExchangeFee: (u32, u32) = (1, 100);
 	pub const TradingPathLimit: u32 = 4;
-	pub const DEXPalletId: PalletId = PalletId(*b"aca/dexm");
+	pub const DEXPalletId: PalletId = PalletId(*b"sel/dexm");
 }
 
 impl module_dex::Config for Test {
@@ -381,7 +381,7 @@ impl module_dex::Config for Test {
 }
 
 parameter_types! {
-	pub const LoansPalletId: PalletId = PalletId(*b"aca/loan");
+	pub const LoansPalletId: PalletId = PalletId(*b"sel/loan");
 }
 
 impl module_loans::Config for Test {
@@ -473,10 +473,10 @@ impl EmergencyShutdown for MockEmergencyShutdown {
 }
 
 parameter_types! {
-	pub const CDPTreasuryPalletId: PalletId = PalletId(*b"aca/cdpt");
-	pub CDPTreasuryAccount: AccountId = PalletId(*b"aca/hztr").into_account_truncating();
+	pub const CDPTreasuryPalletId: PalletId = PalletId(*b"sel/cdpt");
+	pub CDPTreasuryAccount: AccountId = PalletId(*b"sel/hztr").into_account_truncating();
 	pub AlternativeSwapPathJointList: Vec<Vec<CurrencyId>> = vec![
-		vec![AUSD],
+		vec![KUSD],
 	];
 }
 
@@ -603,7 +603,7 @@ parameter_type_with_key! {
 
 parameter_types! {
 	pub StableCurrencyFixedPrice: Price = Price::saturating_from_rational(1, 1);
-	pub const GetLiquidCurrencyId: CurrencyId = LACA;
+	pub const GetLiquidCurrencyId: CurrencyId = LSEL;
 }
 
 ord_parameter_types! {
@@ -628,7 +628,7 @@ impl module_prices::Config for Test {
 
 parameter_types! {
 	pub const StakingCurrencyId: CurrencyId = DOT;
-	pub const LiquidCurrencyId: CurrencyId = LACA;
+	pub const LiquidCurrencyId: CurrencyId = LSEL;
 	pub DefaultExchangeRate: ExchangeRate = ExchangeRate::saturating_from_rational(1, 10);
 	pub ActiveSubAccountsIndexList: Vec<u16> = vec![0, 1, 2];
 	pub const BondingDuration: EraIndex = 28;
@@ -645,7 +645,7 @@ impl orml_rewards::Config for Test {
 }
 
 parameter_types! {
-	pub const IncentivesPalletId: PalletId = PalletId(*b"aca/inct");
+	pub const IncentivesPalletId: PalletId = PalletId(*b"sel/inct");
 }
 
 ord_parameter_types! {
@@ -690,16 +690,16 @@ pub fn bob_evm_addr() -> EvmAddress {
 	EvmAddress::from(hex_literal::hex!("1000000000000000000000000000000000000002"))
 }
 
-pub fn aca_evm_address() -> EvmAddress {
-	EvmAddress::try_from(ACA).unwrap()
+pub fn sel_evm_address() -> EvmAddress {
+	EvmAddress::try_from(SEL).unwrap()
 }
 
-pub fn ausd_evm_address() -> EvmAddress {
-	EvmAddress::try_from(AUSD).unwrap()
+pub fn kusd_evm_address() -> EvmAddress {
+	EvmAddress::try_from(KUSD).unwrap()
 }
 
-pub fn lp_aca_ausd_evm_address() -> EvmAddress {
-	EvmAddress::try_from(LP_ACA_AUSD).unwrap()
+pub fn lp_sel_kusd_evm_address() -> EvmAddress {
+	EvmAddress::try_from(LP_SEL_KUSD).unwrap()
 }
 
 pub fn erc20_address_not_exists() -> EvmAddress {
@@ -794,7 +794,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 	.assimilate_storage(&mut storage)
 	.unwrap();
 	module_asset_registry::GenesisConfig::<Test> {
-		assets: vec![(ACA, ExistenceRequirement::get()), (RENBTC, 0)],
+		assets: vec![(SEL, ExistenceRequirement::get()), (RENBTC, 0)],
 	}
 	.assimilate_storage(&mut storage)
 	.unwrap();
@@ -810,7 +810,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 			RENBTC,
 			1_000_000_000_000
 		));
-		assert_ok!(Currencies::update_balance(Origin::root(), ALICE, AUSD, 1_000_000_000));
+		assert_ok!(Currencies::update_balance(Origin::root(), ALICE, KUSD, 1_000_000_000));
 
 		assert_ok!(Currencies::update_balance(
 			Origin::root(),
@@ -822,7 +822,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 		assert_ok!(Currencies::update_balance(
 			Origin::root(),
 			EvmAddressMapping::<Test>::get_account_id(&alice_evm_addr()),
-			AUSD,
+			KUSD,
 			1_000_000_000
 		));
 	});

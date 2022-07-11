@@ -123,7 +123,7 @@ contract Honzon is IHonzon {
     }
 
     /**
-     * @dev Get Exchange rate of debit units to debit value (AUSD)
+     * @dev Get Exchange rate of debit units to debit value (KUSD)
      * Returns (exchange_rate), value is FixedU128 with
      * a range of [0.000000000000000000, 340282366920938463463.374607431768211455]
      */

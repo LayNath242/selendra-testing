@@ -39,14 +39,14 @@ pub type AccountId = u128;
 pub const ALICE: AccountId = 1;
 pub const BOB: AccountId = 2;
 pub const CAROL: AccountId = 3;
-pub const AUSD: CurrencyId = CurrencyId::Token(TokenSymbol::AUSD);
+pub const KUSD: CurrencyId = CurrencyId::Token(TokenSymbol::KUSD);
 pub const BTC: CurrencyId = CurrencyId::Token(TokenSymbol::RENBTC);
 pub const DOT: CurrencyId = CurrencyId::Token(TokenSymbol::DOT);
-pub const ACA: CurrencyId = CurrencyId::Token(TokenSymbol::ACA);
+pub const SEL: CurrencyId = CurrencyId::Token(TokenSymbol::SEL);
 
 parameter_types! {
-	pub static AUSDBTCPair: TradingPair = TradingPair::from_currency_ids(AUSD, BTC).unwrap();
-	pub static AUSDDOTPair: TradingPair = TradingPair::from_currency_ids(AUSD, DOT).unwrap();
+	pub static KUSDBTCPair: TradingPair = TradingPair::from_currency_ids(KUSD, BTC).unwrap();
+	pub static KUSDDOTPair: TradingPair = TradingPair::from_currency_ids(KUSD, DOT).unwrap();
 	pub static DOTBTCPair: TradingPair = TradingPair::from_currency_ids(DOT, BTC).unwrap();
 }
 
@@ -121,22 +121,22 @@ ord_parameter_types! {
 
 parameter_types! {
 	pub const GetExchangeFee: (u32, u32) = (1, 100);
-	pub const DEXPalletId: PalletId = PalletId(*b"aca/dexm");
+	pub const DEXPalletId: PalletId = PalletId(*b"sel/dexm");
 	pub AlternativeSwapPathJointList: Vec<Vec<CurrencyId>> = vec![
 		vec![DOT],
 	];
 }
 
 thread_local! {
-	pub static AUSD_DOT_POOL_RECORD: RefCell<(Balance, Balance)> = RefCell::new((0, 0));
+	pub static KUSD_DOT_POOL_RECORD: RefCell<(Balance, Balance)> = RefCell::new((0, 0));
 }
 
 pub struct MockOnLiquidityPoolUpdated;
 impl Happened<(TradingPair, Balance, Balance)> for MockOnLiquidityPoolUpdated {
 	fn happened(info: &(TradingPair, Balance, Balance)) {
 		let (trading_pair, new_pool_0, new_pool_1) = info;
-		if *trading_pair == AUSDDOTPair::get() {
-			AUSD_DOT_POOL_RECORD.with(|v| *v.borrow_mut() = (*new_pool_0, *new_pool_1));
+		if *trading_pair == KUSDDOTPair::get() {
+			KUSD_DOT_POOL_RECORD.with(|v| *v.borrow_mut() = (*new_pool_0, *new_pool_1));
 		}
 	}
 }
@@ -156,12 +156,12 @@ impl Config for Runtime {
 }
 
 parameter_types! {
-	pub AUSDJoint: Vec<Vec<CurrencyId>> = vec![vec![AUSD]];
-	pub ACAJoint: Vec<Vec<CurrencyId>> = vec![vec![ACA]];
+	pub KUSDJoint: Vec<Vec<CurrencyId>> = vec![vec![KUSD]];
+	pub SELJoint: Vec<Vec<CurrencyId>> = vec![vec![SEL]];
 }
 
-pub type AUSDJointSwap = SpecificJointsSwap<DexModule, AUSDJoint>;
-pub type ACAJointSwap = SpecificJointsSwap<DexModule, ACAJoint>;
+pub type KUSDJointSwap = SpecificJointsSwap<DexModule, KUSDJoint>;
+pub type SELJointSwap = SpecificJointsSwap<DexModule, SELJoint>;
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Runtime>;
 type Block = frame_system::mocking::MockBlock<Runtime>;
@@ -189,10 +189,10 @@ impl Default for ExtBuilder {
 	fn default() -> Self {
 		Self {
 			balances: vec![
-				(ALICE, ACA, 1_000_000_000_000_000_000u128),
-				(BOB, ACA, 1_000_000_000_000_000_000u128),
-				(ALICE, AUSD, 1_000_000_000_000_000_000u128),
-				(BOB, AUSD, 1_000_000_000_000_000_000u128),
+				(ALICE, SEL, 1_000_000_000_000_000_000u128),
+				(BOB, SEL, 1_000_000_000_000_000_000u128),
+				(ALICE, KUSD, 1_000_000_000_000_000_000u128),
+				(BOB, KUSD, 1_000_000_000_000_000_000u128),
 				(ALICE, BTC, 1_000_000_000_000_000_000u128),
 				(BOB, BTC, 1_000_000_000_000_000_000u128),
 				(ALICE, DOT, 1_000_000_000_000_000_000u128),
@@ -207,7 +207,7 @@ impl Default for ExtBuilder {
 
 impl ExtBuilder {
 	pub fn initialize_enabled_trading_pairs(mut self) -> Self {
-		self.initial_enabled_trading_pairs = vec![AUSDDOTPair::get(), AUSDBTCPair::get(), DOTBTCPair::get()];
+		self.initial_enabled_trading_pairs = vec![KUSDDOTPair::get(), KUSDBTCPair::get(), DOTBTCPair::get()];
 		self
 	}
 
@@ -215,8 +215,8 @@ impl ExtBuilder {
 		self.initial_added_liquidity_pools = vec![(
 			who,
 			vec![
-				(AUSDDOTPair::get(), (1_000_000u128, 2_000_000u128)),
-				(AUSDBTCPair::get(), (1_000_000u128, 2_000_000u128)),
+				(KUSDDOTPair::get(), (1_000_000u128, 2_000_000u128)),
+				(KUSDBTCPair::get(), (1_000_000u128, 2_000_000u128)),
 				(DOTBTCPair::get(), (1_000_000u128, 2_000_000u128)),
 			],
 		)];

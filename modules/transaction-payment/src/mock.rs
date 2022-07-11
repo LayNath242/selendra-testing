@@ -48,8 +48,8 @@ pub const ALICE: AccountId = AccountId::new([1u8; 32]);
 pub const BOB: AccountId = AccountId::new([2u8; 32]);
 pub const CHARLIE: AccountId = AccountId::new([3u8; 32]);
 pub const DAVE: AccountId = AccountId::new([4u8; 32]);
-pub const ACA: CurrencyId = CurrencyId::Token(TokenSymbol::ACA);
-pub const AUSD: CurrencyId = CurrencyId::Token(TokenSymbol::AUSD);
+pub const SEL: CurrencyId = CurrencyId::Token(TokenSymbol::SEL);
+pub const KUSD: CurrencyId = CurrencyId::Token(TokenSymbol::KUSD);
 pub const DOT: CurrencyId = CurrencyId::Token(TokenSymbol::DOT);
 
 parameter_types! {
@@ -101,7 +101,7 @@ impl frame_system::Config for Runtime {
 parameter_type_with_key! {
 	pub ExistentialDeposits: |currency_id: CurrencyId| -> Balance {
 		match *currency_id {
-			AUSD => 100,
+			KUSD => 100,
 			DOT => 1,
 			_ => Default::default(),
 		}
@@ -139,7 +139,7 @@ impl pallet_balances::Config for Runtime {
 pub type AdaptedBasicCurrency = module_currencies::BasicCurrencyAdapter<Runtime, PalletBalances, Amount, BlockNumber>;
 
 parameter_types! {
-	pub const GetNativeCurrencyId: CurrencyId = ACA;
+	pub const GetNativeCurrencyId: CurrencyId = SEL;
 	pub Erc20HoldingAccount: H160 = H160::from_low_u64_be(1);
 }
 
@@ -166,11 +166,11 @@ ord_parameter_types! {
 }
 
 parameter_types! {
-	pub const DEXPalletId: PalletId = PalletId(*b"aca/dexm");
+	pub const DEXPalletId: PalletId = PalletId(*b"sel/dexm");
 	pub const GetExchangeFee: (u32, u32) = (0, 100);
 	pub EnabledTradingPairs: Vec<TradingPair> = vec![
-		TradingPair::from_currency_ids(AUSD, ACA).unwrap(),
-		TradingPair::from_currency_ids(AUSD, DOT).unwrap(),
+		TradingPair::from_currency_ids(KUSD, SEL).unwrap(),
+		TradingPair::from_currency_ids(KUSD, DOT).unwrap(),
 	];
 	pub const TradingPathLimit: u32 = 4;
 }
@@ -193,9 +193,9 @@ parameter_types! {
 	pub MaxSwapSlippageCompareToOracle: Ratio = Ratio::saturating_from_rational(1, 2);
 	pub static TransactionByteFee: u128 = 1;
 	pub static TipPerWeightStep: u128 = 1;
-	pub DefaultFeeTokens: Vec<CurrencyId> = vec![AUSD];
-	pub AusdFeeSwapPath: Vec<CurrencyId> = vec![AUSD, ACA];
-	pub DotFeeSwapPath: Vec<CurrencyId> = vec![DOT, AUSD, ACA];
+	pub DefaultFeeTokens: Vec<CurrencyId> = vec![KUSD];
+	pub KUSDFeeSwapPath: Vec<CurrencyId> = vec![KUSD, SEL];
+	pub DotFeeSwapPath: Vec<CurrencyId> = vec![DOT, KUSD, SEL];
 }
 
 thread_local! {
@@ -241,8 +241,8 @@ parameter_types! {
 	pub const LowerSwapThreshold: Balance = 20;
 	pub const MiddSwapThreshold: Balance = 5000;
 	pub const HigerSwapThreshold: Balance = 9500;
-	pub const TransactionPaymentPalletId: PalletId = PalletId(*b"aca/fees");
-	pub const TreasuryPalletId: PalletId = PalletId(*b"aca/trsy");
+	pub const TransactionPaymentPalletId: PalletId = PalletId(*b"sel/fees");
+	pub const TreasuryPalletId: PalletId = PalletId(*b"sel/trsy");
 	pub KaruraTreasuryAccount: AccountId = TreasuryPalletId::get().into_account_truncating();
 }
 ord_parameter_types! {
@@ -326,7 +326,7 @@ pub struct ExtBuilder {
 impl Default for ExtBuilder {
 	fn default() -> Self {
 		Self {
-			balances: vec![(ALICE, AUSD, 10000), (ALICE, DOT, 1000)],
+			balances: vec![(ALICE, KUSD, 10000), (ALICE, DOT, 1000)],
 			base_weight: 0,
 			byte_fee: 2,
 			weight_to_fee: 1,

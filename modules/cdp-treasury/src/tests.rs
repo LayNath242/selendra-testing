@@ -64,10 +64,10 @@ fn on_system_debit_work() {
 #[test]
 fn on_system_surplus_work() {
 	ExtBuilder::default().build().execute_with(|| {
-		assert_eq!(Currencies::free_balance(AUSD, &CDPTreasuryModule::account_id()), 0);
+		assert_eq!(Currencies::free_balance(KUSD, &CDPTreasuryModule::account_id()), 0);
 		assert_eq!(CDPTreasuryModule::surplus_pool(), 0);
 		assert_ok!(CDPTreasuryModule::on_system_surplus(1000));
-		assert_eq!(Currencies::free_balance(AUSD, &CDPTreasuryModule::account_id()), 1000);
+		assert_eq!(Currencies::free_balance(KUSD, &CDPTreasuryModule::account_id()), 1000);
 		assert_eq!(CDPTreasuryModule::surplus_pool(), 1000);
 	});
 }
@@ -75,26 +75,26 @@ fn on_system_surplus_work() {
 #[test]
 fn offset_surplus_and_debit_on_finalize_work() {
 	ExtBuilder::default().build().execute_with(|| {
-		assert_eq!(Currencies::free_balance(AUSD, &CDPTreasuryModule::account_id()), 0);
+		assert_eq!(Currencies::free_balance(KUSD, &CDPTreasuryModule::account_id()), 0);
 		assert_eq!(CDPTreasuryModule::surplus_pool(), 0);
 		assert_eq!(CDPTreasuryModule::debit_pool(), 0);
 		assert_ok!(CDPTreasuryModule::on_system_surplus(1000));
-		assert_eq!(Currencies::free_balance(AUSD, &CDPTreasuryModule::account_id()), 1000);
+		assert_eq!(Currencies::free_balance(KUSD, &CDPTreasuryModule::account_id()), 1000);
 		assert_eq!(CDPTreasuryModule::surplus_pool(), 1000);
 		CDPTreasuryModule::on_finalize(1);
-		assert_eq!(Currencies::free_balance(AUSD, &CDPTreasuryModule::account_id()), 1000);
+		assert_eq!(Currencies::free_balance(KUSD, &CDPTreasuryModule::account_id()), 1000);
 		assert_eq!(CDPTreasuryModule::surplus_pool(), 1000);
 		assert_eq!(CDPTreasuryModule::debit_pool(), 0);
 		assert_ok!(CDPTreasuryModule::on_system_debit(300));
 		assert_eq!(CDPTreasuryModule::debit_pool(), 300);
 		CDPTreasuryModule::on_finalize(2);
-		assert_eq!(Currencies::free_balance(AUSD, &CDPTreasuryModule::account_id()), 700);
+		assert_eq!(Currencies::free_balance(KUSD, &CDPTreasuryModule::account_id()), 700);
 		assert_eq!(CDPTreasuryModule::surplus_pool(), 700);
 		assert_eq!(CDPTreasuryModule::debit_pool(), 0);
 		assert_ok!(CDPTreasuryModule::on_system_debit(800));
 		assert_eq!(CDPTreasuryModule::debit_pool(), 800);
 		CDPTreasuryModule::on_finalize(3);
-		assert_eq!(Currencies::free_balance(AUSD, &CDPTreasuryModule::account_id()), 0);
+		assert_eq!(Currencies::free_balance(KUSD, &CDPTreasuryModule::account_id()), 0);
 		assert_eq!(CDPTreasuryModule::surplus_pool(), 0);
 		assert_eq!(CDPTreasuryModule::debit_pool(), 100);
 	});
@@ -103,15 +103,15 @@ fn offset_surplus_and_debit_on_finalize_work() {
 #[test]
 fn issue_debit_work() {
 	ExtBuilder::default().build().execute_with(|| {
-		assert_eq!(Currencies::free_balance(AUSD, &ALICE), 1000);
+		assert_eq!(Currencies::free_balance(KUSD, &ALICE), 1000);
 		assert_eq!(CDPTreasuryModule::debit_pool(), 0);
 
 		assert_ok!(CDPTreasuryModule::issue_debit(&ALICE, 1000, true));
-		assert_eq!(Currencies::free_balance(AUSD, &ALICE), 2000);
+		assert_eq!(Currencies::free_balance(KUSD, &ALICE), 2000);
 		assert_eq!(CDPTreasuryModule::debit_pool(), 0);
 
 		assert_ok!(CDPTreasuryModule::issue_debit(&ALICE, 1000, false));
-		assert_eq!(Currencies::free_balance(AUSD, &ALICE), 3000);
+		assert_eq!(Currencies::free_balance(KUSD, &ALICE), 3000);
 		assert_eq!(CDPTreasuryModule::debit_pool(), 1000);
 	});
 }
@@ -119,10 +119,10 @@ fn issue_debit_work() {
 #[test]
 fn burn_debit_work() {
 	ExtBuilder::default().build().execute_with(|| {
-		assert_eq!(Currencies::free_balance(AUSD, &ALICE), 1000);
+		assert_eq!(Currencies::free_balance(KUSD, &ALICE), 1000);
 		assert_eq!(CDPTreasuryModule::debit_pool(), 0);
 		assert_ok!(CDPTreasuryModule::burn_debit(&ALICE, 300));
-		assert_eq!(Currencies::free_balance(AUSD, &ALICE), 700);
+		assert_eq!(Currencies::free_balance(KUSD, &ALICE), 700);
 		assert_eq!(CDPTreasuryModule::debit_pool(), 0);
 	});
 }
@@ -130,12 +130,12 @@ fn burn_debit_work() {
 #[test]
 fn deposit_surplus_work() {
 	ExtBuilder::default().build().execute_with(|| {
-		assert_eq!(Currencies::free_balance(AUSD, &ALICE), 1000);
-		assert_eq!(Currencies::free_balance(AUSD, &CDPTreasuryModule::account_id()), 0);
+		assert_eq!(Currencies::free_balance(KUSD, &ALICE), 1000);
+		assert_eq!(Currencies::free_balance(KUSD, &CDPTreasuryModule::account_id()), 0);
 		assert_eq!(CDPTreasuryModule::surplus_pool(), 0);
 		assert_ok!(CDPTreasuryModule::deposit_surplus(&ALICE, 300));
-		assert_eq!(Currencies::free_balance(AUSD, &ALICE), 700);
-		assert_eq!(Currencies::free_balance(AUSD, &CDPTreasuryModule::account_id()), 300);
+		assert_eq!(Currencies::free_balance(KUSD, &ALICE), 700);
+		assert_eq!(Currencies::free_balance(KUSD, &CDPTreasuryModule::account_id()), 300);
 		assert_eq!(CDPTreasuryModule::surplus_pool(), 300);
 	});
 }
@@ -144,13 +144,13 @@ fn deposit_surplus_work() {
 fn withdraw_surplus_work() {
 	ExtBuilder::default().build().execute_with(|| {
 		assert_ok!(CDPTreasuryModule::deposit_surplus(&ALICE, 300));
-		assert_eq!(Currencies::free_balance(AUSD, &ALICE), 700);
-		assert_eq!(Currencies::free_balance(AUSD, &CDPTreasuryModule::account_id()), 300);
+		assert_eq!(Currencies::free_balance(KUSD, &ALICE), 700);
+		assert_eq!(Currencies::free_balance(KUSD, &CDPTreasuryModule::account_id()), 300);
 		assert_eq!(CDPTreasuryModule::surplus_pool(), 300);
 
 		assert_ok!(CDPTreasuryModule::withdraw_surplus(&ALICE, 200));
-		assert_eq!(Currencies::free_balance(AUSD, &ALICE), 900);
-		assert_eq!(Currencies::free_balance(AUSD, &CDPTreasuryModule::account_id()), 100);
+		assert_eq!(Currencies::free_balance(KUSD, &ALICE), 900);
+		assert_eq!(Currencies::free_balance(KUSD, &CDPTreasuryModule::account_id()), 100);
 		assert_eq!(CDPTreasuryModule::surplus_pool(), 100);
 	});
 }
@@ -197,7 +197,7 @@ fn get_debit_proportion_work() {
 	ExtBuilder::default().build().execute_with(|| {
 		assert_eq!(
 			CDPTreasuryModule::get_debit_proportion(100),
-			Ratio::saturating_from_rational(100, Currencies::total_issuance(AUSD))
+			Ratio::saturating_from_rational(100, Currencies::total_issuance(KUSD))
 		);
 	});
 }
@@ -213,7 +213,7 @@ fn swap_collateral_to_stable_work() {
 		assert_ok!(DEXModule::add_liquidity(
 			Origin::signed(BOB),
 			DOT,
-			AUSD,
+			KUSD,
 			1000,
 			1000,
 			0,
@@ -278,7 +278,7 @@ fn swap_collateral_to_stable_stable_asset_exact_target() {
 		assert_ok!(DEXModule::add_liquidity(
 			Origin::signed(BOB),
 			DOT,
-			AUSD,
+			KUSD,
 			1000,
 			1000,
 			0,
@@ -287,7 +287,7 @@ fn swap_collateral_to_stable_stable_asset_exact_target() {
 		assert_ok!(DEXModule::add_liquidity(
 			Origin::signed(ALICE),
 			BTC,
-			AUSD,
+			KUSD,
 			1000,
 			1000,
 			0,
@@ -315,7 +315,7 @@ fn swap_collateral_to_stable_stable_asset_exact_supply() {
 		assert_ok!(DEXModule::add_liquidity(
 			Origin::signed(BOB),
 			DOT,
-			AUSD,
+			KUSD,
 			1000,
 			1000,
 			0,
@@ -324,7 +324,7 @@ fn swap_collateral_to_stable_stable_asset_exact_supply() {
 		assert_ok!(DEXModule::add_liquidity(
 			Origin::signed(ALICE),
 			BTC,
-			AUSD,
+			KUSD,
 			1000,
 			1000,
 			0,
@@ -352,7 +352,7 @@ fn swap_collateral_to_stable_stable_asset_failures() {
 		assert_ok!(DEXModule::add_liquidity(
 			Origin::signed(BOB),
 			DOT,
-			AUSD,
+			KUSD,
 			1000,
 			1000,
 			0,
@@ -361,7 +361,7 @@ fn swap_collateral_to_stable_stable_asset_failures() {
 		assert_ok!(DEXModule::add_liquidity(
 			Origin::signed(ALICE),
 			BTC,
-			AUSD,
+			KUSD,
 			1000,
 			1000,
 			0,
@@ -433,21 +433,21 @@ fn remove_liquidity_for_lp_collateral_work() {
 	ExtBuilder::default().build().execute_with(|| {
 		assert_ok!(DEXModule::add_liquidity(
 			Origin::signed(BOB),
-			AUSD,
+			KUSD,
 			DOT,
 			1000,
 			100,
 			0,
 			false
 		));
-		assert_ok!(CDPTreasuryModule::deposit_collateral(&BOB, LP_AUSD_DOT, 200));
-		assert_eq!(Currencies::total_issuance(LP_AUSD_DOT), 2000);
-		assert_eq!(DEXModule::get_liquidity_pool(AUSD, DOT), (1000, 100));
+		assert_ok!(CDPTreasuryModule::deposit_collateral(&BOB, LP_KUSD_DOT, 200));
+		assert_eq!(Currencies::total_issuance(LP_KUSD_DOT), 2000);
+		assert_eq!(DEXModule::get_liquidity_pool(KUSD, DOT), (1000, 100));
 		assert_eq!(
-			Currencies::free_balance(LP_AUSD_DOT, &CDPTreasuryModule::account_id()),
+			Currencies::free_balance(LP_KUSD_DOT, &CDPTreasuryModule::account_id()),
 			200
 		);
-		assert_eq!(Currencies::free_balance(AUSD, &CDPTreasuryModule::account_id()), 0);
+		assert_eq!(Currencies::free_balance(KUSD, &CDPTreasuryModule::account_id()), 0);
 		assert_eq!(Currencies::free_balance(DOT, &CDPTreasuryModule::account_id()), 0);
 
 		assert_noop!(
@@ -456,16 +456,16 @@ fn remove_liquidity_for_lp_collateral_work() {
 		);
 
 		assert_eq!(
-			CDPTreasuryModule::remove_liquidity_for_lp_collateral(LP_AUSD_DOT, 120),
+			CDPTreasuryModule::remove_liquidity_for_lp_collateral(LP_KUSD_DOT, 120),
 			Ok((60, 6))
 		);
-		assert_eq!(Currencies::total_issuance(LP_AUSD_DOT), 1880);
-		assert_eq!(DEXModule::get_liquidity_pool(AUSD, DOT), (940, 94));
+		assert_eq!(Currencies::total_issuance(LP_KUSD_DOT), 1880);
+		assert_eq!(DEXModule::get_liquidity_pool(KUSD, DOT), (940, 94));
 		assert_eq!(
-			Currencies::free_balance(LP_AUSD_DOT, &CDPTreasuryModule::account_id()),
+			Currencies::free_balance(LP_KUSD_DOT, &CDPTreasuryModule::account_id()),
 			80
 		);
-		assert_eq!(Currencies::free_balance(AUSD, &CDPTreasuryModule::account_id()), 60);
+		assert_eq!(Currencies::free_balance(KUSD, &CDPTreasuryModule::account_id()), 60);
 		assert_eq!(Currencies::free_balance(DOT, &CDPTreasuryModule::account_id()), 6);
 	});
 }
@@ -498,8 +498,8 @@ fn extract_surplus_to_treasury_work() {
 	ExtBuilder::default().build().execute_with(|| {
 		assert_ok!(CDPTreasuryModule::on_system_surplus(1000));
 		assert_eq!(CDPTreasuryModule::surplus_pool(), 1000);
-		assert_eq!(Currencies::free_balance(AUSD, &CDPTreasuryModule::account_id()), 1000);
-		assert_eq!(Currencies::free_balance(AUSD, &TreasuryAccount::get()), 0);
+		assert_eq!(Currencies::free_balance(KUSD, &CDPTreasuryModule::account_id()), 1000);
+		assert_eq!(Currencies::free_balance(KUSD, &TreasuryAccount::get()), 0);
 
 		assert_noop!(
 			CDPTreasuryModule::extract_surplus_to_treasury(Origin::signed(5), 200),
@@ -507,8 +507,8 @@ fn extract_surplus_to_treasury_work() {
 		);
 		assert_ok!(CDPTreasuryModule::extract_surplus_to_treasury(Origin::signed(1), 200));
 		assert_eq!(CDPTreasuryModule::surplus_pool(), 800);
-		assert_eq!(Currencies::free_balance(AUSD, &CDPTreasuryModule::account_id()), 800);
-		assert_eq!(Currencies::free_balance(AUSD, &TreasuryAccount::get()), 200);
+		assert_eq!(Currencies::free_balance(KUSD, &CDPTreasuryModule::account_id()), 800);
+		assert_eq!(Currencies::free_balance(KUSD, &TreasuryAccount::get()), 200);
 	});
 }
 
@@ -553,7 +553,7 @@ fn exchange_collateral_to_stable_work() {
 		assert_ok!(DEXModule::add_liquidity(
 			Origin::signed(BOB),
 			BTC,
-			AUSD,
+			KUSD,
 			200,
 			1000,
 			0,

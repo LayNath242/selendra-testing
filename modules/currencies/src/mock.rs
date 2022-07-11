@@ -98,8 +98,8 @@ impl tokens::Config for Runtime {
 	type OnKilledTokenAccount = ();
 }
 
-pub const NATIVE_CURRENCY_ID: CurrencyId = CurrencyId::Token(TokenSymbol::ACA);
-pub const X_TOKEN_ID: CurrencyId = CurrencyId::Token(TokenSymbol::AUSD);
+pub const NATIVE_CURRENCY_ID: CurrencyId = CurrencyId::Token(TokenSymbol::SEL);
+pub const X_TOKEN_ID: CurrencyId = CurrencyId::Token(TokenSymbol::KUSD);
 pub const DOT: CurrencyId = CurrencyId::Token(TokenSymbol::DOT);
 
 parameter_types! {

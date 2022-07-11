@@ -45,13 +45,13 @@ pub type AuctionId = u32;
 pub const ALICE: AccountId = 0;
 pub const BOB: AccountId = 1;
 pub const CHARLIE: AccountId = 2;
-pub const ACA: CurrencyId = CurrencyId::Token(TokenSymbol::ACA);
-pub const AUSD: CurrencyId = CurrencyId::Token(TokenSymbol::AUSD);
+pub const SEL: CurrencyId = CurrencyId::Token(TokenSymbol::SEL);
+pub const KUSD: CurrencyId = CurrencyId::Token(TokenSymbol::KUSD);
 pub const BTC: CurrencyId = CurrencyId::Token(TokenSymbol::RENBTC);
 pub const DOT: CurrencyId = CurrencyId::Token(TokenSymbol::DOT);
 pub const STABLE_ASSET_LP: CurrencyId = CurrencyId::StableAssetPoolToken(0);
-pub const LP_AUSD_DOT: CurrencyId =
-	CurrencyId::DexShare(DexShare::Token(TokenSymbol::AUSD), DexShare::Token(TokenSymbol::DOT));
+pub const LP_KUSD_DOT: CurrencyId =
+	CurrencyId::DexShare(DexShare::Token(TokenSymbol::KUSD), DexShare::Token(TokenSymbol::DOT));
 
 mod cdp_treasury {
 	pub use super::super::*;
@@ -120,7 +120,7 @@ impl pallet_balances::Config for Runtime {
 pub type AdaptedBasicCurrency = orml_currencies::BasicCurrencyAdapter<Runtime, PalletBalances, Amount, BlockNumber>;
 
 parameter_types! {
-	pub const GetNativeCurrencyId: CurrencyId = ACA;
+	pub const GetNativeCurrencyId: CurrencyId = SEL;
 }
 
 impl orml_currencies::Config for Runtime {
@@ -131,14 +131,14 @@ impl orml_currencies::Config for Runtime {
 }
 
 parameter_types! {
-	pub const GetStableCurrencyId: CurrencyId = AUSD;
+	pub const GetStableCurrencyId: CurrencyId = KUSD;
 	pub const GetExchangeFee: (u32, u32) = (0, 100);
 	pub EnabledTradingPairs: Vec<TradingPair> = vec![
-		TradingPair::from_currency_ids(AUSD, BTC).unwrap(),
-		TradingPair::from_currency_ids(AUSD, DOT).unwrap(),
+		TradingPair::from_currency_ids(KUSD, BTC).unwrap(),
+		TradingPair::from_currency_ids(KUSD, DOT).unwrap(),
 		TradingPair::from_currency_ids(BTC, DOT).unwrap(),
 	];
-	pub const DEXPalletId: PalletId = PalletId(*b"aca/dexm");
+	pub const DEXPalletId: PalletId = PalletId(*b"sel/dexm");
 }
 
 impl module_dex::Config for Runtime {
@@ -195,7 +195,7 @@ ord_parameter_types! {
 }
 
 parameter_types! {
-	pub const CDPTreasuryPalletId: PalletId = PalletId(*b"aca/cdpt");
+	pub const CDPTreasuryPalletId: PalletId = PalletId(*b"sel/cdpt");
 	pub const TreasuryAccount: AccountId = 10;
 	pub AlternativeSwapPathJointList: Vec<Vec<CurrencyId>> = vec![
 		vec![DOT],
@@ -248,11 +248,11 @@ impl Default for ExtBuilder {
 		Self {
 			balances: vec![
 				(ALICE, DOT, 1000),
-				(ALICE, AUSD, 1000),
+				(ALICE, KUSD, 1000),
 				(ALICE, BTC, 1000),
 				(ALICE, STABLE_ASSET_LP, 1000),
 				(BOB, DOT, 1000),
-				(BOB, AUSD, 1000),
+				(BOB, KUSD, 1000),
 				(BOB, BTC, 1000),
 				(BOB, STABLE_ASSET_LP, 1000),
 				(CHARLIE, DOT, 1000),

@@ -118,7 +118,7 @@ impl orml_tokens::Config for TestRuntime {
 }
 
 parameter_types! {
-	pub const GetNativeCurrencyId: CurrencyId = CurrencyId::Token(TokenSymbol::ACA);
+	pub const GetNativeCurrencyId: CurrencyId = CurrencyId::Token(TokenSymbol::SEL);
 }
 
 impl orml_currencies::Config for TestRuntime {

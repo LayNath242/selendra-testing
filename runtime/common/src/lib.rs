@@ -48,7 +48,7 @@ pub use precompile::{
 	SchedulePrecompile, StableAssetPrecompile,
 };
 pub use primitives::{
-	currency::{TokenInfo, ACA, AUSD, LACA, KSM, DOT, RENBTC, DAI},
+	currency::{TokenInfo, SEL, KUSD, LSEL, KSM, DOT, RENBTC, DAI},
 	AccountId, BlockNumber
 };
 
@@ -110,8 +110,8 @@ parameter_types! {
 	//              = final_fee_min * OperationalFeeMultiplier / TipPerWeightStep
 	// Ensure Inherent -> Operational tx -> Unsigned tx -> Signed normal tx
 	// Ensure `max_normal_priority < MinOperationalPriority / 2`
-	pub TipPerWeightStep: Balance = cent(ACA); // 0.01 ACA
-	pub MaxTipsOfPriority: Balance = 10_000 * dollar(ACA); // 10_000 ACA
+	pub TipPerWeightStep: Balance = cent(SEL); // 0.01 SEL
+	pub MaxTipsOfPriority: Balance = 10_000 * dollar(SEL); // 10_000 SEL
 	pub const OperationalFeeMultiplier: u64 = 100_000_000_000_000u64;
 	// MinOperationalPriority = final_fee_min * OperationalFeeMultiplier / TipPerWeightStep
 	MinOperationalPriority: TransactionPriority = (1_500_000_000u128 * OperationalFeeMultiplier::get() as u128 / TipPerWeightStep::get())

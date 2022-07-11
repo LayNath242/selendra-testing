@@ -42,7 +42,7 @@ use sp_runtime::{
 
 type Balance = u128;
 type Ratio = FixedU128;
-pub const AUSD: CurrencyId = CurrencyId::Token(TokenSymbol::AUSD);
+pub const KUSD: CurrencyId = CurrencyId::Token(TokenSymbol::KUSD);
 
 mod evm_mod {
 	pub use super::super::super::*;
@@ -117,7 +117,7 @@ impl orml_tokens::Config for Runtime {
 }
 
 parameter_types! {
-	pub const GetNativeCurrencyId: CurrencyId = CurrencyId::Token(TokenSymbol::ACA);
+	pub const GetNativeCurrencyId: CurrencyId = CurrencyId::Token(TokenSymbol::SEL);
 }
 
 impl orml_currencies::Config for Runtime {
@@ -210,14 +210,14 @@ impl Config for Runtime {
 }
 
 parameter_types! {
-	pub const GetStableCurrencyId: CurrencyId = AUSD;
+	pub const GetStableCurrencyId: CurrencyId = KUSD;
 	pub MaxSwapSlippageCompareToOracle: Ratio = Ratio::one();
-	pub const TreasuryPalletId: PalletId = PalletId(*b"aca/trsy");
-	pub const TransactionPaymentPalletId: PalletId = PalletId(*b"aca/fees");
+	pub const TreasuryPalletId: PalletId = PalletId(*b"sel/trsy");
+	pub const TransactionPaymentPalletId: PalletId = PalletId(*b"sel/fees");
 	pub KaruraTreasuryAccount: AccountId32 = TreasuryPalletId::get().into_account_truncating();
 	pub const CustomFeeSurplus: Percent = Percent::from_percent(50);
 	pub const AlternativeFeeSurplus: Percent = Percent::from_percent(25);
-	pub DefaultFeeTokens: Vec<CurrencyId> = vec![AUSD];
+	pub DefaultFeeTokens: Vec<CurrencyId> = vec![KUSD];
 	pub const TradingPathLimit: u32 = 4;
 	pub const ExistenceRequirement: u128 = 1;
 }
@@ -276,7 +276,7 @@ impl DEXIncentives<AccountId32, CurrencyId, Balance> for MockDEXIncentives {
 
 parameter_types! {
 	pub const GetExchangeFee: (u32, u32) = (1, 100);
-	pub const DEXPalletId: PalletId = PalletId(*b"aca/dexm");
+	pub const DEXPalletId: PalletId = PalletId(*b"sel/dexm");
 }
 
 impl module_dex::Config for Runtime {

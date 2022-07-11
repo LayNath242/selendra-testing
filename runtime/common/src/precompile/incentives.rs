@@ -372,8 +372,8 @@ fn init_pool_id(
 mod tests {
 	use super::*;
 	use crate::precompile::mock::{
-		alice, alice_evm_addr, bob, new_test_ext, Currencies, Incentives, Origin, Rewards, Test, Tokens, ACA, ALICE,
-		AUSD, DOT, LP_ACA_AUSD,
+		alice, alice_evm_addr, bob, new_test_ext, Currencies, Incentives, Origin, Rewards, Test, Tokens, SEL, ALICE,
+		KUSD, DOT, LP_SEL_KUSD,
 	};
 	use frame_support::assert_ok;
 	use hex_literal::hex;
@@ -405,8 +405,8 @@ mod tests {
 			let input = hex! {"
 				7469000d
 				00000000000000000000000000000000 00000000000000000000000000000000
-				000000000000000000000000 0000000000000000000100000000000000000002
-				000000000000000000000000 0000000000000000000100000000000000000002
+				000000000000000000000000 0000000000000000000100000000000000000083
+				000000000000000000000000 0000000000000000000100000000000000000083
 			"};
 
 			// value of 100
@@ -431,7 +431,7 @@ mod tests {
 
 			assert_ok!(Incentives::update_dex_saving_rewards(
 				Origin::signed(ALICE),
-				vec![(PoolId::Dex(LP_ACA_AUSD), FixedU128::saturating_from_rational(1, 10))]
+				vec![(PoolId::Dex(LP_SEL_KUSD), FixedU128::saturating_from_rational(1, 10))]
 			));
 
 			// getDexRewardRate(address) => 0x7ec93136
@@ -461,7 +461,7 @@ mod tests {
 				apparent_value: Default::default(),
 			};
 
-			assert_ok!(Currencies::deposit(LP_ACA_AUSD, &alice(), 1_000_000_000));
+			assert_ok!(Currencies::deposit(LP_SEL_KUSD, &alice(), 1_000_000_000));
 
 			// depositDexShare(address,address,uint256) => 0xc17ca2a6
 			// who
@@ -478,14 +478,14 @@ mod tests {
 			assert_eq!(res.exit_status, ExitSucceed::Returned);
 
 			assert_eq!(
-				Rewards::pool_infos(PoolId::Dex(LP_ACA_AUSD)),
+				Rewards::pool_infos(PoolId::Dex(LP_SEL_KUSD)),
 				PoolInfo {
 					total_shares: 1048576,
 					..Default::default()
 				}
 			);
 			assert_eq!(
-				Rewards::shares_and_withdrawn_rewards(PoolId::Dex(LP_ACA_AUSD), alice()),
+				Rewards::shares_and_withdrawn_rewards(PoolId::Dex(LP_SEL_KUSD), alice()),
 				(1048576, Default::default())
 			);
 		});
@@ -500,10 +500,10 @@ mod tests {
 				apparent_value: Default::default(),
 			};
 
-			assert_ok!(Currencies::deposit(LP_ACA_AUSD, &alice(), 1_000_000_000));
+			assert_ok!(Currencies::deposit(LP_SEL_KUSD, &alice(), 1_000_000_000));
 			assert_ok!(Incentives::deposit_dex_share(
 				Origin::signed(alice()),
-				LP_ACA_AUSD,
+				LP_SEL_KUSD,
 				100_000
 			));
 
@@ -522,14 +522,14 @@ mod tests {
 			assert_eq!(res.exit_status, ExitSucceed::Returned);
 
 			assert_eq!(
-				Rewards::pool_infos(PoolId::Dex(LP_ACA_AUSD)),
+				Rewards::pool_infos(PoolId::Dex(LP_SEL_KUSD)),
 				PoolInfo {
 					total_shares: 99744,
 					..Default::default()
 				}
 			);
 			assert_eq!(
-				Rewards::shares_and_withdrawn_rewards(PoolId::Dex(LP_ACA_AUSD), alice()),
+				Rewards::shares_and_withdrawn_rewards(PoolId::Dex(LP_SEL_KUSD), alice()),
 				(99744, Default::default())
 			);
 		});
@@ -544,25 +544,25 @@ mod tests {
 				apparent_value: Default::default(),
 			};
 
-			assert_ok!(Tokens::deposit(ACA, &alice(), 1_000));
-			assert_ok!(Tokens::deposit(ACA, &bob(), 1_000));
-			assert_ok!(Tokens::deposit(ACA, &Incentives::account_id(), 1_000_000));
-			assert_ok!(Tokens::deposit(AUSD, &Incentives::account_id(), 1_000_000));
+			assert_ok!(Tokens::deposit(SEL, &alice(), 1_000));
+			assert_ok!(Tokens::deposit(SEL, &bob(), 1_000));
+			assert_ok!(Tokens::deposit(SEL, &Incentives::account_id(), 1_000_000));
+			assert_ok!(Tokens::deposit(KUSD, &Incentives::account_id(), 1_000_000));
 
 			assert_ok!(Incentives::update_claim_reward_deduction_rates(
 				Origin::signed(ALICE),
-				vec![(PoolId::Loans(ACA), Rate::saturating_from_rational(50, 100)),]
+				vec![(PoolId::Loans(SEL), Rate::saturating_from_rational(50, 100)),]
 			));
-			Rewards::add_share(&alice(), &PoolId::Loans(ACA), 100);
-			assert_ok!(Rewards::accumulate_reward(&PoolId::Loans(ACA), ACA, 1_000));
-			Rewards::add_share(&bob(), &PoolId::Loans(ACA), 100);
-			assert_ok!(Rewards::accumulate_reward(&PoolId::Loans(ACA), ACA, 1_000));
+			Rewards::add_share(&alice(), &PoolId::Loans(SEL), 100);
+			assert_ok!(Rewards::accumulate_reward(&PoolId::Loans(SEL), SEL, 1_000));
+			Rewards::add_share(&bob(), &PoolId::Loans(SEL), 100);
+			assert_ok!(Rewards::accumulate_reward(&PoolId::Loans(SEL), SEL, 1_000));
 
 			assert_eq!(
-				Rewards::pool_infos(PoolId::Loans(ACA)),
+				Rewards::pool_infos(PoolId::Loans(SEL)),
 				PoolInfo {
 					total_shares: 200,
-					rewards: vec![(ACA, (3_000, 1_000))].into_iter().collect(),
+					rewards: vec![(SEL, (3_000, 1_000))].into_iter().collect(),
 				}
 			);
 
@@ -581,15 +581,15 @@ mod tests {
 			assert_eq!(res.exit_status, ExitSucceed::Returned);
 
 			assert_eq!(
-				Rewards::pool_infos(PoolId::Loans(ACA)),
+				Rewards::pool_infos(PoolId::Loans(SEL)),
 				PoolInfo {
 					total_shares: 200,
-					rewards: vec![(ACA, (3_750, 2_500))].into_iter().collect(),
+					rewards: vec![(SEL, (3_750, 2_500))].into_iter().collect(),
 				}
 			);
 			assert_eq!(
-				Rewards::shares_and_withdrawn_rewards(PoolId::Loans(ACA), alice()),
-				(100, vec![(ACA, 1_500)].into_iter().collect())
+				Rewards::shares_and_withdrawn_rewards(PoolId::Loans(SEL), alice()),
+				(100, vec![(SEL, 1_500)].into_iter().collect())
 			);
 		});
 	}
@@ -605,7 +605,7 @@ mod tests {
 
 			assert_ok!(Incentives::update_claim_reward_deduction_rates(
 				Origin::signed(ALICE),
-				vec![(PoolId::Dex(LP_ACA_AUSD), FixedU128::saturating_from_rational(1, 10))]
+				vec![(PoolId::Dex(LP_SEL_KUSD), FixedU128::saturating_from_rational(1, 10))]
 			));
 
 			// getClaimRewardDeductionRate(PoolId,address) => 0xa2e2fc8e
@@ -637,23 +637,23 @@ mod tests {
 				apparent_value: Default::default(),
 			};
 
-			assert_ok!(Tokens::deposit(ACA, &alice(), 1_000));
-			assert_ok!(Tokens::deposit(ACA, &bob(), 1_000));
-			assert_ok!(Tokens::deposit(ACA, &Incentives::account_id(), 1_000_000));
-			assert_ok!(Tokens::deposit(AUSD, &Incentives::account_id(), 1_000_000));
+			assert_ok!(Tokens::deposit(SEL, &alice(), 1_000));
+			assert_ok!(Tokens::deposit(SEL, &bob(), 1_000));
+			assert_ok!(Tokens::deposit(SEL, &Incentives::account_id(), 1_000_000));
+			assert_ok!(Tokens::deposit(KUSD, &Incentives::account_id(), 1_000_000));
 
 			assert_ok!(Incentives::update_claim_reward_deduction_rates(
 				Origin::signed(ALICE),
-				vec![(PoolId::Loans(ACA), Rate::saturating_from_rational(50, 100)),]
+				vec![(PoolId::Loans(SEL), Rate::saturating_from_rational(50, 100)),]
 			));
-			Rewards::add_share(&alice(), &PoolId::Loans(ACA), 100);
-			assert_ok!(Rewards::accumulate_reward(&PoolId::Loans(ACA), ACA, 1_000));
-			Rewards::add_share(&bob(), &PoolId::Loans(ACA), 100);
-			assert_ok!(Rewards::accumulate_reward(&PoolId::Loans(ACA), AUSD, 1_000));
-			Rewards::remove_share(&alice(), &PoolId::Loans(ACA), 100);
+			Rewards::add_share(&alice(), &PoolId::Loans(SEL), 100);
+			assert_ok!(Rewards::accumulate_reward(&PoolId::Loans(SEL), SEL, 1_000));
+			Rewards::add_share(&bob(), &PoolId::Loans(SEL), 100);
+			assert_ok!(Rewards::accumulate_reward(&PoolId::Loans(SEL), KUSD, 1_000));
+			Rewards::remove_share(&alice(), &PoolId::Loans(SEL), 100);
 
 			assert_eq!(
-				Incentives::get_pending_rewards(PoolId::Loans(ACA), alice(), vec![ACA, AUSD]),
+				Incentives::get_pending_rewards(PoolId::Loans(SEL), alice(), vec![SEL, KUSD]),
 				vec![1000, 500]
 			);
 
@@ -663,8 +663,8 @@ mod tests {
 			// pool_currency_id
 			// who
 			// currency_ids_len
-			// ACA
-			// AUSD
+			// SEL
+			// KUSD
 			let input = hex! {"
 				0eb797b1
 				00000000000000000000000000000000 00000000000000000000000000000000

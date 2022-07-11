@@ -262,7 +262,7 @@ mod mock {
 	}
 
 	parameter_types! {
-		pub const NftPalletId: PalletId = PalletId(*b"aca/aNFT");
+		pub const NftPalletId: PalletId = PalletId(*b"sel/aNFT");
 	}
 
 	impl crate::Config for Runtime {

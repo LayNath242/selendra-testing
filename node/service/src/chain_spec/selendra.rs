@@ -38,7 +38,7 @@ use selendra_runtime::{
 	DexConfig, EVMConfig, GenesisConfig, GrandpaConfig, ImOnlineConfig,
 	OperatorMembershipSelendraConfig, OrmlNFTConfig, SS58Prefix, SessionConfig, SessionKeys, IndicesConfig,
 	StakerStatus, StakingConfig, SudoConfig, SystemConfig, TechnicalCommitteeMembershipConfig, TokensConfig,
-	ACA, AUSD, CouncilMembershipConfig, FinancialCouncilMembershipConfig, CdpTreasuryConfig
+	SEL, KUSD, CouncilMembershipConfig, FinancialCouncilMembershipConfig, CdpTreasuryConfig
 };
 
 /// Node `ChainSpec` extensions.
@@ -82,7 +82,7 @@ fn selendra_properties() -> Properties {
 	let mut properties = Map::new();
 	let mut token_symbol: Vec<String> = vec![];
 	let mut token_decimals: Vec<u32> = vec![];
-	[ACA, AUSD].iter().for_each(|token| {
+	[SEL, KUSD].iter().for_each(|token| {
 		token_symbol.push(token.symbol().unwrap().to_string());
 		token_decimals.push(token.decimals().unwrap() as u32);
 	});
@@ -282,7 +282,7 @@ pub fn selendra_development_genesis(
 	root_key: AccountId,
 	endowed_accounts: Option<Vec<AccountId>>,
 ) -> GenesisConfig {
-	let endowment: Balance = 10_000_000 * dollar(ACA);
+	let endowment: Balance = 10_000_000 * dollar(SEL);
 	let stash: Balance = endowment / 1000;
 	let endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(testnet_accounts);
 
@@ -381,7 +381,7 @@ pub fn selendra_genesis(
 	root_key: AccountId,
 	endowed_accounts: Option<Vec<AccountId>>,
 ) -> GenesisConfig {
-	let endowment: Balance = 1_000_000_000 * dollar(ACA);
+	let endowment: Balance = 1_000_000_000 * dollar(SEL);
 	let stash: Balance = endowment / 1_000_000;
 	let endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(testnet_accounts);
 

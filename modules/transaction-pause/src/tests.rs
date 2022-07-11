@@ -29,7 +29,7 @@ const BALANCE_TRANSFER: &<Runtime as frame_system::Config>::Call =
 	&mock::Call::Balances(pallet_balances::Call::transfer { dest: ALICE, value: 10 });
 const TOKENS_TRANSFER: &<Runtime as frame_system::Config>::Call = &mock::Call::Tokens(orml_tokens::Call::transfer {
 	dest: ALICE,
-	currency_id: AUSD,
+	currency_id: KUSD,
 	amount: 10,
 });
 

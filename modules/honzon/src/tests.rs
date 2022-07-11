@@ -283,7 +283,7 @@ fn transfer_debit_works() {
 		);
 		// Won't work for currency that is not collateral
 		assert_noop!(
-			HonzonModule::transfer_debit(Origin::signed(ALICE), BTC, ACA, 50),
+			HonzonModule::transfer_debit(Origin::signed(ALICE), BTC, SEL, 50),
 			cdp_engine::Error::<Runtime>::InvalidCollateralType
 		);
 
@@ -303,7 +303,7 @@ fn transfer_debit_works() {
 }
 
 #[test]
-fn transfer_debit_no_ausd() {
+fn transfer_debit_no_kusd() {
 	ExtBuilder::default().build().execute_with(|| {
 		System::set_block_number(1);
 		assert_ok!(CDPEngineModule::set_collateral_params(
@@ -334,10 +334,10 @@ fn transfer_debit_no_ausd() {
 		assert_eq!(LoansModule::positions(DOT, ALICE).collateral, 100);
 		assert_eq!(LoansModule::positions(DOT, ALICE).debit, 500);
 
-		assert_eq!(Currencies::free_balance(AUSD, &ALICE), 100);
-		assert_ok!(Currencies::transfer(Origin::signed(ALICE), BOB, AUSD, 100));
-		assert_eq!(Currencies::free_balance(AUSD, &ALICE), 0);
+		assert_eq!(Currencies::free_balance(KUSD, &ALICE), 100);
+		assert_ok!(Currencies::transfer(Origin::signed(ALICE), BOB, KUSD, 100));
+		assert_eq!(Currencies::free_balance(KUSD, &ALICE), 0);
 		assert_ok!(HonzonModule::transfer_debit(Origin::signed(ALICE), BTC, DOT, 5));
-		assert_eq!(Currencies::free_balance(AUSD, &ALICE), 0);
+		assert_eq!(Currencies::free_balance(KUSD, &ALICE), 0);
 	});
 }

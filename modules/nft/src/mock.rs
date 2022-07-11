@@ -162,7 +162,7 @@ impl orml_tokens::Config for Runtime {
 	type OnKilledTokenAccount = ();
 }
 
-pub const NATIVE_CURRENCY_ID: CurrencyId = CurrencyId::Token(TokenSymbol::ACA);
+pub const NATIVE_CURRENCY_ID: CurrencyId = CurrencyId::Token(TokenSymbol::SEL);
 
 parameter_types! {
 	pub const GetNativeCurrencyId: CurrencyId = NATIVE_CURRENCY_ID;
@@ -184,7 +184,7 @@ impl module_currencies::Config for Runtime {
 }
 
 parameter_types! {
-	pub const NftPalletId: PalletId = PalletId(*b"aca/aNFT");
+	pub const NftPalletId: PalletId = PalletId(*b"sel/aNFT");
 }
 pub const CREATE_CLASS_DEPOSIT: u128 = 200;
 pub const CREATE_TOKEN_DEPOSIT: u128 = 100;

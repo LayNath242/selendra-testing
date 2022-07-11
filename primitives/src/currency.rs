@@ -141,16 +141,16 @@ macro_rules! create_currency_id {
 
 			let mut selendra_lp_tokens = vec![
 				Token {
-					symbol: "LP_ACA_AUSD".to_string(),
-					address: EvmAddress::try_from(TradingPair::from_currency_ids(CurrencyId::Token(ACA), CurrencyId::Token(AUSD)).unwrap().dex_share_currency_id()).unwrap(),
+					symbol: "LP_SEL_KUSD".to_string(),
+					address: EvmAddress::try_from(TradingPair::from_currency_ids(CurrencyId::Token(SEL), CurrencyId::Token(KUSD)).unwrap().dex_share_currency_id()).unwrap(),
 				},
 				Token {
-					symbol: "LP_DOT_AUSD".to_string(),
-					address: EvmAddress::try_from(TradingPair::from_currency_ids(CurrencyId::Token(DOT), CurrencyId::Token(AUSD)).unwrap().dex_share_currency_id()).unwrap(),
+					symbol: "LP_DOT_KUSD".to_string(),
+					address: EvmAddress::try_from(TradingPair::from_currency_ids(CurrencyId::Token(DOT), CurrencyId::Token(KUSD)).unwrap().dex_share_currency_id()).unwrap(),
 				},
 				Token {
-					symbol: "LP_RENBTC_AUSD".to_string(),
-					address: EvmAddress::try_from(TradingPair::from_currency_ids(CurrencyId::Token(RENBTC), CurrencyId::Token(AUSD)).unwrap().dex_share_currency_id()).unwrap(),
+					symbol: "LP_RENBTC_KUSD".to_string(),
+					address: EvmAddress::try_from(TradingPair::from_currency_ids(CurrencyId::Token(RENBTC), CurrencyId::Token(KUSD)).unwrap().dex_share_currency_id()).unwrap(),
 				},
 			];
 			selendra_tokens.append(&mut selendra_lp_tokens);
@@ -177,9 +177,9 @@ create_currency_id! {
 	#[repr(u8)]
 	pub enum TokenSymbol {
 		// 0 - 19: Selendra & Polkadot native tokens
-		ACA("Selendra", 12) = 0,
-		AUSD("Selendra Dollar", 12) = 1,
-		LACA("Liquid Selendra", 12) = 2,
+		SEL("Selendra", 12) = 0,
+		KUSD("Khmer Dollar", 12) = 1,
+		LSEL("Liquid Selendra", 12) = 2,
 
 		// 20 - 39: External tokens (e.g. bridged)
 		RENBTC("Ren Protocol BTC", 8) = 20,

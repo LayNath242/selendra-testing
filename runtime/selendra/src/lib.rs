@@ -112,7 +112,7 @@ pub use runtime_common::{
 	CouncilMembershipInstance, MaxTipsOfPriority, BlockHashCount,
 	OffchainSolutionWeightLimit, OperationalFeeMultiplier, OperatorMembershipInstanceSelendra, Price, ProxyType, Rate,
 	Ratio, RuntimeBlockLength, RuntimeBlockWeights, SystemContractsFilter, TechnicalCommitteeInstance,
-	TechnicalCommitteeMembershipInstance, TimeStampedPrice, TipPerWeightStep, ACA, AUSD, DOT, LACA, KSM, RENBTC,
+	TechnicalCommitteeMembershipInstance, TimeStampedPrice, TipPerWeightStep, SEL, KUSD, DOT, LSEL, KSM, RENBTC,
 	DAI,
 };
 
@@ -175,24 +175,24 @@ impl_opaque_keys! {
 
 // Pallet accounts of runtime
 parameter_types! {
-	pub const TreasuryPalletId: PalletId = PalletId(*b"aca/trsy");
-	pub const LoansPalletId: PalletId = PalletId(*b"aca/loan");
-	pub const DEXPalletId: PalletId = PalletId(*b"aca/dexm");
-	pub const CDPTreasuryPalletId: PalletId = PalletId(*b"aca/cdpt");
-	pub const HonzonTreasuryPalletId: PalletId = PalletId(*b"aca/hztr");
-	pub const IncentivesPalletId: PalletId = PalletId(*b"aca/inct");
-	pub const CollatorPotId: PalletId = PalletId(*b"aca/cpot");
+	pub const TreasuryPalletId: PalletId = PalletId(*b"sel/trsy");
+	pub const LoansPalletId: PalletId = PalletId(*b"sel/loan");
+	pub const DEXPalletId: PalletId = PalletId(*b"sel/dexm");
+	pub const CDPTreasuryPalletId: PalletId = PalletId(*b"sel/cdpt");
+	pub const HonzonTreasuryPalletId: PalletId = PalletId(*b"sel/hztr");
+	pub const IncentivesPalletId: PalletId = PalletId(*b"sel/inct");
+	pub const CollatorPotId: PalletId = PalletId(*b"sel/cpot");
 	// Treasury reserve
-	pub const TreasuryReservePalletId: PalletId = PalletId(*b"aca/reve");
-	pub const PhragmenElectionPalletId: LockIdentifier = *b"aca/phre";
-	pub const NftPalletId: PalletId = PalletId(*b"aca/aNFT");
-	pub UnreleasedNativeVaultAccountId: AccountId = PalletId(*b"aca/urls").into_account_truncating();
+	pub const TreasuryReservePalletId: PalletId = PalletId(*b"sel/reve");
+	pub const PhragmenElectionPalletId: LockIdentifier = *b"sel/phre";
+	pub const NftPalletId: PalletId = PalletId(*b"sel/aNFT");
+	pub UnreleasedNativeVaultAccountId: AccountId = PalletId(*b"sel/urls").into_account_truncating();
 	// This Pallet is only used to payment fee pool, it's not added to whitelist by design.
 	// because transaction payment pallet will ensure the accounts always have enough ED.
-	pub const TransactionPaymentPalletId: PalletId = PalletId(*b"aca/fees");
+	pub const TransactionPaymentPalletId: PalletId = PalletId(*b"sel/fees");
 	pub const StableAssetPalletId: PalletId = PalletId(*b"nuts/sta");
 	// lock identifier for earning module
-	pub const EarningLockIdentifier: LockIdentifier = *b"aca/earn";
+	pub const EarningLockIdentifier: LockIdentifier = *b"sel/earn";
 }
 
 pub fn get_all_module_accounts() -> Vec<AccountId> {
@@ -265,7 +265,7 @@ parameter_types! {
 }
 
 parameter_types! {
-	pub IndexDeposit: Balance = dollar(ACA);
+	pub IndexDeposit: Balance = dollar(SEL);
 }
 
 impl pallet_indices::Config for Runtime {
@@ -291,7 +291,7 @@ impl pallet_timestamp::Config for Runtime {
 
 parameter_types! {
 	pub const MaxReserves: u32 = ReserveIdentifier::Count as u32;
-	pub NativeTokenExistentialDeposit: Balance = 10 * cent(ACA);
+	pub NativeTokenExistentialDeposit: Balance = 10 * cent(SEL);
 	// For weight estimation, we assume that the most locks on an individual account will be 50.
 	// This number may need to be adjusted in the future if this assumption no longer holds true.
 	pub const MaxLocks: u32 = 50;
@@ -310,7 +310,7 @@ impl pallet_balances::Config for Runtime {
 }
 
 parameter_types! {
-	pub TransactionByteFee: Balance = 10 * millicent(ACA);
+	pub TransactionByteFee: Balance = 10 * millicent(SEL);
 	pub const TargetBlockFullness: Perquintill = Perquintill::from_percent(25);
 	pub AdjustmentVariable: Multiplier = Multiplier::saturating_from_rational(1, 100_000);
 	pub MinimumMultiplier: Multiplier = Multiplier::saturating_from_rational(1, 1_000_000_000u128);
@@ -428,8 +428,8 @@ impl pallet_utility::Config for Runtime {
 }
 
 parameter_types! {
-	pub MultisigDepositBase: Balance = 500 * millicent(ACA);
-	pub MultisigDepositFactor: Balance = 100 * millicent(ACA);
+	pub MultisigDepositBase: Balance = 500 * millicent(SEL);
+	pub MultisigDepositFactor: Balance = 100 * millicent(SEL);
 }
 
 impl pallet_multisig::Config for Runtime {
@@ -465,24 +465,24 @@ impl ContainsLengthBound for CouncilProvider {
 
 parameter_types! {
 	pub const ProposalBond: Permill = Permill::from_percent(5);
-	pub ProposalBondMinimum: Balance = dollar(ACA);
-	pub ProposalBondMaximum: Balance = 5 * dollar(ACA);
+	pub ProposalBondMinimum: Balance = dollar(SEL);
+	pub ProposalBondMaximum: Balance = 5 * dollar(SEL);
 	pub const SpendPeriod: BlockNumber = DAYS;
 	pub const Burn: Permill = Permill::from_percent(0);
 	pub const TipCountdown: BlockNumber = DAYS;
 	pub const TipFindersFee: Percent = Percent::from_percent(10);
-	pub TipReportDepositBase: Balance = dollar(ACA);
+	pub TipReportDepositBase: Balance = dollar(SEL);
 	pub const SevenDays: BlockNumber = 7 * DAYS;
 	pub const ZeroDay: BlockNumber = 0;
 	pub const OneDay: BlockNumber = DAYS;
-	pub BountyDepositBase: Balance = dollar(ACA);
+	pub BountyDepositBase: Balance = dollar(SEL);
 	pub const BountyDepositPayoutDelay: BlockNumber = DAYS;
 	pub const BountyUpdatePeriod: BlockNumber = 14 * DAYS;
 	pub const CuratorDepositMultiplier: Permill = Permill::from_percent(50);
-	pub CuratorDepositMin: Balance = dollar(ACA);
-	pub CuratorDepositMax: Balance = 100 * dollar(ACA);
-	pub BountyValueMinimum: Balance = 5 * dollar(ACA);
-	pub DataDepositPerByte: Balance = cent(ACA);
+	pub CuratorDepositMin: Balance = dollar(SEL);
+	pub CuratorDepositMax: Balance = 100 * dollar(SEL);
+	pub BountyValueMinimum: Balance = 5 * dollar(SEL);
+	pub DataDepositPerByte: Balance = cent(SEL);
 	pub const MaximumReasonLength: u32 = 16384;
 	pub const MaxApprovals: u32 = 100;
 }
@@ -532,9 +532,9 @@ impl pallet_tips::Config for Runtime {
 }
 
 parameter_types! {
-	pub ConfigDepositBase: Balance = 10 * cent(ACA);
-	pub FriendDepositFactor: Balance = cent(ACA);
-	pub RecoveryDeposit: Balance = 10 * cent(ACA);
+	pub ConfigDepositBase: Balance = 10 * cent(SEL);
+	pub FriendDepositFactor: Balance = cent(SEL);
+	pub RecoveryDeposit: Balance = 10 * cent(SEL);
 }
 
 impl pallet_recovery::Config for Runtime {
@@ -552,7 +552,7 @@ parameter_types! {
 	pub const LaunchPeriod: BlockNumber = 2 * HOURS;
 	pub const VotingPeriod: BlockNumber = HOURS;
 	pub const FastTrackVotingPeriod: BlockNumber = HOURS;
-	pub MinimumDeposit: Balance = 100 * cent(ACA);
+	pub MinimumDeposit: Balance = 100 * cent(SEL);
 	pub const EnactmentPeriod: BlockNumber = MINUTES;
 	pub const CooloffPeriod: BlockNumber = MINUTES;
 }
@@ -620,9 +620,9 @@ impl orml_authority::Config for Runtime {
 }
 
 parameter_types! {
-	pub CandidacyBond: Balance = 10 * dollar(ACA);
-	pub VotingBondBase: Balance = 2 * dollar(ACA);
-	pub VotingBondFactor: Balance = dollar(ACA);
+	pub CandidacyBond: Balance = 10 * dollar(SEL);
+	pub VotingBondBase: Balance = 2 * dollar(SEL);
+	pub VotingBondFactor: Balance = dollar(SEL);
 	pub const TermDuration: BlockNumber = 7 * DAYS;
 }
 
@@ -689,9 +689,9 @@ parameter_type_with_key! {
 	pub ExistentialDeposits: |currency_id: CurrencyId| -> Balance {
 		match currency_id {
 			CurrencyId::Token(symbol) => match symbol {
-				TokenSymbol::ACA => cent(*currency_id),
-				TokenSymbol::AUSD => cent(*currency_id),
-				TokenSymbol::LACA |
+				TokenSymbol::SEL => cent(*currency_id),
+				TokenSymbol::KUSD => cent(*currency_id),
+				TokenSymbol::LSEL |
 				TokenSymbol::DOT |
 				TokenSymbol::KSM |
 				TokenSymbol::DAI |
@@ -780,8 +780,8 @@ impl module_prices::Config for Runtime {
 }
 
 parameter_types! {
-	pub const GetNativeCurrencyId: CurrencyId = ACA;
-	pub const GetStableCurrencyId: CurrencyId = AUSD;
+	pub const GetNativeCurrencyId: CurrencyId = SEL;
+	pub const GetStableCurrencyId: CurrencyId = KUSD;
 	pub Erc20HoldingAccount: H160 = primitives::evm::ERC20_HOLDING_ACCOUNT;
 }
 
@@ -958,7 +958,7 @@ parameter_types! {
 	pub DefaultLiquidationRatio: Ratio = Ratio::saturating_from_rational(110, 100);
 	pub DefaultDebitExchangeRate: ExchangeRate = ExchangeRate::saturating_from_rational(1, 10);
 	pub DefaultLiquidationPenalty: Rate = Rate::saturating_from_rational(5, 100);
-	pub MinimumDebitValue: Balance = dollar(AUSD);
+	pub MinimumDebitValue: Balance = dollar(KUSD);
 	pub MaxSwapSlippageCompareToOracle: Ratio = Ratio::saturating_from_rational(15, 100);
 }
 
@@ -985,7 +985,7 @@ impl module_cdp_engine::Config for Runtime {
 }
 
 parameter_types! {
-	pub DepositPerAuthorization: Balance = dollar(ACA);
+	pub DepositPerAuthorization: Balance = dollar(SEL);
 }
 
 impl module_honzon::Config for Runtime {
@@ -1011,8 +1011,8 @@ parameter_types! {
 	pub const ExtendedProvisioningBlocks: BlockNumber = 2 * DAYS;
 	pub const TradingPathLimit: u32 = 4;
 	pub AlternativeSwapPathJointList: Vec<Vec<CurrencyId>> = vec![
-		vec![ACA],
-		vec![LACA],
+		vec![SEL],
+		vec![LSEL],
 	];
 }
 
@@ -1080,7 +1080,7 @@ impl module_transaction_pause::Config for Runtime {
 }
 
 parameter_types! {
-	pub DefaultFeeTokens: Vec<CurrencyId> = vec![AUSD, DOT, LACA];
+	pub DefaultFeeTokens: Vec<CurrencyId> = vec![KUSD, DOT, LSEL];
 	pub const CustomFeeSurplus: Percent = Percent::from_percent(50);
 	pub const AlternativeFeeSurplus: Percent = Percent::from_percent(25);
 }
@@ -1152,13 +1152,13 @@ impl module_incentives::Config for Runtime {
 }
 
 parameter_types! {
-	pub const GetLiquidCurrencyId: CurrencyId = LACA;
+	pub const GetLiquidCurrencyId: CurrencyId = LSEL;
 	pub const GetStakingCurrencyId: CurrencyId = DOT;
 }
 
 parameter_types! {
-	pub CreateClassDeposit: Balance = 20 * dollar(ACA);
-	pub CreateTokenDeposit: Balance = 2 * dollar(ACA);
+	pub CreateClassDeposit: Balance = 20 * dollar(SEL);
+	pub CreateTokenDeposit: Balance = 2 * dollar(SEL);
 }
 
 impl module_nft::Config for Runtime {
@@ -1290,7 +1290,7 @@ impl orml_tokens::ConvertBalance<Balance, Balance> for ConvertBalanceSelendra {
 
 	fn convert_balance(balance: Balance, asset_id: CurrencyId) -> Balance {
 		match asset_id {
-			LACA => ExchangeRate::saturating_from_rational(1, 10)
+			LSEL => ExchangeRate::saturating_from_rational(1, 10)
 				.checked_mul_int(balance)
 				.unwrap_or(Bounded::max_value()),
 			_ => balance,
@@ -1299,7 +1299,7 @@ impl orml_tokens::ConvertBalance<Balance, Balance> for ConvertBalanceSelendra {
 
 	fn convert_balance_back(balance: Balance, asset_id: CurrencyId) -> Balance {
 		match asset_id {
-			LACA => ExchangeRate::saturating_from_rational(10, 1)
+			LSEL => ExchangeRate::saturating_from_rational(10, 1)
 				.checked_mul_int(balance)
 				.unwrap_or(Bounded::max_value()),
 			_ => balance,
@@ -1310,7 +1310,7 @@ impl orml_tokens::ConvertBalance<Balance, Balance> for ConvertBalanceSelendra {
 pub struct IsLiquidToken;
 impl Contains<CurrencyId> for IsLiquidToken {
 	fn contains(currency_id: &CurrencyId) -> bool {
-		matches!(currency_id, CurrencyId::Token(TokenSymbol::LACA))
+		matches!(currency_id, CurrencyId::Token(TokenSymbol::LSEL))
 	}
 }
 
@@ -1947,7 +1947,7 @@ impl_runtime_apis! {
 			let whitelist: Vec<TrackedStorageKey> = vec![
 				// Block Number
 				// frame_system::Number::<Runtime>::hashed_key().to_vec(),
-				hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef702a5c1b19ab7a04f536c519aca4983ac").to_vec().into(),
+				hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef702a5c1b19ab7a04f536c519sel4983ac").to_vec().into(),
 				// Total Issuance
 				hex_literal::hex!("c2261276cc9d1f8598ea4b6a74b15c2f57c875e4cff74148e4628f264b974c80").to_vec().into(),
 				// Execution Phase

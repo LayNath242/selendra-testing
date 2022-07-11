@@ -33,7 +33,7 @@ use sp_runtime::{testing::Header, traits::IdentityLookup};
 
 pub type AccountId = u128;
 pub const ALICE: AccountId = 1;
-pub const AUSD: CurrencyId = CurrencyId::Token(TokenSymbol::AUSD);
+pub const KUSD: CurrencyId = CurrencyId::Token(TokenSymbol::KUSD);
 
 mod transaction_pause {
 	pub use super::super::*;

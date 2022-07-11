@@ -1,6 +1,6 @@
-// This file is part of Acala.
+// This file is part of Selendra.
 
-// Copyright (C) 2020-2022 Acala Foundation.
+// Copyright (C) 2020-2022 Selendra.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -40,15 +40,15 @@ use support::{mocks::MockErc20InfoMapping, ExchangeRate, SwapLimit};
 pub type AccountId = u128;
 pub type BlockNumber = u64;
 
-pub const ACA: CurrencyId = CurrencyId::Token(TokenSymbol::ACA);
-pub const AUSD: CurrencyId = CurrencyId::Token(TokenSymbol::AUSD);
+pub const SEL: CurrencyId = CurrencyId::Token(TokenSymbol::SEL);
+pub const KUSD: CurrencyId = CurrencyId::Token(TokenSymbol::KUSD);
 pub const BTC: CurrencyId = CurrencyId::Token(TokenSymbol::RENBTC);
 pub const DOT: CurrencyId = CurrencyId::Token(TokenSymbol::DOT);
-pub const LACA: CurrencyId = CurrencyId::Token(TokenSymbol::LACA);
+pub const LSEL: CurrencyId = CurrencyId::Token(TokenSymbol::LSEL);
 pub const KSM: CurrencyId = CurrencyId::Token(TokenSymbol::KSM);
 pub const TAIKSM: CurrencyId = CurrencyId::StableAssetPoolToken(0);
-pub const LP_AUSD_DOT: CurrencyId =
-	CurrencyId::DexShare(DexShare::Token(TokenSymbol::AUSD), DexShare::Token(TokenSymbol::DOT));
+pub const LP_KUSD_DOT: CurrencyId =
+	CurrencyId::DexShare(DexShare::Token(TokenSymbol::KUSD), DexShare::Token(TokenSymbol::DOT));
 
 mod prices {
 	pub use super::super::*;
@@ -94,18 +94,18 @@ impl DataProvider<CurrencyId, Price> for MockDataProvider {
 	fn get(currency_id: &CurrencyId) -> Option<Price> {
 		if CHANGED.with(|v| *v.borrow_mut()) {
 			match *currency_id {
-				AUSD => None,
+				KUSD => None,
 				BTC => Some(Price::saturating_from_integer(40000)),
 				DOT => Some(Price::saturating_from_integer(30)),
-				ACA => Some(Price::saturating_from_integer(10)),
+				SEL => Some(Price::saturating_from_integer(10)),
 				KSM => Some(Price::saturating_from_integer(200)),
 				_ => None,
 			}
 		} else {
 			match *currency_id {
-				AUSD => Some(Price::saturating_from_rational(99, 100)),
+				KUSD => Some(Price::saturating_from_rational(99, 100)),
 				BTC => Some(Price::saturating_from_integer(50000)),
-				ACA => Some(Price::saturating_from_integer(100)),
+				SEL => Some(Price::saturating_from_integer(100)),
 				DOT => Some(Price::zero()),
 				KSM => None,
 				_ => None,
@@ -135,7 +135,7 @@ pub struct MockDEX;
 impl DEXManager<AccountId, Balance, CurrencyId> for MockDEX {
 	fn get_liquidity_pool(currency_id_a: CurrencyId, currency_id_b: CurrencyId) -> (Balance, Balance) {
 		match (currency_id_a, currency_id_b) {
-			(AUSD, DOT) => (10000, 200),
+			(KUSD, DOT) => (10000, 200),
 			_ => (0, 0),
 		}
 	}
@@ -227,9 +227,9 @@ ord_parameter_types! {
 }
 
 parameter_types! {
-	pub const GetStableCurrencyId: CurrencyId = AUSD;
-	pub const GetNativeCurrencyId: CurrencyId = ACA;
-	pub const GetLiquidCurrencyId: CurrencyId = LACA;
+	pub const GetStableCurrencyId: CurrencyId = KUSD;
+	pub const GetNativeCurrencyId: CurrencyId = SEL;
+	pub const GetLiquidCurrencyId: CurrencyId = LSEL;
 	pub StableCurrencyFixedPrice: Price = Price::one();
 }
 

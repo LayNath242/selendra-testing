@@ -21,7 +21,7 @@
 /// Time and blocks.
 pub mod time {
 	use primitives::{Balance, BlockNumber, Moment};
-	use runtime_common::{dollar, millicent, ACA, prod_or_fast};
+	use runtime_common::{dollar, millicent, SEL, prod_or_fast};
 
 	pub const MILLISECS_PER_BLOCK: Moment = 6000;
 	pub const SLOT_DURATION: Moment = MILLISECS_PER_BLOCK;
@@ -36,7 +36,7 @@ pub mod time {
 	pub const PRIMARY_PROBABILITY: (u64, u64) = (1, 4);
 
 	pub fn deposit(items: u32, bytes: u32) -> Balance {
-		items as Balance * 2 * dollar(ACA) + (bytes as Balance) * 10 * millicent(ACA)
+		items as Balance * 2 * dollar(SEL) + (bytes as Balance) * 10 * millicent(SEL)
 	}
 }
 
@@ -47,12 +47,12 @@ pub mod fee {
 		WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial,
 	};
 	use primitives::Balance;
-	use runtime_common::{cent, ACA};
+	use runtime_common::{cent, SEL};
 	use smallvec::smallvec;
 	use sp_runtime::Perbill;
 
-	pub fn base_tx_in_aca() -> Balance {
-		cent(ACA) / 10
+	pub fn base_tx_in_sel() -> Balance {
+		cent(SEL) / 10
 	}
 
 	/// Handles converting a weight scalar to a fee value, based on the scale
@@ -71,7 +71,7 @@ pub mod fee {
 		type Balance = Balance;
 		fn polynomial() -> WeightToFeeCoefficients<Self::Balance> {
 			// in Selendra, extrinsic base weight (smallest non-zero weight) is mapped to 1/10 CENT:
-			let p = base_tx_in_aca(); // 1_000_000_000;
+			let p = base_tx_in_sel(); // 1_000_000_000;
 			let q = Balance::from(ExtrinsicBaseWeight::get()); // 125_000_000
 			smallvec![WeightToFeeCoefficient {
 				degree: 1,
@@ -82,25 +82,25 @@ pub mod fee {
 		}
 	}
 
-	pub fn aca_per_second() -> u128 {
+	pub fn sel_per_second() -> u128 {
 		let base_weight = Balance::from(ExtrinsicBaseWeight::get());
 		let base_tx_per_second = (WEIGHT_PER_SECOND as u128) / base_weight;
-		base_tx_per_second * base_tx_in_aca()
+		base_tx_per_second * base_tx_in_sel()
 	}
 
 	pub fn dot_per_second() -> u128 {
-		aca_per_second() / 100
+		sel_per_second() / 100
 	}
 }
 
 #[cfg(test)]
 mod tests {
-	use crate::{constants::fee::base_tx_in_aca, Balance};
+	use crate::{constants::fee::base_tx_in_sel, Balance};
 	use frame_support::weights::constants::ExtrinsicBaseWeight;
 
 	#[test]
 	fn check_weight() {
-		let p = base_tx_in_aca();
+		let p = base_tx_in_sel();
 		let q = Balance::from(ExtrinsicBaseWeight::get());
 
 		assert_eq!(p, 1_000_000_000);

@@ -29,7 +29,7 @@ All of the tokens and predeployed system contracts have generated code in `./con
 
 ## ERC20 Contracts
 These ERC20 contracts make native and cross-chain tokens available inside Acala EVM.
-- Mirrored Token contract address: `ADDRESS.ACA`, `ADDRESS.AUSD`...(`./contracts/utils/AcalaAddress.sol` or `./contracts/utils/KaruraAddress.sol`)
+- Mirrored Token contract address: `ADDRESS.ACA`, `ADDRESS.KUSD`...(`./contracts/utils/AcalaAddress.sol` or `./contracts/utils/KaruraAddress.sol`)
 ```
 // Returns the currencyId of the token.
 function currencyId() public view returns (uint256);

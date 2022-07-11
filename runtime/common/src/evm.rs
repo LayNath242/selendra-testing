@@ -1,6 +1,6 @@
 use super::{
 	PrecompileCallerFilter, is_system_contract, Weight, Convert, gas_to_weight_ratio, H160, PhantomData, DispatchClass,
-	Get, BTreeMap, GenesisAccount, Nonce, dollar, ACA, Bytes, Balance
+	Get, BTreeMap, GenesisAccount, Nonce, dollar, SEL, Bytes, Balance
 };
 
 #[cfg(feature = "std")]
@@ -77,7 +77,7 @@ pub fn evm_genesis(evm_accounts: Vec<H160>) -> BTreeMap<H160, GenesisAccount<Bal
 	for dev_acc in evm_accounts {
 		let account = GenesisAccount {
 			nonce: 0u32,
-			balance: 1000 * dollar(ACA),
+			balance: 1000 * dollar(SEL),
 			storage: BTreeMap::new(),
 			code: vec![],
 			enable_contract_development: true,
