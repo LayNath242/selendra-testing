@@ -41,24 +41,22 @@ sp-std = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v
 # modules
 module-asset-registry = { path = "../../modules/asset-registry", default-features = false, optional = true }
 module-currencies = { path = "../../modules/currencies", default-features = false }
-module-evm = { path = "../../modules/evm", default-features = false }
-module-evm-bridge = { path = "../../modules/evm-bridge", default-features = false, optional = true }
-module-evm-utility-macro = { path = "../../modules/evm-utility/macro" }
-module-idle-scheduler = { path = "../../modules/idle-scheduler", default-features = false }
-module-loans = { path = "../../modules/loans", default-features = false }
-module-support = { path = "../../modules/support", default-features = false }
-
-module-prices = { path = "../../modules/prices", default-features = false }
-module-transaction-payment = { path = "../../modules/transaction-payment", default-features = false }
-module-nft = { path = "../../modules/nft", default-features = false }
-module-dex = { path = "../../modules/dex", default-features = false }
-module-evm-accounts = { path = "../../modules/evm-accounts", default-features = false }
-module-stable-asset = { default-features = false, path = "../../modules/stable-asset" }
-module-funan = { path = "../../modules/funan", default-features = false }
-
 module-cdp-engine = { path = "../../modules/cdp-engine", default-features = false }
 module-cdp-treasury = { path = "../../modules/cdp-treasury", default-features = false, optional = true }
+module-dex = { path = "../../modules/dex", default-features = false }
+module-evm = { path = "../../modules/evm", default-features = false }
+module-evm-accounts = { path = "../../modules/evm-accounts", default-features = false }
+module-evm-bridge = { path = "../../modules/evm-bridge", default-features = false, optional = true }
+module-evm-utility-macro = { path = "../../modules/evm-utility/macro" }
+module-funan = { path = "../../modules/funan", default-features = false }
+module-idle-scheduler = { path = "../../modules/idle-scheduler", default-features = false }
 module-incentives = { path = "../../modules/incentives", default-features = false }
+module-loans = { path = "../../modules/loans", default-features = false }
+module-nft = { path = "../../modules/nft", default-features = false }
+module-prices = { path = "../../modules/prices", default-features = false }
+module-stable-asset = { default-features = false, path = "../../modules/stable-asset" }
+module-support = { path = "../../modules/support", default-features = false }
+module-transaction-payment = { path = "../../modules/transaction-payment", default-features = false }
 
 # primitives
 primitives = { package = "selendra-primitives", path = "../../primitives", default-features = false }
@@ -107,23 +105,24 @@ std = [
 	"orml-currencies/std",
 	"orml-rewards/std",
 
-	"module-evm/std",
-	"module-idle-scheduler/std",
-	"module-support/std",
 	"primitives/std",
-	"module-prices/std",
-	"module-transaction-payment/std",
-	"module-nft/std",
-	"module-dex/std",
-	"module-currencies/std",
-	"module-evm-accounts/std",
+
 	"module-asset-registry/std",
-	"module-evm-bridge/std",
-	"module-loans/std",
 	"module-cdp-engine/std",
-	"module-funan/std",
 	"module-cdp-treasury/std",
+	"module-currencies/std",
+	"module-dex/std",
+	"module-evm/std",
+	"module-evm-accounts/std",
+	"module-evm-bridge/std",
+	"module-funan/std",
+	"module-idle-scheduler/std",
 	"module-incentives/std",
+	"module-loans/std",
+	"module-nft/std",
+	"module-prices/std",
+	"module-support/std",
+	"module-transaction-payment/std",
 ]
 with-ethereum-compatibility = [
 	"module-evm/with-ethereum-compatibility",

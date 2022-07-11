@@ -27,7 +27,7 @@ use module_dex::TradingPairStatus;
 use orml_benchmarking::runtime_benchmarks;
 use orml_traits::{MultiCurrency, MultiCurrencyExtended};
 use primitives::TradingPair;
-use runtime_common::{BNC, RENBTC, VSKSM};
+use runtime_common::RENBTC;
 use sp_runtime::traits::UniqueSaturatedInto;
 use sp_std::prelude::*;
 
@@ -38,7 +38,7 @@ const STABLECOIN: CurrencyId = GetStableCurrencyId::get();
 const LIQUID: CurrencyId = GetLiquidCurrencyId::get();
 const STAKING: CurrencyId = GetStakingCurrencyId::get();
 
-const CURRENCY_LIST: [CurrencyId; 7] = [NATIVE, STABLECOIN, LIQUID, STAKING, BNC, VSKSM, RENBTC];
+const CURRENCY_LIST: [CurrencyId; 5] = [NATIVE, STABLECOIN, LIQUID, STAKING, RENBTC];
 
 fn assert_last_event(generic_event: Event) {
 	System::assert_last_event(generic_event.into());

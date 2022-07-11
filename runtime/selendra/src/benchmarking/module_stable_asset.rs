@@ -24,18 +24,18 @@ use frame_support::traits::Get;
 use frame_system::RawOrigin;
 use orml_benchmarking::runtime_benchmarks;
 use primitives::{
-	currency::{AssetMetadata, CurrencyId, KUSD, BNC, LSEL, VSKSM},
+	currency::{AssetMetadata, CurrencyId, KUSD, DOT, LSEL, KSM},
 	DexShare, TokenSymbol,
 };
 use sp_std::prelude::*;
 
 const SEED: u32 = 0;
 const CURRENCY_LIST: [CurrencyId; 5] = [
-	CurrencyId::DexShare(DexShare::Token(TokenSymbol::BNC), DexShare::Token(TokenSymbol::VSKSM)),
-	CurrencyId::DexShare(DexShare::Token(TokenSymbol::VSKSM), DexShare::Token(TokenSymbol::LSEL)),
-	CurrencyId::DexShare(DexShare::Token(TokenSymbol::VSKSM), DexShare::Token(TokenSymbol::KUSD)),
-	BNC,
-	VSKSM,
+	CurrencyId::DexShare(DexShare::Token(TokenSymbol::DOT), DexShare::Token(TokenSymbol::KSM)),
+	CurrencyId::DexShare(DexShare::Token(TokenSymbol::SEL), DexShare::Token(TokenSymbol::DOT)),
+	CurrencyId::DexShare(DexShare::Token(TokenSymbol::SEL), DexShare::Token(TokenSymbol::KUSD)),
+	DOT,
+	KSM,
 ];
 
 fn register_stable_asset() -> DispatchResult {

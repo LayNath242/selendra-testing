@@ -19,7 +19,7 @@
 //! An orml_authority trait implementation.
 
 use crate::{
-	AccountId, AccountIdConversion, AuthoritysOriginIdMadala, BadOrigin, BlockNumber, DispatchResult, EnsureRoot,
+	AccountId, AccountIdConversion, AuthoritysOriginId, BadOrigin, BlockNumber, DispatchResult, EnsureRoot,
 	EnsureRootOrHalfFinancialCouncil, EnsureRootOrHalfCouncil,
 	EnsureRootOrOneThirdsTechnicalCommittee, EnsureRootOrThreeFourthsCouncil,
 	EnsureRootOrTwoThirdsTechnicalCommittee, FunanTreasuryPalletId, OneDay, Origin,
@@ -74,19 +74,19 @@ impl orml_authority::AuthorityConfig<Origin, OriginCaller, BlockNumber> for Auth
 	}
 }
 
-impl orml_authority::AsOriginId<Origin, OriginCaller> for AuthoritysOriginIdMadala {
+impl orml_authority::AsOriginId<Origin, OriginCaller> for AuthoritysOriginId {
 	fn into_origin(self) -> OriginCaller {
 		match self {
-			AuthoritysOriginIdMadala::Root => Origin::root().caller().clone(),
-			AuthoritysOriginIdMadala::Treasury => Origin::signed(TreasuryPalletId::get().into_account_truncating())
+			AuthoritysOriginId::Root => Origin::root().caller().clone(),
+			AuthoritysOriginId::Treasury => Origin::signed(TreasuryPalletId::get().into_account_truncating())
 				.caller()
 				.clone(),
-			AuthoritysOriginIdMadala::FunanTreasury => {
+			AuthoritysOriginId::FunanTreasury => {
 				Origin::signed(FunanTreasuryPalletId::get().into_account_truncating())
 					.caller()
 					.clone()
 			}
-			AuthoritysOriginIdMadala::TreasuryReserve => {
+			AuthoritysOriginId::TreasuryReserve => {
 				Origin::signed(TreasuryReservePalletId::get().into_account_truncating())
 					.caller()
 					.clone()
@@ -96,26 +96,26 @@ impl orml_authority::AsOriginId<Origin, OriginCaller> for AuthoritysOriginIdMada
 
 	fn check_dispatch_from(&self, origin: Origin) -> DispatchResult {
 		ensure_root(origin.clone()).or_else(|_| match self {
-			AuthoritysOriginIdMadala::Root => <EnsureDelayed<
+			AuthoritysOriginId::Root => <EnsureDelayed<
 				SevenDays,
 				EnsureRootOrThreeFourthsCouncil,
 				BlockNumber,
 				OriginCaller,
 			> as EnsureOrigin<Origin>>::ensure_origin(origin)
 			.map_or_else(|_| Err(BadOrigin.into()), |_| Ok(())),
-			AuthoritysOriginIdMadala::Treasury => {
+			AuthoritysOriginId::Treasury => {
 				<EnsureDelayed<OneDay, EnsureRootOrHalfCouncil, BlockNumber, OriginCaller> as EnsureOrigin<
 					Origin,
 				>>::ensure_origin(origin)
 				.map_or_else(|_| Err(BadOrigin.into()), |_| Ok(()))
 			}
-			AuthoritysOriginIdMadala::FunanTreasury => {
+			AuthoritysOriginId::FunanTreasury => {
 				<EnsureDelayed<OneDay, EnsureRootOrHalfFinancialCouncil, BlockNumber, OriginCaller> as EnsureOrigin<
 					Origin,
 				>>::ensure_origin(origin)
 				.map_or_else(|_| Err(BadOrigin.into()), |_| Ok(()))
 			}
-			AuthoritysOriginIdMadala::TreasuryReserve => <EnsureDelayed<
+			AuthoritysOriginId::TreasuryReserve => <EnsureDelayed<
 				ZeroDay,
 				EnsureRoot<AccountId>,
 				BlockNumber,

@@ -7,22 +7,22 @@ build = "build.rs"
 
 [dependencies]
 smallvec = "1.4.0"
-codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "max-encoded-len"] }
-serde = { version = "1.0.136", optional = true, default-features = false }
-serde_json = { version = "1.0.68", default-features = false, features = ["alloc"] }
-hex = { version = "0.4", default-features = false }
 hex-literal = { version = "0.3.1" }
-scale-info = { version = "2.1", default-features = false, features = ["derive"] }
+hex = { version = "0.4", default-features = false }
+serde = { version = "1.0.136", optional = true, default-features = false }
 libsecp256k1 = { version = "0.7", default-features = false, optional = true }
+scale-info = { version = "2.1", default-features = false, features = ["derive"] }
+serde_json = { version = "1.0.68", default-features = false, features = ["alloc"] }
+codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "max-encoded-len"] }
 
 # substrate
 frame-benchmarking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false, optional = true }
+frame-election-provider-support = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.24", default-features = false }
 frame-executive = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 frame-support = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 frame-system = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 frame-system-rpc-runtime-api = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 frame-try-runtime = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false, optional = true }
-frame-election-provider-support = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.24", default-features = false }
 
 pallet-authority-discovery = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.24", default-features = false }
 pallet-authorship = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false}
@@ -43,11 +43,14 @@ pallet-multisig = { git = "https://github.com/paritytech/substrate", branch = "p
 pallet-nomination-pools = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.24" }
 pallet-nomination-pools-benchmarking = { git = "https://github.com/paritytech/substrate", default-features = false, optional = true , branch = "polkadot-v0.9.24" }
 pallet-offences = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
+pallet-preimage = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 pallet-proxy = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 pallet-recovery = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 pallet-session = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false, features = ["historical"] }
 pallet-session-benchmarking = { git = "https://github.com/paritytech/substrate", default-features = false, optional = true , branch = "polkadot-v0.9.24" }
 pallet-scheduler = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
+pallet-staking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
+pallet-staking-reward-curve = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 pallet-sudo = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 pallet-timestamp = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 pallet-tips = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
@@ -55,11 +58,10 @@ pallet-transaction-payment = { git = "https://github.com/paritytech/substrate", 
 pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 pallet-treasury = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 pallet-utility = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
-pallet-preimage = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 
-sp-authority-discovery = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.24" }
 sp-api = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 sp-application-crypto = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
+sp-authority-discovery = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.24" }
 sp-block-builder = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 sp-consensus-babe = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 sp-core = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
@@ -68,8 +70,6 @@ sp-io = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0
 sp-offchain = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 sp-runtime = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 sp-session = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
-pallet-staking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
-pallet-staking-reward-curve = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 sp-std = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 sp-staking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 sp-transaction-pool = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
@@ -79,17 +79,16 @@ sp-version = { git = "https://github.com/paritytech/substrate", branch = "polkad
 orml-auction = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5" , default-features = false }
 orml-authority = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false }
 orml-benchmarking = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false, optional = true }
+orml-nft = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false }
 orml-oracle = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false }
 orml-oracle-rpc-runtime-api = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false }
+orml-rewards = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false }
 orml-tokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false }
 orml-tokens-rpc-runtime-api = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false }
 orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false }
-orml-rewards = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false }
-orml-nft = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false }
 
 # modules
-module-transaction-pause = { path = "../../modules/transaction-pause", default-features = false }
-module-transaction-payment = { path = "../../modules/transaction-payment", default-features = false }
+module-aggregated-dex = { path = "../../modules/aggregated-dex", default-features = false }
 module-asset-registry = { path = "../../modules/asset-registry", default-features = false }
 module-auction-manager = { path = "../../modules/auction-manager", default-features = false }
 module-cdp-engine = { path = "../../modules/cdp-engine", default-features = false }
@@ -104,19 +103,18 @@ module-evm-bridge = { path = "../../modules/evm-bridge", default-features = fals
 module-evm-rpc-runtime-api = { path = "../../modules/evm/rpc/runtime_api",  default-features = false }
 module-evm-utility = { path = "../../modules/evm-utility", default-features = false }
 module-funan = { path = "../../modules/funan", default-features = false }
+module-idle-scheduler = { path = "../../modules/idle-scheduler", default-features = false }
+module-incentives = { path = "../../modules/incentives", default-features = false }
 module-loans = { path = "../../modules/loans", default-features = false }
 module-nft = { path = "../../modules/nft", default-features = false }
 module-prices = { path = "../../modules/prices", default-features = false }
-module-incentives = { path = "../../modules/incentives", default-features = false }
+module-stable-asset = { version = "0.1.0", default-features = false, path = "../../modules/stable-asset" }
 module-support = { path = "../../modules/support", default-features = false }
-module-idle-scheduler = { path = "../../modules/idle-scheduler", default-features = false }
-module-aggregated-dex = { path = "../../modules/aggregated-dex", default-features = false }
+module-transaction-pause = { path = "../../modules/transaction-pause", default-features = false }
+module-transaction-payment = { path = "../../modules/transaction-payment", default-features = false }
 
 primitives = { package = "selendra-primitives", path = "../../primitives", default-features = false }
 runtime-common = { path = "../common", default-features = false }
-
-# ecosystem
-module-stable-asset = { version = "0.1.0", default-features = false, path = "../../modules/stable-asset" }
 
 [build-dependencies]
 substrate-wasm-builder = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }
@@ -134,13 +132,13 @@ std = [
 	"serde",
 	"hex/std",
 	"serde_json/std",
-
 	"scale-info/std",
+
 	"frame-benchmarking/std",
+	"frame-election-provider-support/std",
 	"frame-executive/std",
 	"frame-support/std",
 	"frame-system-rpc-runtime-api/std",
-	"frame-election-provider-support/std",
 	"frame-system/std",
 	"frame-try-runtime/std",
 
@@ -158,8 +156,8 @@ std = [
 	"pallet-im-online/std",
 	"pallet-indices/std",
 	"pallet-membership/std",
-	"pallet-nomination-pools/std",
 	"pallet-multisig/std",
+	"pallet-nomination-pools/std",
 	"pallet-proxy/std",
 	"pallet-recovery/std",
 	"pallet-session/std",
@@ -172,12 +170,13 @@ std = [
 	"pallet-transaction-payment-rpc-runtime-api/std",
 	"pallet-treasury/std",
 	"pallet-utility/std",
+
 	"sp-authority-discovery/std",
-	"sp-io/std",
 	"sp-api/std",
 	"sp-block-builder/std",
 	"sp-consensus-babe/std",
 	"sp-core/std",
+	"sp-io/std",
 	"sp-offchain/std",
 	"sp-runtime/std",
 	"sp-session/std",
@@ -185,22 +184,19 @@ std = [
 	"sp-std/std",
 	"sp-transaction-pool/std",
 	"sp-version/std",
-	"pallet-bounties/std",
-	"pallet-tips/std",
 
 	"orml-auction/std",
 	"orml-authority/std",
 	"orml-benchmarking/std",
+	"orml-nft/std",
 	"orml-oracle-rpc-runtime-api/std",
 	"orml-oracle/std",
+	"orml-rewards/std",
 	"orml-tokens-rpc-runtime-api/std",
 	"orml-tokens/std",
 	"orml-traits/std",
-	"orml-rewards/std",
-	"orml-nft/std",
 
-	"module-transaction-pause/std",
-	"module-transaction-payment/std",
+	"module-aggregated-dex/std",
 	"module-asset-registry/std",
 	"module-auction-manager/std",
 	"module-cdp-engine/std",
@@ -212,35 +208,33 @@ std = [
 	"module-evm/std",
 	"module-evm-accounts/std",
 	"module-evm-bridge/std",
+	"module-evm-rpc-runtime-api/std",
 	"module-evm-utility/std",
 	"module-funan/std",
+	"module-idle-scheduler/std",
+	"module-incentives/std",
 	"module-loans/std",
 	"module-nft/std",
 	"module-prices/std",
-	"module-incentives/std",
 	"module-support/std",
-	"module-idle-scheduler/std",
-	"module-aggregated-dex/std",
+	"module-transaction-pause/std",
+	"module-transaction-payment/std",
+
 	"primitives/std",
 	"runtime-common/std",
 
-	"module-evm-rpc-runtime-api/std",
 ]
 runtime-benchmarks = [
-	"orml-benchmarking",
 	"libsecp256k1/hmac",
+
 
 	"frame-benchmarking/runtime-benchmarks",
 	"frame-support/runtime-benchmarks",
 	"frame-system/runtime-benchmarks",
-	"pallet-collective/runtime-benchmarks",
-	"sp-runtime/runtime-benchmarks",
-	"orml-authority/runtime-benchmarks",
-	"orml-tokens/runtime-benchmarks",
-	"pallet-timestamp/runtime-benchmarks",
 
 	"pallet-bags-list/runtime-benchmarks",
 	"pallet-babe/runtime-benchmarks",
+	"pallet-collective/runtime-benchmarks",
 	"pallet-election-provider-multi-phase/runtime-benchmarks",
 	"pallet-election-provider-support-benchmarking/runtime-benchmarks",
 	"pallet-elections-phragmen/runtime-benchmarks",
@@ -250,11 +244,17 @@ runtime-benchmarks = [
 	"pallet-nomination-pools-benchmarking",
 	"pallet-session-benchmarking",
 	"pallet-staking/runtime-benchmarks",
-
-	"module-nft/runtime-benchmarks",
-	"module-evm-accounts/runtime-benchmarks",
+	"pallet-timestamp/runtime-benchmarks",
 
 	"sp-api/disable-logging",
+	"sp-runtime/runtime-benchmarks",
+
+	"orml-authority/runtime-benchmarks",
+	"orml-benchmarking",
+	"orml-tokens/runtime-benchmarks",
+
+	"module-evm-accounts/runtime-benchmarks",
+	"module-nft/runtime-benchmarks",
 ]
 
 # A feature that should be enabled when the runtime should be build for on-chain

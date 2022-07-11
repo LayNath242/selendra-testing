@@ -9,7 +9,7 @@ use crate::{
 use codec::{Decode, Encode};
 use scale_info::TypeInfo;
 
-use module_evm::{EvmChainId, EvmTask};
+pub use module_evm::{EvmChainId, EvmTask};
 use module_evm_accounts::EvmAddressMapping;
 
 use primitives::{define_combined_task, task::TaskResult, Balance};

@@ -115,16 +115,6 @@ pub enum AuthoritysOriginId {
 	Root,
 	Treasury,
 	FunanTreasury,
-	HomaTreasury,
-	TreasuryReserve,
-}
-
-#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord, TypeInfo)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum AuthoritysOriginIdMadala {
-	Root,
-	Treasury,
-	FunanTreasury,
 	TreasuryReserve,
 }
 

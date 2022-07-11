@@ -16,10 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-#![cfg(feature = "runtime-benchmarks")]
-
-use sp_runtime::traits::AccountIdConversion;
-
 use super::{CurrencyId, SEL, DOT, LSEL, RENBTC};
 use sp_std::prelude::*;
 
@@ -30,7 +26,6 @@ pub mod asset_registry;
 pub mod auction_manager;
 pub mod cdp_engine;
 pub mod cdp_treasury;
-pub mod collator_selection;
 pub mod currencies;
 pub mod dex;
 pub mod dex_oracle;
@@ -50,10 +45,6 @@ pub mod auction;
 pub mod authority;
 pub mod oracle;
 pub mod tokens;
-
-pub fn get_vesting_account() -> super::AccountId {
-	super::TreasuryPalletId::get().into_account_truncating()
-}
 
 pub fn get_benchmarking_collateral_currency_ids() -> Vec<CurrencyId> {
 	vec![SEL, DOT, LSEL, RENBTC, CurrencyId::StableAssetPoolToken(0)]

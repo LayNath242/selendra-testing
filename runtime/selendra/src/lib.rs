@@ -98,7 +98,7 @@ pub use constants::{fee::*, time::*};
 pub use primitives::{
 	currency::AssetIds,
 	evm::{BlockLimits, EstimateResourcesRequest},
-	AccountId, AccountIndex, Address, Amount, AuctionId, AuthoritysOriginIdMadala, Balance, BlockNumber, CurrencyId,
+	AccountId, AccountIndex, Address, Amount, AuctionId, AuthoritysOriginId, Balance, BlockNumber, CurrencyId,
 	DataProviderId, EraIndex, Hash, Lease, Moment, Multiplier, Nonce, ReserveIdentifier, Share, Signature, TokenSymbol,
 	TradingPair,
 };
@@ -132,6 +132,8 @@ mod config;
 pub use config::consensus_config::{EpochDuration, MaxNominations};
 #[cfg(test)]
 use config::evm_config::NewContractExtraBytes;
+#[cfg(feature = "runtime-benchmarks")]
+use config::evm_config::{EvmTask, ScheduledTasks};
 use config::evm_config::{StorageDepositPerByte, TxFeePerGas};
 
 /// This runtime version.
@@ -191,8 +193,6 @@ parameter_types! {
 	// because transaction payment pallet will ensure the accounts always have enough ED.
 	pub const TransactionPaymentPalletId: PalletId = PalletId(*b"sel/fees");
 	pub const StableAssetPalletId: PalletId = PalletId(*b"nuts/sta");
-	// lock identifier for earning module
-	pub const EarningLockIdentifier: LockIdentifier = *b"sel/earn";
 }
 
 pub fn get_all_module_accounts() -> Vec<AccountId> {
@@ -614,7 +614,7 @@ impl orml_authority::Config for Runtime {
 	type PalletsOrigin = OriginCaller;
 	type Call = Call;
 	type Scheduler = Scheduler;
-	type AsOriginId = AuthoritysOriginIdMadala;
+	type AsOriginId = AuthoritysOriginId;
 	type AuthorityConfig = AuthorityConfigImpl;
 	type WeightInfo = weights::orml_authority::WeightInfo<Runtime>;
 }
@@ -1572,28 +1572,28 @@ extern crate orml_benchmarking;
 #[cfg(feature = "runtime-benchmarks")]
 mod benches {
 	define_benchmarks!(
-		[module_dex, benchmarking::dex]
-		[module_dex_oracle, benchmarking::dex_oracle]
 		[module_asset_registry, benchmarking::asset_registry]
 		[module_auction_manager, benchmarking::auction_manager]
 		[module_cdp_engine, benchmarking::cdp_engine]
-		[module_earning, benchmarking::earning]
+		[module_cdp_treasury, benchmarking::cdp_treasury]
+		[module_currencies, benchmarking::currencies]
+		[module_dex, benchmarking::dex]
+		[module_dex_oracle, benchmarking::dex_oracle]
 		[module_emergency_shutdown, benchmarking::emergency_shutdown]
 		[module_evm, benchmarking::evm]
+		[module_evm_accounts, benchmarking::evm_accounts]
 		[module_funan, benchmarking::funan]
-		[module_cdp_treasury, benchmarking::cdp_treasury]
-		[module_transaction_pause, benchmarking::transaction_pause]
-		[module_transaction_payment, benchmarking::transaction_payment]
+		[module_idle_scheduler, benchmarking::idle_scheduler]
 		[module_incentives, benchmarking::incentives]
 		[module_prices, benchmarking::prices]
-		[module_evm_accounts, benchmarking::evm_accounts]
-		[module_currencies, benchmarking::currencies]
-		[orml_tokens, benchmarking::tokens]
+		[module_stable_asset, benchmarking::module_stable_asset]
+		[module_transaction_pause, benchmarking::transaction_pause]
+		[module_transaction_payment, benchmarking::transaction_payment]
+
 		[orml_auction, benchmarking::auction]
 		[orml_authority, benchmarking::authority]
 		[orml_oracle, benchmarking::oracle]
-		[module_stable_asset, benchmarking::module_stable_asset]
-		[module_idle_scheduler, benchmarking::idle_scheduler]
+		[orml_tokens, benchmarking::tokens]
 	);
 }
 
@@ -1947,7 +1947,7 @@ impl_runtime_apis! {
 			let whitelist: Vec<TrackedStorageKey> = vec![
 				// Block Number
 				// frame_system::Number::<Runtime>::hashed_key().to_vec(),
-				hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef702a5c1b19ab7a04f536c519sel4983ac").to_vec().into(),
+				hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef702a5c1b19ab7a04f536c519aca4983ac").to_vec().into(),
 				// Total Issuance
 				hex_literal::hex!("c2261276cc9d1f8598ea4b6a74b15c2f57c875e4cff74148e4628f264b974c80").to_vec().into(),
 				// Execution Phase
