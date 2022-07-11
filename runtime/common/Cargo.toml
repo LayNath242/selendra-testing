@@ -13,61 +13,64 @@ required-features = ["bench"]
 hex-literal = "0.3.1"
 static_assertions = "1.1.0"
 log = { version = "0.4.17", default-features = false }
+ethabi = { version = "17.0.0", default-features = false }
 num_enum = { version = "0.5.1", default-features = false }
 serde = { version = "1.0.136", optional = true, default-features = false }
+scale-info = { version = "2.1", default-features = false, features = ["derive"] }
 serde_json = { version = "1.0.68", default-features = false, features = ["alloc"] }
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["max-encoded-len"] }
-ethabi = { version = "17.0.0", default-features = false }
-scale-info = { version = "2.1", default-features = false, features = ["derive"] }
 
 # substrate
 frame-support = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 frame-system = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
-pallet-scheduler  = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
+
+pallet-balances = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false, optional = true }
 pallet-collective = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 pallet-membership = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
-pallet-balances = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false, optional = true }
-pallet-timestamp = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false, optional = true }
 pallet-proxy = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false, optional = true }
+pallet-scheduler  = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 pallet-staking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
+pallet-timestamp = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false, optional = true }
 pallet-utility = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false, optional = true }
+
 sp-core = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
+sp-io = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 sp-runtime = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 sp-std = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
-sp-io = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
-
-# cumulus
-cumulus-pallet-parachain-system = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.24", default-features = false }
 
 # modules
+module-asset-registry = { path = "../../modules/asset-registry", default-features = false, optional = true }
 module-currencies = { path = "../../modules/currencies", default-features = false }
 module-evm = { path = "../../modules/evm", default-features = false }
+module-evm-bridge = { path = "../../modules/evm-bridge", default-features = false, optional = true }
 module-evm-utility-macro = { path = "../../modules/evm-utility/macro" }
-module-support = { path = "../../modules/support", default-features = false }
 module-idle-scheduler = { path = "../../modules/idle-scheduler", default-features = false }
+module-loans = { path = "../../modules/loans", default-features = false }
+module-support = { path = "../../modules/support", default-features = false }
+
 module-prices = { path = "../../modules/prices", default-features = false }
 module-transaction-payment = { path = "../../modules/transaction-payment", default-features = false }
 module-nft = { path = "../../modules/nft", default-features = false }
 module-dex = { path = "../../modules/dex", default-features = false }
 module-evm-accounts = { path = "../../modules/evm-accounts", default-features = false }
-module-asset-registry = { path = "../../modules/asset-registry", default-features = false, optional = true }
-module-evm-bridge = { path = "../../modules/evm-bridge", default-features = false, optional = true }
-primitives = { package = "selendra-primitives", path = "../../primitives", default-features = false }
-module-stable-asset = { version = "0.1.0", default-features = false, path = "../../modules/stable-asset" }
-module-honzon = { path = "../../modules/honzon", default-features = false }
-module-loans = { path = "../../modules/loans", default-features = false }
+module-stable-asset = { default-features = false, path = "../../modules/stable-asset" }
+module-funan = { path = "../../modules/funan", default-features = false }
+
 module-cdp-engine = { path = "../../modules/cdp-engine", default-features = false }
 module-cdp-treasury = { path = "../../modules/cdp-treasury", default-features = false, optional = true }
 module-incentives = { path = "../../modules/incentives", default-features = false }
 
+# primitives
+primitives = { package = "selendra-primitives", path = "../../primitives", default-features = false }
+
 # orml
-orml-oracle = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false }
-orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false }
 orml-bencher = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false, optional = true }
-orml-tokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false, optional = true }
-orml-nft = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false, optional = true }
 orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false, optional = true }
+orml-nft = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false, optional = true }
+orml-oracle = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false }
 orml-rewards = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false, optional = true }
+orml-tokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false, optional = true }
+orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "b57f88b39cd547e2fb51727d8bb9bcc64fddf8b5", default-features = false }
 
 [features]
 default = ["std"]
@@ -82,20 +85,19 @@ std = [
 
 	"frame-support/std",
 	"frame-system/std",
-	"pallet-scheduler/std",
+	"pallet-balances/std",
 	"pallet-collective/std",
 	"pallet-membership/std",
-	"pallet-balances/std",
-	"pallet-timestamp/std",
 	"pallet-proxy/std",
+	"pallet-scheduler/std",
 	"pallet-staking/std",
+	"pallet-timestamp/std",
 	"pallet-utility/std",
+
 	"sp-core/std",
+	"sp-io/std",
 	"sp-runtime/std",
 	"sp-std/std",
-	"sp-io/std",
-
-	"cumulus-pallet-parachain-system/std",
 
 	"orml-oracle/std",
 	"orml-traits/std",
@@ -119,7 +121,7 @@ std = [
 	"module-evm-bridge/std",
 	"module-loans/std",
 	"module-cdp-engine/std",
-	"module-honzon/std",
+	"module-funan/std",
 	"module-cdp-treasury/std",
 	"module-incentives/std",
 ]

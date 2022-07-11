@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-//! Common runtime code for Selendra, Karura and Selendra.
+//! Common runtime code for Selendra.
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![recursion_limit = "256"]

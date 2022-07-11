@@ -17,8 +17,6 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 #![cfg_attr(not(feature = "std"), no_std)]
-#![allow(clippy::unnecessary_cast)]
-#![allow(clippy::upper_case_acronyms)]
 
 pub mod bonding;
 pub mod currency;
@@ -116,7 +114,7 @@ pub type Multiplier = FixedU128;
 pub enum AuthoritysOriginId {
 	Root,
 	Treasury,
-	HonzonTreasury,
+	FunanTreasury,
 	HomaTreasury,
 	TreasuryReserve,
 }
@@ -126,7 +124,7 @@ pub enum AuthoritysOriginId {
 pub enum AuthoritysOriginIdMadala {
 	Root,
 	Treasury,
-	HonzonTreasury,
+	FunanTreasury,
 	TreasuryReserve,
 }
 
@@ -193,7 +191,7 @@ pub enum ReserveIdentifier {
 	CollatorSelection,
 	EvmStorageDeposit,
 	EvmDeveloperDeposit,
-	Honzon,
+	Funan,
 	Nft,
 	TransactionPayment,
 	TransactionPaymentDeposit,

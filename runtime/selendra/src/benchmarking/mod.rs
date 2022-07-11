@@ -37,7 +37,7 @@ pub mod dex_oracle;
 pub mod emergency_shutdown;
 pub mod evm;
 pub mod evm_accounts;
-pub mod honzon;
+pub mod funan;
 pub mod idle_scheduler;
 pub mod incentives;
 pub mod module_stable_asset;

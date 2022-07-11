@@ -78,7 +78,7 @@ pub trait AuctionManager<AccountId> {
 	fn get_total_target_in_auction() -> Self::Balance;
 }
 
-/// An abstraction of cdp treasury for Honzon Protocol.
+/// An abstraction of cdp treasury for Funan Protocol.
 pub trait CDPTreasury<AccountId> {
 	type Balance;
 	type CurrencyId;
@@ -149,8 +149,8 @@ pub trait EmergencyShutdown {
 	fn is_shutdown() -> bool;
 }
 
-/// Functionality of Honzon Protocol to be exposed to EVM+.
-pub trait HonzonManager<AccountId, CurrencyId, Amount, Balance> {
+/// Functionality of Funan Protocol to be exposed to EVM+.
+pub trait FunanManager<AccountId, CurrencyId, Amount, Balance> {
 	/// Adjust CDP loan
 	fn adjust_loan(
 		who: &AccountId,

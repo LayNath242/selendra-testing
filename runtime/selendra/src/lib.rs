@@ -179,7 +179,7 @@ parameter_types! {
 	pub const LoansPalletId: PalletId = PalletId(*b"sel/loan");
 	pub const DEXPalletId: PalletId = PalletId(*b"sel/dexm");
 	pub const CDPTreasuryPalletId: PalletId = PalletId(*b"sel/cdpt");
-	pub const HonzonTreasuryPalletId: PalletId = PalletId(*b"sel/hztr");
+	pub const FunanTreasuryPalletId: PalletId = PalletId(*b"sel/hztr");
 	pub const IncentivesPalletId: PalletId = PalletId(*b"sel/inct");
 	pub const CollatorPotId: PalletId = PalletId(*b"sel/cpot");
 	// Treasury reserve
@@ -201,7 +201,7 @@ pub fn get_all_module_accounts() -> Vec<AccountId> {
 		LoansPalletId::get().into_account_truncating(),
 		DEXPalletId::get().into_account_truncating(),
 		CDPTreasuryPalletId::get().into_account_truncating(),
-		HonzonTreasuryPalletId::get().into_account_truncating(),
+		FunanTreasuryPalletId::get().into_account_truncating(),
 		IncentivesPalletId::get().into_account_truncating(),
 		TreasuryReservePalletId::get().into_account_truncating(),
 		CollatorPotId::get().into_account_truncating(),
@@ -988,12 +988,12 @@ parameter_types! {
 	pub DepositPerAuthorization: Balance = dollar(SEL);
 }
 
-impl module_honzon::Config for Runtime {
+impl module_funan::Config for Runtime {
 	type Event = Event;
 	type Currency = Balances;
 	type DepositPerAuthorization = DepositPerAuthorization;
 	type CollateralCurrencyIds = CollateralCurrencyIds<Runtime>;
-	type WeightInfo = weights::module_honzon::WeightInfo<Runtime>;
+	type WeightInfo = weights::module_funan::WeightInfo<Runtime>;
 }
 
 impl module_emergency_shutdown::Config for Runtime {
@@ -1055,7 +1055,7 @@ impl module_dex_oracle::Config for Runtime {
 }
 
 parameter_types! {
-	pub HonzonTreasuryAccount: AccountId = HonzonTreasuryPalletId::get().into_account_truncating();
+	pub FunanTreasuryAccount: AccountId = FunanTreasuryPalletId::get().into_account_truncating();
 }
 
 impl module_cdp_treasury::Config for Runtime {
@@ -1068,7 +1068,7 @@ impl module_cdp_treasury::Config for Runtime {
 	type Swap = SelendraSwap;
 	type MaxAuctionsCount = ConstU32<50>;
 	type PalletId = CDPTreasuryPalletId;
-	type TreasuryAccount = HonzonTreasuryAccount;
+	type TreasuryAccount = FunanTreasuryAccount;
 	type WeightInfo = weights::module_cdp_treasury::WeightInfo<Runtime>;
 	type StableAsset = RebasedStableAsset;
 }
@@ -1224,10 +1224,10 @@ impl InstanceFilter<Call> for ProxyType {
 			ProxyType::Loan => {
 				matches!(
 					c,
-					Call::Honzon(module_honzon::Call::adjust_loan { .. })
-						| Call::Honzon(module_honzon::Call::close_loan_has_debit_by_dex { .. })
-						| Call::Honzon(module_honzon::Call::adjust_loan_by_debit_value { .. })
-						| Call::Honzon(module_honzon::Call::transfer_debit { .. })
+					Call::Funan(module_funan::Call::adjust_loan { .. })
+						| Call::Funan(module_funan::Call::close_loan_has_debit_by_dex { .. })
+						| Call::Funan(module_funan::Call::adjust_loan_by_debit_value { .. })
+						| Call::Funan(module_funan::Call::transfer_debit { .. })
 				)
 			}
 			ProxyType::DexLiquidity => {
@@ -1539,10 +1539,10 @@ construct_runtime!(
 		DexOracle: module_dex_oracle = 112,
 		AggregatedDex: module_aggregated_dex = 113,
 
-		// Honzon
+		// Funan
 		AuctionManager: module_auction_manager = 120,
 		Loans: module_loans = 121,
-		Honzon: module_honzon = 122,
+		Funan: module_funan = 122,
 		CdpTreasury: module_cdp_treasury = 123,
 		CdpEngine: module_cdp_engine = 124,
 		EmergencyShutdown: module_emergency_shutdown = 125,
@@ -1580,7 +1580,7 @@ mod benches {
 		[module_earning, benchmarking::earning]
 		[module_emergency_shutdown, benchmarking::emergency_shutdown]
 		[module_evm, benchmarking::evm]
-		[module_honzon, benchmarking::honzon]
+		[module_funan, benchmarking::funan]
 		[module_cdp_treasury, benchmarking::cdp_treasury]
 		[module_transaction_pause, benchmarking::transaction_pause]
 		[module_transaction_payment, benchmarking::transaction_payment]

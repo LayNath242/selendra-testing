@@ -163,15 +163,11 @@ macro_rules! create_currency_id {
 create_currency_id! {
 	// Represent a Token symbol with 8 bit
 	//
-	// 0 - 127: Polkadot Ecosystem tokens
-	// 0 - 19: Selendra & Polkadot native tokens
+	// 0 - 127: Selendra Ecosystem tokens
+	// 0 - 19: Selendra & Bridge native tokens
 	// 20 - 39: External tokens (e.g. bridged)
-	// 40 - 127: Polkadot parachain tokens
 	//
-	// 128 - 255: Kusama Ecosystem tokens
-	// 128 - 147: Karura & Kusama native tokens
-	// 148 - 167: External tokens (e.g. bridged)
-	// 168 - 255: Kusama parachain tokens
+	// 130 - 147: Kusama & Pokadot Bridge tokens
 	#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord, TypeInfo, MaxEncodedLen)]
 	#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 	#[repr(u8)]

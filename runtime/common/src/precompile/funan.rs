@@ -27,14 +27,14 @@ use module_evm::{
 	runner::state::{PrecompileFailure, PrecompileOutput, PrecompileResult},
 	Context, ExitError, ExitRevert, ExitSucceed,
 };
-use module_honzon::WeightInfo;
-use module_support::HonzonManager;
+use module_funan::WeightInfo;
+use module_support::FunanManager;
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 use primitives::{Amount, Balance, CurrencyId, Position};
 use sp_runtime::{traits::Convert, FixedPointNumber, RuntimeDebug};
 use sp_std::{marker::PhantomData, prelude::*};
 
-/// The Honzon precomnpile
+/// The Funan precomnpile
 ///
 /// `input` data starts with `action`.
 ///
@@ -45,7 +45,7 @@ use sp_std::{marker::PhantomData, prelude::*};
 ///  - Get position. `input` bytes: `who`, `currency_id`.
 ///  - Get liquidation ratio. `input` bytes: `currency_id`.
 ///  - Get current collateral ratio. `input` bytes: `who`, `currency_id`.
-pub struct HonzonPrecompile<R>(PhantomData<R>);
+pub struct FunanPrecompile<R>(PhantomData<R>);
 
 #[module_evm_utility_macro::generate_function_selector]
 #[derive(RuntimeDebug, Eq, PartialEq, TryFromPrimitive, IntoPrimitive)]
@@ -59,10 +59,10 @@ pub enum Action {
 	GetDebitExchangeRate = "getDebitExchangeRate(address)",
 }
 
-impl<Runtime> Precompile for HonzonPrecompile<Runtime>
+impl<Runtime> Precompile for FunanPrecompile<Runtime>
 where
-	Runtime: module_evm::Config + module_honzon::Config + module_prices::Config,
-	module_honzon::Pallet<Runtime>: HonzonManager<Runtime::AccountId, CurrencyId, Amount, Balance>,
+	Runtime: module_evm::Config + module_funan::Config + module_prices::Config,
+	module_funan::Pallet<Runtime>: FunanManager<Runtime::AccountId, CurrencyId, Amount, Balance>,
 {
 	fn execute(input: &[u8], target_gas: Option<u64>, _context: &Context, _is_static: bool) -> PrecompileResult {
 		let input = Input::<Action, Runtime::AccountId, Runtime::AddressMapping, Runtime::Erc20InfoMapping>::new(
@@ -91,11 +91,11 @@ where
 
 				log::debug!(
 					target: "evm",
-					"honzon: adjust_loan who: {:?}, currency_id: {:?}, collateral_adjustment: {:?}, debit_adjustment: {:?}",
+					"funan: adjust_loan who: {:?}, currency_id: {:?}, collateral_adjustment: {:?}, debit_adjustment: {:?}",
 					who, currency_id, collateral_adjustment, debit_adjustment
 				);
 
-				<module_honzon::Pallet<Runtime> as HonzonManager<
+				<module_funan::Pallet<Runtime> as FunanManager<
 					Runtime::AccountId,
 					CurrencyId,
 					Amount,
@@ -122,11 +122,11 @@ where
 
 				log::debug!(
 					target: "evm",
-					"honzon: close_loan_by_dex who: {:?}, currency_id: {:?}, max_collateral_adjustment: {:?}",
+					"funan: close_loan_by_dex who: {:?}, currency_id: {:?}, max_collateral_adjustment: {:?}",
 					who, currency_id, max_collateral_amount
 				);
 
-				<module_honzon::Pallet<Runtime> as HonzonManager<
+				<module_funan::Pallet<Runtime> as FunanManager<
 					Runtime::AccountId,
 					CurrencyId,
 					Amount,
@@ -150,7 +150,7 @@ where
 				let who = input.account_id_at(1)?;
 				let currency_id = input.currency_id_at(2)?;
 
-				let Position { collateral, debit } = <module_honzon::Pallet<Runtime> as HonzonManager<
+				let Position { collateral, debit } = <module_funan::Pallet<Runtime> as FunanManager<
 					Runtime::AccountId,
 					CurrencyId,
 					Amount,
@@ -166,7 +166,7 @@ where
 			}
 			Action::GetLiquidationRatio => {
 				let currency_id = input.currency_id_at(1)?;
-				let ratio = <module_honzon::Pallet<Runtime> as HonzonManager<
+				let ratio = <module_funan::Pallet<Runtime> as FunanManager<
 					Runtime::AccountId,
 					CurrencyId,
 					Amount,
@@ -184,7 +184,7 @@ where
 			Action::GetCurrentCollateralRatio => {
 				let who = input.account_id_at(1)?;
 				let currency_id = input.currency_id_at(2)?;
-				let ratio = <module_honzon::Pallet<Runtime> as HonzonManager<
+				let ratio = <module_funan::Pallet<Runtime> as FunanManager<
 					Runtime::AccountId,
 					CurrencyId,
 					Amount,
@@ -201,7 +201,7 @@ where
 			}
 			Action::GetDebitExchangeRate => {
 				let currency_id = input.currency_id_at(1)?;
-				let exchange_rate = <module_honzon::Pallet<Runtime> as HonzonManager<
+				let exchange_rate = <module_funan::Pallet<Runtime> as FunanManager<
 					Runtime::AccountId,
 					CurrencyId,
 					Amount,
@@ -223,7 +223,7 @@ struct Pricer<R>(PhantomData<R>);
 
 impl<Runtime> Pricer<Runtime>
 where
-	Runtime: module_evm::Config + module_honzon::Config + module_prices::Config,
+	Runtime: module_evm::Config + module_funan::Config + module_prices::Config,
 {
 	const BASE_COST: u64 = 200;
 
@@ -238,7 +238,7 @@ where
 				let currency_id = input.currency_id_at(2)?;
 				let read_currency = InputPricer::<Runtime>::read_currency(currency_id);
 
-				let weight = <Runtime as module_honzon::Config>::WeightInfo::adjust_loan();
+				let weight = <Runtime as module_funan::Config>::WeightInfo::adjust_loan();
 
 				Self::BASE_COST
 					.saturating_add(read_account)
@@ -250,7 +250,7 @@ where
 				let currency_id = input.currency_id_at(2)?;
 				let read_currency = InputPricer::<Runtime>::read_currency(currency_id);
 
-				let weight = <Runtime as module_honzon::Config>::WeightInfo::close_loan_has_debit_by_dex();
+				let weight = <Runtime as module_funan::Config>::WeightInfo::close_loan_has_debit_by_dex();
 
 				Self::BASE_COST
 					.saturating_add(read_account)
@@ -281,7 +281,7 @@ where
 				let read_account = InputPricer::<Runtime>::read_accounts(1);
 				let currency_id = input.currency_id_at(2)?;
 				let read_currency = InputPricer::<Runtime>::read_currency(currency_id);
-				let weight = <Runtime as module_honzon::Config>::WeightInfo::precompile_get_current_collateral_ratio();
+				let weight = <Runtime as module_funan::Config>::WeightInfo::precompile_get_current_collateral_ratio();
 
 				Self::BASE_COST
 					.saturating_add(read_account)
@@ -307,7 +307,7 @@ mod tests {
 	use super::*;
 
 	use crate::precompile::mock::{
-		alice, alice_evm_addr, new_test_ext, CDPEngine, Currencies, DexModule, Honzon, Loans, One, Origin, Test, KUSD,
+		alice, alice_evm_addr, new_test_ext, CDPEngine, Currencies, DexModule, Funan, Loans, One, Origin, Test, KUSD,
 		BOB, DOT,
 	};
 	use frame_support::assert_ok;
@@ -316,7 +316,7 @@ mod tests {
 	use orml_traits::Change;
 	use sp_runtime::FixedPointNumber;
 
-	type HonzonPrecompile = super::HonzonPrecompile<Test>;
+	type FunanPrecompile = super::FunanPrecompile<Test>;
 
 	#[test]
 	fn adjust_loan_works() {
@@ -355,7 +355,7 @@ mod tests {
 				00000000000000000000000000000000 00000000000000000000000000001000
 			"};
 
-			let res = HonzonPrecompile::execute(&input, None, &context, false).unwrap();
+			let res = FunanPrecompile::execute(&input, None, &context, false).unwrap();
 			assert_eq!(res.exit_status, ExitSucceed::Returned);
 			assert_eq!(Loans::positions(DOT, alice()).collateral, 268435456);
 			assert_eq!(Loans::positions(DOT, alice()).debit, 4096)
@@ -380,7 +380,7 @@ mod tests {
 				DOT,
 				1_000_000_000_000
 			));
-			assert_ok!(Honzon::adjust_loan(
+			assert_ok!(Funan::adjust_loan(
 				Origin::signed(alice()),
 				DOT,
 				100_000_000_000,
@@ -419,7 +419,7 @@ mod tests {
 				00000000000000000000000000000000 00000000000000000000000100000000
 			"};
 
-			let res = HonzonPrecompile::execute(&input, None, &context, false).unwrap();
+			let res = FunanPrecompile::execute(&input, None, &context, false).unwrap();
 			assert_eq!(res.exit_status, ExitSucceed::Returned);
 
 			assert_eq!(Loans::positions(DOT, alice()).debit, 0);
@@ -445,7 +445,7 @@ mod tests {
 				DOT,
 				1_000_000_000_000
 			));
-			assert_ok!(Honzon::adjust_loan(
+			assert_ok!(Funan::adjust_loan(
 				Origin::signed(alice()),
 				DOT,
 				100_000_000_000,
@@ -472,7 +472,7 @@ mod tests {
 				00000000000000000000000000000000 0000000000000000000000174876e800
 				00000000000000000000000000000000 000000000000000000000000000f4240
 			"};
-			let res = HonzonPrecompile::execute(&input, None, &context, false).unwrap();
+			let res = FunanPrecompile::execute(&input, None, &context, false).unwrap();
 			assert_eq!(res.exit_status, ExitSucceed::Returned);
 			assert_eq!(res.output, expected_output.to_vec());
 		});
@@ -508,7 +508,7 @@ mod tests {
 				00000000000000000000000000000000 000000000000000014d1120d7b160000
 			"};
 
-			let res = HonzonPrecompile::execute(&input, None, &context, false).unwrap();
+			let res = FunanPrecompile::execute(&input, None, &context, false).unwrap();
 			assert_eq!(res.exit_status, ExitSucceed::Returned);
 			assert_eq!(res.output, expected_output.to_vec());
 		});
@@ -532,7 +532,7 @@ mod tests {
 				DOT,
 				1_000_000_000_000
 			));
-			assert_ok!(Honzon::adjust_loan(
+			assert_ok!(Funan::adjust_loan(
 				Origin::signed(alice()),
 				DOT,
 				100_000_000_000,
@@ -557,7 +557,7 @@ mod tests {
 			let expected_output = hex! {"
 				00000000000000000000000000000000 000000000000152d02c7e14af6800000
 			"};
-			let res = HonzonPrecompile::execute(&input, None, &context, false).unwrap();
+			let res = FunanPrecompile::execute(&input, None, &context, false).unwrap();
 			assert_eq!(res.exit_status, ExitSucceed::Returned);
 			assert_eq!(res.output, expected_output.to_vec());
 		});
@@ -592,7 +592,7 @@ mod tests {
 			let expected_output = hex! {"
 				00000000000000000000000000000000 00000000000000000de0b6b3a7640000
 			"};
-			let res = HonzonPrecompile::execute(&input, None, &context, false).unwrap();
+			let res = FunanPrecompile::execute(&input, None, &context, false).unwrap();
 			assert_eq!(res.exit_status, ExitSucceed::Returned);
 			assert_eq!(res.output, expected_output.to_vec());
 		})

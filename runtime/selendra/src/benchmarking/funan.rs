@@ -18,7 +18,7 @@
 
 use crate::{
 	AccountId, Amount, Balance, CdpEngine, Currencies, CurrencyId, DepositPerAuthorization, Dex, ExistentialDeposits,
-	GetLiquidCurrencyId, GetNativeCurrencyId, GetStableCurrencyId, GetStakingCurrencyId, Honzon, Price, Rate, Ratio,
+	GetLiquidCurrencyId, GetNativeCurrencyId, GetStableCurrencyId, GetStakingCurrencyId, Funan, Price, Rate, Ratio,
 	Runtime,
 };
 
@@ -28,7 +28,7 @@ use super::{
 };
 use frame_benchmarking::{account, whitelisted_caller};
 use frame_system::RawOrigin;
-use module_support::HonzonManager;
+use module_support::FunanManager;
 use orml_benchmarking::runtime_benchmarks;
 use orml_traits::{Change, GetByKey, MultiCurrencyExtended};
 use sp_runtime::{
@@ -80,7 +80,7 @@ fn inject_liquidity(
 }
 
 runtime_benchmarks! {
-	{ Runtime, module_honzon }
+	{ Runtime, module_funan }
 
 	authorize {
 		let caller: AccountId = whitelisted_caller();
@@ -98,7 +98,7 @@ runtime_benchmarks! {
 
 		// set balance
 		set_balance(NATIVE, &caller, DepositPerAuthorization::get());
-		Honzon::authorize(
+		Funan::authorize(
 			RawOrigin::Signed(caller.clone()).into(),
 			STAKING,
 			to_lookup.clone()
@@ -116,7 +116,7 @@ runtime_benchmarks! {
 		// set balance
 		set_balance(NATIVE, &caller, DepositPerAuthorization::get().saturating_mul(c.into()));
 		for i in 0 .. c {
-			Honzon::authorize(
+			Funan::authorize(
 				RawOrigin::Signed(caller.clone()).into(),
 				currency_ids[i as usize],
 				to_lookup.clone(),
@@ -188,7 +188,7 @@ runtime_benchmarks! {
 		)?;
 
 		// initialize sender's loan
-		Honzon::adjust_loan(
+		Funan::adjust_loan(
 			RawOrigin::Signed(sender.clone()).into(),
 			currency_id,
 			collateral_amount.try_into().unwrap(),
@@ -196,7 +196,7 @@ runtime_benchmarks! {
 		)?;
 
 		// authorize receiver
-		Honzon::authorize(
+		Funan::authorize(
 			RawOrigin::Signed(sender.clone()).into(),
 			currency_id,
 			receiver_lookup,
@@ -233,7 +233,7 @@ runtime_benchmarks! {
 		)?;
 
 		// initialize sender's loan
-		Honzon::adjust_loan(
+		Funan::adjust_loan(
 			RawOrigin::Signed(sender.clone()).into(),
 			LIQUID,
 			(10 * collateral_amount).try_into().unwrap(),
@@ -269,7 +269,7 @@ runtime_benchmarks! {
 		)?;
 
 		// initialize sender's loan
-		Honzon::adjust_loan(
+		Funan::adjust_loan(
 			RawOrigin::Signed(sender.clone()).into(),
 			currency_id,
 			collateral_amount.try_into().unwrap(),
@@ -305,7 +305,7 @@ runtime_benchmarks! {
 		)?;
 
 		// initialize sender's loan
-		Honzon::adjust_loan(
+		Funan::adjust_loan(
 			RawOrigin::Signed(sender.clone()).into(),
 			currency_id,
 			collateral_amount.try_into().unwrap(),
@@ -338,8 +338,8 @@ runtime_benchmarks! {
 		)?;
 		feed_price(vec![(STAKING, Price::one())])?;
 
-		Honzon::adjust_loan(RawOrigin::Signed(sender.clone()).into(), STAKING, (10_000 * dollar(STAKING)).try_into().unwrap(), (1_000 * dollar(STABLECOIN)).try_into().unwrap())?;
-		Honzon::adjust_loan(RawOrigin::Signed(sender.clone()).into(), LIQUID, (10_000 * dollar(LIQUID)).try_into().unwrap(), (1_000 * dollar(STABLECOIN)).try_into().unwrap())?;
+		Funan::adjust_loan(RawOrigin::Signed(sender.clone()).into(), STAKING, (10_000 * dollar(STAKING)).try_into().unwrap(), (1_000 * dollar(STABLECOIN)).try_into().unwrap())?;
+		Funan::adjust_loan(RawOrigin::Signed(sender.clone()).into(), LIQUID, (10_000 * dollar(LIQUID)).try_into().unwrap(), (1_000 * dollar(STABLECOIN)).try_into().unwrap())?;
 	}: _(RawOrigin::Signed(sender), LIQUID, STAKING, dollar(STABLECOIN))
 
 	precompile_get_current_collateral_ratio {
@@ -372,14 +372,14 @@ runtime_benchmarks! {
 		)?;
 
 		// initialize sender's loan
-		Honzon::adjust_loan(
+		Funan::adjust_loan(
 			RawOrigin::Signed(sender.clone()).into(),
 			LIQUID,
 			(10 * collateral_amount).try_into().unwrap(),
 			debit_amount,
 		)?;
 	}: {
-		Honzon::get_current_collateral_ratio(&sender, LIQUID);
+		Funan::get_current_collateral_ratio(&sender, LIQUID);
 	}
 }
 

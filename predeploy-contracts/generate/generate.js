@@ -11,14 +11,9 @@ const exec = util.promisify(childProcess.exec);
 
 const generate = async () => {
   const selendraTokensFile = path.join(__dirname, '../resources', 'selendra_tokens.json');
-  const karuraTokensFile = path.join(__dirname, '../resources', 'karura_tokens.json');
-  const mandalaTokensFile = path.join(__dirname, '../resources', 'mandala_tokens.json');
-  const bytecodesFile = path.join(__dirname, '../resources', 'bytecodes.json');
   const addressDir = path.join(__dirname, '../contracts/utils');
 
   const selendraTokens = require(selendraTokensFile);
-  const karuraTokens = require(karuraTokensFile);
-  const mandalaTokens = require(mandalaTokensFile);
 
   // compile to generate contracts json.
   await exec('yarn build');
@@ -54,9 +49,9 @@ const generate = async () => {
   const { bytecode: evmAccounts } = await hre.artifacts.readArtifact("EVMAccounts");
   bytecodes.push(['EVM_ACCOUNTS', ethers.utils.getAddress('0x0000000000000000000000000000000000000806'), evmAccounts]);
 
-  // add Honzon bytecodes
-  const { bytecode: honzon } = await hre.artifacts.readArtifact("Honzon");
-  bytecodes.push(['HONZON', ethers.utils.getAddress('0x0000000000000000000000000000000000000807'), honzon]);
+  // add Funan bytecodes
+  const { bytecode: funan } = await hre.artifacts.readArtifact("Funan");
+  bytecodes.push(['FUNAN', ethers.utils.getAddress('0x0000000000000000000000000000000000000807'), funan]);
 
   // add Incentives bytecodes
   const { bytecode: incentives } = await hre.artifacts.readArtifact("Incentives");

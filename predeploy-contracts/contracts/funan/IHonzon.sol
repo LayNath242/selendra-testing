@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.0;
 
-interface IHonzon {
+interface IFunan {
     event AdjustedLoan(
         address indexed sender,
         address indexed currencyId,

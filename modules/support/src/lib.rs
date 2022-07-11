@@ -29,14 +29,14 @@ use sp_runtime::{
 
 pub mod dex;
 pub mod evm;
-pub mod honzon;
+pub mod funan;
 pub mod incentives;
 pub mod mocks;
 pub mod stable_asset;
 
 pub use crate::dex::*;
 pub use crate::evm::*;
-pub use crate::honzon::*;
+pub use crate::funan::*;
 pub use crate::incentives::*;
 pub use crate::stable_asset::*;
 

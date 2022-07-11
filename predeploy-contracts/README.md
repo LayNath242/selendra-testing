@@ -225,8 +225,8 @@ function getEvmAddress(bytes32 accountId) external view returns (address);
 function claimDefaultEvmAddress(bytes32 accountId) external returns (bool);
 ```
 
-### Honzon Protocol
-- Honzon contract address: `ADDRESS.HONZON`
+### Funan Protocol
+- Funan contract address: `ADDRESS.FUNAN`
 ```
 // Adjust CDP position
 // Returns a boolean value indicating whether the operation succeeded.

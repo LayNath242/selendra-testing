@@ -239,9 +239,6 @@ runtime_benchmarks! {
 	verify {
 		let (_, stable_amount) = Dex::get_liquidity_pool(STAKING, STABLECOIN);
 		let (_, stable_amount_selendra) = Dex::get_liquidity_pool(LIQUID, STABLECOIN);
-		// paths of karura and selendra are LIQUID => STAKING => STABLECOIN
-		#[cfg(any(feature = "with-karura-runtime", feature = "with-selendra-runtime"))]
-		assert!(stable_amount < 10_000 * dollar(STABLECOIN));
 		// path of selendra is LIQUID => STABLECOIN
 		#[cfg(feature = "with-selendra-runtime")]
 		assert!(stable_amount_selendra < 10_000 * dollar(STABLECOIN));

@@ -42,7 +42,7 @@ use sp_std::{collections::btree_set::BTreeSet, marker::PhantomData};
 pub mod dex;
 pub mod evm;
 pub mod evm_accounts;
-pub mod honzon;
+pub mod funan;
 pub mod incentives;
 pub mod input;
 pub mod multicurrency;
@@ -55,7 +55,7 @@ use crate::SystemContractsFilter;
 pub use dex::DEXPrecompile;
 pub use evm::EVMPrecompile;
 pub use evm_accounts::EVMAccountsPrecompile;
-pub use honzon::HonzonPrecompile;
+pub use funan::FunanPrecompile;
 pub use incentives::IncentivesPrecompile;
 pub use multicurrency::MultiCurrencyPrecompile;
 pub use nft::NFTPrecompile;
@@ -87,7 +87,7 @@ pub const SCHEDULER: H160 = H160(hex!("0000000000000000000000000000000000000404"
 pub const DEX: H160 = H160(hex!("0000000000000000000000000000000000000405"));
 pub const STABLE_ASSET: H160 = H160(hex!("0000000000000000000000000000000000000406"));
 pub const EVM_ACCOUNTS: H160 = H160(hex!("0000000000000000000000000000000000000408"));
-pub const HONZON: H160 = H160(hex!("0000000000000000000000000000000000000409"));
+pub const FUNAN: H160 = H160(hex!("0000000000000000000000000000000000000409"));
 pub const INCENTIVES: H160 = H160(hex!("000000000000000000000000000000000000040a"));
 
 pub fn target_gas_limit(target_gas: Option<u64>) -> Option<u64> {
@@ -128,7 +128,7 @@ where
 				DEX,
 				STABLE_ASSET,
 				EVM_ACCOUNTS,
-				HONZON,
+				FUNAN,
 				INCENTIVES,
 			]),
 			_marker: Default::default(),
@@ -147,7 +147,7 @@ where
 	DEXPrecompile<R>: Precompile,
 	StableAssetPrecompile<R>: Precompile,
 	SchedulePrecompile<R>: Precompile,
-	HonzonPrecompile<R>: Precompile,
+	FunanPrecompile<R>: Precompile,
 	IncentivesPrecompile<R>: Precompile,
 {
 	fn execute(
@@ -247,8 +247,8 @@ where
 				Some(EVMAccountsPrecompile::<R>::execute(
 					input, target_gas, context, is_static,
 				))
-			} else if address == HONZON {
-				Some(HonzonPrecompile::<R>::execute(input, target_gas, context, is_static))
+			} else if address == FUNAN {
+				Some(FunanPrecompile::<R>::execute(input, target_gas, context, is_static))
 			} else if address == INCENTIVES {
 				Some(IncentivesPrecompile::<R>::execute(
 					input, target_gas, context, is_static,

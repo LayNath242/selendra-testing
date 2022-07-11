@@ -16,11 +16,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-//! # Honzon Module
+//! # Funan Module
 //!
 //! ## Overview
 //!
-//! The entry of the Honzon protocol for users, user can manipulate their CDP
+//! The entry of the Funan protocol for users, user can manipulate their CDP
 //! position to loan/payback, and can also authorize others to manage the their
 //! CDP under specific collateral type.
 //!
@@ -37,7 +37,7 @@ use sp_runtime::{
 	ArithmeticError, DispatchResult,
 };
 use sp_std::prelude::*;
-use support::{CDPTreasury, EmergencyShutdown, ExchangeRate, HonzonManager, PriceProvider, Ratio};
+use support::{CDPTreasury, EmergencyShutdown, ExchangeRate, FunanManager, PriceProvider, Ratio};
 
 mod mock;
 mod tests;
@@ -50,7 +50,7 @@ pub use weights::WeightInfo;
 pub mod module {
 	use super::*;
 
-	pub const RESERVE_ID: ReserveIdentifier = ReserveIdentifier::Honzon;
+	pub const RESERVE_ID: ReserveIdentifier = ReserveIdentifier::Funan;
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config + cdp_engine::Config {
@@ -408,7 +408,7 @@ impl<T: Config> Pallet<T> {
 	}
 }
 
-impl<T: Config> HonzonManager<T::AccountId, CurrencyId, Amount, Balance> for Pallet<T> {
+impl<T: Config> FunanManager<T::AccountId, CurrencyId, Amount, Balance> for Pallet<T> {
 	fn adjust_loan(
 		who: &T::AccountId,
 		currency_id: CurrencyId,

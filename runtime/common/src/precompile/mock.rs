@@ -247,7 +247,7 @@ parameter_types! {
 	pub MaxSwapSlippageCompareToOracle: Ratio = Ratio::one();
 	pub const TreasuryPalletId: PalletId = PalletId(*b"sel/trsy");
 	pub const TransactionPaymentPalletId: PalletId = PalletId(*b"sel/fees");
-	pub KaruraTreasuryAccount: AccountId = TreasuryPalletId::get().into_account_truncating();
+	pub SelendraTreasuryAccount: AccountId = TreasuryPalletId::get().into_account_truncating();
 	pub const CustomFeeSurplus: Percent = Percent::from_percent(50);
 	pub const AlternativeFeeSurplus: Percent = Percent::from_percent(25);
 	pub DefaultFeeTokens: Vec<CurrencyId> = vec![KUSD];
@@ -273,7 +273,7 @@ impl module_transaction_payment::Config for Test {
 	type PriceSource = module_prices::RealTimePriceProvider<Test>;
 	type WeightInfo = ();
 	type PalletId = TransactionPaymentPalletId;
-	type TreasuryAccount = KaruraTreasuryAccount;
+	type TreasuryAccount = SelendraTreasuryAccount;
 	type UpdateOrigin = EnsureSignedBy<ListingOrigin, AccountId>;
 	type CustomFeeSurplus = CustomFeeSurplus;
 	type AlternativeFeeSurplus = AlternativeFeeSurplus;
@@ -495,7 +495,7 @@ impl module_cdp_treasury::Config for Test {
 	type Swap = SpecificJointsSwap<DexModule, AlternativeSwapPathJointList>;
 }
 
-impl module_honzon::Config for Test {
+impl module_funan::Config for Test {
 	type Event = Event;
 	type Currency = Balances;
 	type DepositPerAuthorization = ConstU128<100>;
@@ -727,7 +727,7 @@ frame_support::construct_runtime!(
 		CDPEngine: module_cdp_engine,
 		CDPTreasury: module_cdp_treasury,
 		Loans: module_loans,
-		Honzon: module_honzon,
+		Funan: module_funan,
 		EVMBridge: module_evm_bridge exclude_parts { Call },
 		AssetRegistry: module_asset_registry,
 		NFTModule: module_nft,

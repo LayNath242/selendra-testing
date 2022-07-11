@@ -103,7 +103,7 @@ module-evm-accounts = { path = "../../modules/evm-accounts", default-features = 
 module-evm-bridge = { path = "../../modules/evm-bridge", default-features = false }
 module-evm-rpc-runtime-api = { path = "../../modules/evm/rpc/runtime_api",  default-features = false }
 module-evm-utility = { path = "../../modules/evm-utility", default-features = false }
-module-honzon = { path = "../../modules/honzon", default-features = false }
+module-funan = { path = "../../modules/funan", default-features = false }
 module-loans = { path = "../../modules/loans", default-features = false }
 module-nft = { path = "../../modules/nft", default-features = false }
 module-prices = { path = "../../modules/prices", default-features = false }
@@ -213,7 +213,7 @@ std = [
 	"module-evm-accounts/std",
 	"module-evm-bridge/std",
 	"module-evm-utility/std",
-	"module-honzon/std",
+	"module-funan/std",
 	"module-loans/std",
 	"module-nft/std",
 	"module-prices/std",
@@ -321,7 +321,7 @@ try-runtime = [
 	"module-evm/try-runtime",
 	"module-evm-accounts/try-runtime",
 	"module-evm-bridge/try-runtime",
-	"module-honzon/try-runtime",
+	"module-funan/try-runtime",
 	"module-loans/try-runtime",
 	"module-nft/try-runtime",
 	"module-prices/try-runtime",

@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-//! Mocks for the honzon module.
+//! Mocks for the funan module.
 
 #![cfg(test)]
 
@@ -40,7 +40,7 @@ use sp_std::cell::RefCell;
 use support::mocks::MockStableAsset;
 use support::{AuctionManager, ExchangeRate, Price, PriceProvider, Rate, Ratio, SpecificJointsSwap};
 
-mod honzon {
+mod funan {
 	pub use super::super::*;
 }
 
@@ -283,7 +283,7 @@ construct_runtime!(
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
 		System: frame_system::{Pallet, Call, Storage, Config, Event<T>},
-		HonzonModule: honzon::{Pallet, Storage, Call, Event<T>},
+		FunanModule: funan::{Pallet, Storage, Call, Event<T>},
 		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>},
 		PalletBalances: pallet_balances::{Pallet, Call, Storage, Event<T>},
 		Currencies: orml_currencies::{Pallet, Call},

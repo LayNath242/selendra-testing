@@ -2,9 +2,9 @@
 
 pragma solidity ^0.8.0;
 
-import "./IHonzon.sol";
+import "./IFunan.sol";
 
-contract Honzon is IHonzon {
+contract Funan is IFunan {
     address constant private PRECOMPILE = address(0x0000000000000000000000000000000000000409);
 
     /**
@@ -15,7 +15,7 @@ contract Honzon is IHonzon {
     public
     override
     returns (bool) {
-        require(collateralAdjustment != 0 && debitAdjustment != 0, "Honzon: adjustment amounts are zero");
+        require(collateralAdjustment != 0 && debitAdjustment != 0, "Funan: adjustment amounts are zero");
 
         (bool success, bytes memory returnData) = PRECOMPILE.call(
             abi.encodeWithSignature(

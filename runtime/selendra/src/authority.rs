@@ -22,7 +22,7 @@ use crate::{
 	AccountId, AccountIdConversion, AuthoritysOriginIdMadala, BadOrigin, BlockNumber, DispatchResult, EnsureRoot,
 	EnsureRootOrHalfFinancialCouncil, EnsureRootOrHalfCouncil,
 	EnsureRootOrOneThirdsTechnicalCommittee, EnsureRootOrThreeFourthsCouncil,
-	EnsureRootOrTwoThirdsTechnicalCommittee, HonzonTreasuryPalletId, OneDay, Origin,
+	EnsureRootOrTwoThirdsTechnicalCommittee, FunanTreasuryPalletId, OneDay, Origin,
 	OriginCaller, SevenDays, TreasuryPalletId, TreasuryReservePalletId, ZeroDay, HOURS,
 };
 pub use frame_support::traits::{schedule::Priority, EnsureOrigin, OriginTrait};
@@ -81,8 +81,8 @@ impl orml_authority::AsOriginId<Origin, OriginCaller> for AuthoritysOriginIdMada
 			AuthoritysOriginIdMadala::Treasury => Origin::signed(TreasuryPalletId::get().into_account_truncating())
 				.caller()
 				.clone(),
-			AuthoritysOriginIdMadala::HonzonTreasury => {
-				Origin::signed(HonzonTreasuryPalletId::get().into_account_truncating())
+			AuthoritysOriginIdMadala::FunanTreasury => {
+				Origin::signed(FunanTreasuryPalletId::get().into_account_truncating())
 					.caller()
 					.clone()
 			}
@@ -109,7 +109,7 @@ impl orml_authority::AsOriginId<Origin, OriginCaller> for AuthoritysOriginIdMada
 				>>::ensure_origin(origin)
 				.map_or_else(|_| Err(BadOrigin.into()), |_| Ok(()))
 			}
-			AuthoritysOriginIdMadala::HonzonTreasury => {
+			AuthoritysOriginIdMadala::FunanTreasury => {
 				<EnsureDelayed<OneDay, EnsureRootOrHalfFinancialCouncil, BlockNumber, OriginCaller> as EnsureOrigin<
 					Origin,
 				>>::ensure_origin(origin)
