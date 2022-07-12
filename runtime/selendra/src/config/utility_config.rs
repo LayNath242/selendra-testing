@@ -1,10 +1,11 @@
 use crate::{
-	Runtime, Event, Call, OriginCaller, Balance, millicent, SEL, ConstU16, ConstU32, config::evm_config::EvmTask,
-	ProxyType, cent, dollar, deposit, parameter_types, RuntimeDebug, Balances, DispatchableTask, Weight, AccountIndex,
-	RuntimeBlockWeights, InstanceFilter, BlakeTwo256
+	cent, config::evm_config::EvmTask, deposit, dollar, millicent, parameter_types, AccountIndex,
+	Balance, Balances, BlakeTwo256, Call, ConstU16, ConstU32, DispatchableTask, Event,
+	InstanceFilter, OriginCaller, ProxyType, Runtime, RuntimeBlockWeights, RuntimeDebug, Weight,
+	SEL,
 };
-use primitives::{define_combined_task, task::TaskResult};
 use codec::{Decode, Encode};
+use primitives::{define_combined_task, task::TaskResult};
 use scale_info::TypeInfo;
 
 impl pallet_utility::Config for Runtime {
@@ -77,7 +78,6 @@ impl pallet_indices::Config for Runtime {
 	type WeightInfo = ();
 }
 
-
 parameter_types! {
 	// One storage item; key size 32, value size 8; .
 	pub ProxyDepositBase: Balance = deposit(1, 8);
@@ -95,57 +95,57 @@ impl InstanceFilter<Call> for ProxyType {
 			// otherwise `BadOrigin` will be returned in Call::Utility.
 			_ if matches!(c, Call::Utility(..)) => true,
 			ProxyType::Any => true,
-			ProxyType::CancelProxy => matches!(c, Call::Proxy(pallet_proxy::Call::reject_announcement { .. })),
+			ProxyType::CancelProxy =>
+				matches!(c, Call::Proxy(pallet_proxy::Call::reject_announcement { .. })),
 			ProxyType::Governance => {
 				matches!(
 					c,
-					Call::Authority(..)
-						| Call::Democracy(..) | Call::PhragmenElection(..)
-						| Call::Council(..)
-						| Call::FinancialCouncil(..)
-						| Call::TechnicalCommittee(..)
-						| Call::Treasury(..) | Call::Bounties(..)
-						| Call::Tips(..)
+					Call::Authority(..) |
+						Call::Democracy(..) | Call::PhragmenElection(..) |
+						Call::Council(..) | Call::FinancialCouncil(..) |
+						Call::TechnicalCommittee(..) |
+						Call::Treasury(..) | Call::Bounties(..) |
+						Call::Tips(..)
 				)
-			}
+			},
 			ProxyType::Auction => {
 				matches!(c, Call::Auction(orml_auction::Call::bid { .. }))
-			}
+			},
 			ProxyType::Swap => {
 				matches!(
 					c,
-					Call::Dex(module_dex::Call::swap_with_exact_supply { .. })
-						| Call::Dex(module_dex::Call::swap_with_exact_target { .. })
+					Call::Dex(module_dex::Call::swap_with_exact_supply { .. }) |
+						Call::Dex(module_dex::Call::swap_with_exact_target { .. })
 				)
-			}
+			},
 			ProxyType::Loan => {
 				matches!(
 					c,
-					Call::Funan(module_funan::Call::adjust_loan { .. })
-						| Call::Funan(module_funan::Call::close_loan_has_debit_by_dex { .. })
-						| Call::Funan(module_funan::Call::adjust_loan_by_debit_value { .. })
-						| Call::Funan(module_funan::Call::transfer_debit { .. })
+					Call::Funan(module_funan::Call::adjust_loan { .. }) |
+						Call::Funan(module_funan::Call::close_loan_has_debit_by_dex { .. }) |
+						Call::Funan(module_funan::Call::adjust_loan_by_debit_value { .. }) |
+						Call::Funan(module_funan::Call::transfer_debit { .. })
 				)
-			}
+			},
 			ProxyType::DexLiquidity => {
 				matches!(
 					c,
-					Call::Dex(module_dex::Call::add_liquidity { .. })
-						| Call::Dex(module_dex::Call::remove_liquidity { .. })
+					Call::Dex(module_dex::Call::add_liquidity { .. }) |
+						Call::Dex(module_dex::Call::remove_liquidity { .. })
 				)
-			}
+			},
 			ProxyType::StableAssetSwap => {
 				matches!(c, Call::StableAsset(module_stable_asset::Call::swap { .. }))
-			}
+			},
 			ProxyType::StableAssetLiquidity => {
 				matches!(
 					c,
-					Call::StableAsset(module_stable_asset::Call::mint { .. })
-						| Call::StableAsset(module_stable_asset::Call::redeem_proportion { .. })
-						| Call::StableAsset(module_stable_asset::Call::redeem_single { .. })
-						| Call::StableAsset(module_stable_asset::Call::redeem_multi { .. })
+					Call::StableAsset(module_stable_asset::Call::mint { .. }) |
+						Call::StableAsset(module_stable_asset::Call::redeem_proportion { .. }) |
+						Call::StableAsset(module_stable_asset::Call::redeem_single { .. }) |
+						Call::StableAsset(module_stable_asset::Call::redeem_multi { .. })
 				)
-			}
+			},
 		}
 	}
 	fn is_superset(&self, o: &Self) -> bool {

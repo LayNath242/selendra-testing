@@ -34,12 +34,11 @@ use frame_system::pallet_prelude::*;
 use orml_traits::{DataFeeder, DataProvider, GetByKey, MultiCurrency};
 use primitives::{Balance, CurrencyId};
 use sp_core::U256;
-use sp_runtime::{
-	traits::CheckedMul,
-	FixedPointNumber,
-};
+use sp_runtime::{traits::CheckedMul, FixedPointNumber};
 use sp_std::marker::PhantomData;
-use support::{DEXManager, Erc20InfoMapping, ExchangeRateProvider, LockablePrice, Price, PriceProvider};
+use support::{
+	DEXManager, Erc20InfoMapping, ExchangeRateProvider, LockablePrice, Price, PriceProvider,
+};
 
 mod mock;
 mod tests;
@@ -57,7 +56,8 @@ pub mod module {
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
 		/// The data source, such as Oracle.
-		type Source: DataProvider<CurrencyId, Price> + DataFeeder<CurrencyId, Price, Self::AccountId>;
+		type Source: DataProvider<CurrencyId, Price>
+			+ DataFeeder<CurrencyId, Price, Self::AccountId>;
 
 		/// The stable currency id, it should be KUSD in Selendra.
 		#[pallet::constant]
@@ -111,10 +111,7 @@ pub mod module {
 	#[pallet::generate_deposit(pub(crate) fn deposit_event)]
 	pub enum Event<T: Config> {
 		/// Lock price.
-		LockPrice {
-			currency_id: CurrencyId,
-			locked_price: Price,
-		},
+		LockPrice { currency_id: CurrencyId, locked_price: Price },
 		/// Unlock price.
 		UnlockPrice { currency_id: CurrencyId },
 	}
@@ -180,30 +177,36 @@ impl<T: Config> Pallet<T> {
 			Some(T::StableCurrencyFixedPrice::get())
 		} else if currency_id == T::GetLiquidCurrencyId::get() {
 			// directly return real-time the multiple of the price of StakingCurrencyId and the exchange rate
-			return Self::access_price(T::GetNativeCurrencyId::get())
-				.and_then(|n| n.checked_mul(&T::LiquidNativeExchangeRateProvider::get_exchange_rate()));
+			return Self::access_price(T::GetNativeCurrencyId::get()).and_then(|n| {
+				n.checked_mul(&T::LiquidNativeExchangeRateProvider::get_exchange_rate())
+			})
 		} else if let CurrencyId::DexShare(dex_share_0, dex_share_1) = currency_id {
 			let token_0: CurrencyId = dex_share_0.into();
 			let token_1: CurrencyId = dex_share_1.into();
 
 			// directly return the fair price
 			return {
-				if let (Some(price_0), Some(price_1)) = (Self::access_price(token_0), Self::access_price(token_1)) {
+				if let (Some(price_0), Some(price_1)) =
+					(Self::access_price(token_0), Self::access_price(token_1))
+				{
 					let (pool_0, pool_1) = T::DEX::get_liquidity_pool(token_0, token_1);
 					let total_shares = T::Currency::total_issuance(currency_id);
 					lp_token_fair_price(total_shares, pool_0, pool_1, price_0, price_1)
 				} else {
 					None
 				}
-			};
+			}
 		} else {
 			// get real-time price from oracle
 			T::Source::get(&currency_id)
 		};
 
-		let maybe_adjustment_multiplier = 10u128.checked_pow(T::Erc20InfoMapping::decimals(currency_id)?.into());
+		let maybe_adjustment_multiplier =
+			10u128.checked_pow(T::Erc20InfoMapping::decimals(currency_id)?.into());
 
-		if let (Some(price), Some(adjustment_multiplier)) = (maybe_price, maybe_adjustment_multiplier) {
+		if let (Some(price), Some(adjustment_multiplier)) =
+			(maybe_price, maybe_adjustment_multiplier)
+		{
 			// return the price for 1 basic unit
 			Price::checked_from_rational(price.into_inner(), adjustment_multiplier)
 		} else {
@@ -217,10 +220,7 @@ impl<T: Config> LockablePrice<CurrencyId> for Pallet<T> {
 	fn lock_price(currency_id: CurrencyId) -> DispatchResult {
 		let price = Self::access_price(currency_id).ok_or(Error::<T>::AccessPriceFailed)?;
 		LockedPrice::<T>::insert(currency_id, price);
-		Pallet::<T>::deposit_event(Event::LockPrice {
-			currency_id,
-			locked_price: price,
-		});
+		Pallet::<T>::deposit_event(Event::LockPrice { currency_id, locked_price: price });
 		Ok(())
 	}
 

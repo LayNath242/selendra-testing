@@ -1,6 +1,7 @@
 use super::{
-	PrecompileCallerFilter, is_system_contract, Weight, Convert, gas_to_weight_ratio, H160, PhantomData, DispatchClass,
-	Get, BTreeMap, GenesisAccount, Nonce, dollar, SEL, Bytes, Balance
+	dollar, gas_to_weight_ratio, is_system_contract, BTreeMap, Balance, Bytes, Convert,
+	DispatchClass, GenesisAccount, Get, Nonce, PhantomData, PrecompileCallerFilter, Weight, H160,
+	SEL,
 };
 
 #[cfg(feature = "std")]
@@ -54,7 +55,8 @@ where
 #[cfg(feature = "std")]
 /// Returns `evm_genesis_accounts`
 pub fn evm_genesis(evm_accounts: Vec<H160>) -> BTreeMap<H160, GenesisAccount<Balance, Nonce>> {
-	let contracts_json = &include_bytes!("../../../predeploy-contracts/resources/bytecodes.json")[..];
+	let contracts_json =
+		&include_bytes!("../../../predeploy-contracts/resources/bytecodes.json")[..];
 	let contracts: Vec<(String, String, String)> = serde_json::from_slice(contracts_json).unwrap();
 	let mut accounts = BTreeMap::new();
 	for (_, address, code_string) in contracts {

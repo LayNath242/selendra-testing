@@ -31,8 +31,7 @@
 
 use frame_support::{log, pallet_prelude::*, transactional, PalletId};
 use frame_system::pallet_prelude::*;
-use module_stable_asset::traits::StableAsset;
-use module_stable_asset::RedeemProportionResult;
+use module_stable_asset::{traits::StableAsset, RedeemProportionResult};
 use orml_traits::{MultiCurrency, MultiCurrencyExtended};
 use primitives::{Balance, CurrencyId};
 use sp_runtime::{
@@ -40,7 +39,9 @@ use sp_runtime::{
 	ArithmeticError, DispatchError, DispatchResult, FixedPointNumber,
 };
 use sp_std::prelude::*;
-use support::{AuctionManager, CDPTreasury, CDPTreasuryExtended, DEXManager, Ratio, Swap, SwapLimit};
+use support::{
+	AuctionManager, CDPTreasury, CDPTreasuryExtended, DEXManager, Ratio, Swap, SwapLimit,
+};
 
 mod mock;
 mod tests;
@@ -62,14 +63,22 @@ pub mod module {
 		type UpdateOrigin: EnsureOrigin<Self::Origin>;
 
 		/// The Currency for managing assets related to CDP
-		type Currency: MultiCurrencyExtended<Self::AccountId, CurrencyId = CurrencyId, Balance = Balance>;
+		type Currency: MultiCurrencyExtended<
+			Self::AccountId,
+			CurrencyId = CurrencyId,
+			Balance = Balance,
+		>;
 
 		/// Stablecoin currency id
 		#[pallet::constant]
 		type GetStableCurrencyId: Get<CurrencyId>;
 
 		/// Auction manager creates auction to handle system surplus and debit
-		type AuctionManagerHandler: AuctionManager<Self::AccountId, CurrencyId = CurrencyId, Balance = Balance>;
+		type AuctionManagerHandler: AuctionManager<
+			Self::AccountId,
+			CurrencyId = CurrencyId,
+			Balance = Balance,
+		>;
 
 		/// Dex manager
 		type DEX: DEXManager<Self::AccountId, Balance, CurrencyId>;
@@ -122,10 +131,7 @@ pub mod module {
 	pub enum Event<T: Config> {
 		/// The expected amount size for per lot collateral auction of specific collateral type
 		/// updated.
-		ExpectedCollateralAuctionSizeUpdated {
-			collateral_type: CurrencyId,
-			new_size: Balance,
-		},
+		ExpectedCollateralAuctionSizeUpdated { collateral_type: CurrencyId, new_size: Balance },
 	}
 
 	/// The expected amount size for per lot collateral auction of specific
@@ -134,7 +140,8 @@ pub mod module {
 	/// ExpectedCollateralAuctionSize: map CurrencyId => Balance
 	#[pallet::storage]
 	#[pallet::getter(fn expected_collateral_auction_size)]
-	pub type ExpectedCollateralAuctionSize<T: Config> = StorageMap<_, Twox64Concat, CurrencyId, Balance, ValueQuery>;
+	pub type ExpectedCollateralAuctionSize<T: Config> =
+		StorageMap<_, Twox64Concat, CurrencyId, Balance, ValueQuery>;
 
 	/// Current total debit value of system. It's not same as debit in CDP
 	/// engine, it is the bad debt of the system.
@@ -153,11 +160,9 @@ pub mod module {
 	#[pallet::genesis_build]
 	impl<T: Config> GenesisBuild<T> for GenesisConfig {
 		fn build(&self) {
-			self.expected_collateral_auction_size
-				.iter()
-				.for_each(|(currency_id, size)| {
-					ExpectedCollateralAuctionSize::<T>::insert(currency_id, size);
-				});
+			self.expected_collateral_auction_size.iter().for_each(|(currency_id, size)| {
+				ExpectedCollateralAuctionSize::<T>::insert(currency_id, size);
+			});
 		}
 	}
 
@@ -177,7 +182,10 @@ pub mod module {
 	impl<T: Config> Pallet<T> {
 		#[pallet::weight(T::WeightInfo::extract_surplus_to_treasury())]
 		#[transactional]
-		pub fn extract_surplus_to_treasury(origin: OriginFor<T>, #[pallet::compact] amount: Balance) -> DispatchResult {
+		pub fn extract_surplus_to_treasury(
+			origin: OriginFor<T>,
+			#[pallet::compact] amount: Balance,
+		) -> DispatchResult {
 			T::UpdateOrigin::ensure_origin(origin)?;
 			T::Currency::transfer(
 				T::GetStableCurrencyId::get(),
@@ -212,13 +220,14 @@ pub mod module {
 			splited: bool,
 		) -> DispatchResultWithPostInfo {
 			T::UpdateOrigin::ensure_origin(origin)?;
-			let created_auctions = <Self as CDPTreasuryExtended<T::AccountId>>::create_collateral_auctions(
-				currency_id,
-				amount,
-				target,
-				Self::account_id(),
-				splited,
-			)?;
+			let created_auctions =
+				<Self as CDPTreasuryExtended<T::AccountId>>::create_collateral_auctions(
+					currency_id,
+					amount,
+					target,
+					Self::account_id(),
+					splited,
+				)?;
 			Ok(Some(T::WeightInfo::auction_collateral(created_auctions)).into())
 		}
 
@@ -293,7 +302,11 @@ impl<T: Config> Pallet<T> {
 
 		// Burn the amount that is equal to offset amount of stable currency.
 		if !offset_amount.is_zero() {
-			let res = T::Currency::withdraw(T::GetStableCurrencyId::get(), &Self::account_id(), offset_amount);
+			let res = T::Currency::withdraw(
+				T::GetStableCurrencyId::get(),
+				&Self::account_id(),
+				offset_amount,
+			);
 			match res {
 				Ok(_) => {
 					DebitPool::<T>::mutate(|debit| {
@@ -301,14 +314,14 @@ impl<T: Config> Pallet<T> {
 							.checked_sub(offset_amount)
 							.expect("offset = min(debit, surplus); qed")
 					});
-				}
+				},
 				Err(e) => {
 					log::warn!(
 						target: "cdp-treasury",
 						"get_swap_supply_amount: Attempt to burn surplus {:?} failed: {:?}, this is unexpected but should be safe",
 						offset_amount, e
 					);
-				}
+				},
 			}
 		}
 	}
@@ -368,11 +381,19 @@ impl<T: Config> CDPTreasury<T::AccountId> for Pallet<T> {
 		T::Currency::transfer(T::GetStableCurrencyId::get(), &Self::account_id(), to, surplus)
 	}
 
-	fn deposit_collateral(from: &T::AccountId, currency_id: Self::CurrencyId, amount: Self::Balance) -> DispatchResult {
+	fn deposit_collateral(
+		from: &T::AccountId,
+		currency_id: Self::CurrencyId,
+		amount: Self::Balance,
+	) -> DispatchResult {
 		T::Currency::transfer(currency_id, from, &Self::account_id(), amount)
 	}
 
-	fn withdraw_collateral(to: &T::AccountId, currency_id: Self::CurrencyId, amount: Self::Balance) -> DispatchResult {
+	fn withdraw_collateral(
+		to: &T::AccountId,
+		currency_id: Self::CurrencyId,
+		amount: Self::Balance,
+	) -> DispatchResult {
 		T::Currency::transfer(currency_id, &Self::account_id(), to, amount)
 	}
 }
@@ -395,8 +416,9 @@ impl<T: Config> CDPTreasuryExtended<T::AccountId> for Pallet<T> {
 
 		if collateral_in_auction {
 			ensure!(
-				Self::total_collaterals(currency_id) >= supply_limit
-					&& T::AuctionManagerHandler::get_total_collateral_in_auction(currency_id) >= supply_limit,
+				Self::total_collaterals(currency_id) >= supply_limit &&
+					T::AuctionManagerHandler::get_total_collateral_in_auction(currency_id) >=
+						supply_limit,
 				Error::<T>::CollateralNotEnough,
 			);
 		} else {
@@ -408,15 +430,13 @@ impl<T: Config> CDPTreasuryExtended<T::AccountId> for Pallet<T> {
 
 		match currency_id {
 			CurrencyId::StableAssetPoolToken(stable_asset_id) => {
-				let pool_info = T::StableAsset::pool(stable_asset_id).ok_or(Error::<T>::CannotSwap)?;
-				let updated_balance_info =
-					T::StableAsset::get_balance_update_amount(&pool_info).ok_or(Error::<T>::CannotSwap)?;
-				let yield_info =
-					T::StableAsset::get_collect_yield_amount(&updated_balance_info).ok_or(Error::<T>::CannotSwap)?;
-				ensure!(
-					yield_info.total_supply >= pool_info.total_supply,
-					Error::<T>::CannotSwap,
-				);
+				let pool_info =
+					T::StableAsset::pool(stable_asset_id).ok_or(Error::<T>::CannotSwap)?;
+				let updated_balance_info = T::StableAsset::get_balance_update_amount(&pool_info)
+					.ok_or(Error::<T>::CannotSwap)?;
+				let yield_info = T::StableAsset::get_collect_yield_amount(&updated_balance_info)
+					.ok_or(Error::<T>::CannotSwap)?;
+				ensure!(yield_info.total_supply >= pool_info.total_supply, Error::<T>::CannotSwap,);
 				let RedeemProportionResult { amounts, .. } =
 					T::StableAsset::get_redeem_proportion_amount(&yield_info, supply_limit)
 						.ok_or(Error::<T>::CannotSwap)?;
@@ -444,15 +464,22 @@ impl<T: Config> CDPTreasuryExtended<T::AccountId> for Pallet<T> {
 							T::GetStableCurrencyId::get(),
 							swap_limit,
 						)?;
-						supply_sum = supply_sum.checked_add(response.0).ok_or(ArithmeticError::Overflow)?;
-						target_sum = target_sum.checked_add(response.1).ok_or(ArithmeticError::Overflow)?;
+						supply_sum =
+							supply_sum.checked_add(response.0).ok_or(ArithmeticError::Overflow)?;
+						target_sum =
+							target_sum.checked_add(response.1).ok_or(ArithmeticError::Overflow)?;
 					}
 				}
 
 				ensure!(target_sum >= target_limit, Error::<T>::CannotSwap);
 				Ok((supply_sum, target_sum))
-			}
-			_ => T::Swap::swap(&Self::account_id(), currency_id, T::GetStableCurrencyId::get(), limit),
+			},
+			_ => T::Swap::swap(
+				&Self::account_id(),
+				currency_id,
+				T::GetStableCurrencyId::get(),
+				limit,
+			),
 		}
 	}
 
@@ -472,10 +499,10 @@ impl<T: Config> CDPTreasuryExtended<T::AccountId> for Pallet<T> {
 		let mut unhandled_target = target;
 		let expected_collateral_auction_size = Self::expected_collateral_auction_size(currency_id);
 		let max_auctions_count: Balance = T::MaxAuctionsCount::get().into();
-		let lots_count = if !splited
-			|| max_auctions_count.is_zero()
-			|| expected_collateral_auction_size.is_zero()
-			|| amount <= expected_collateral_auction_size
+		let lots_count = if !splited ||
+			max_auctions_count.is_zero() ||
+			expected_collateral_auction_size.is_zero() ||
+			amount <= expected_collateral_auction_size
 		{
 			One::one()
 		} else {
@@ -491,8 +518,10 @@ impl<T: Config> CDPTreasuryExtended<T::AccountId> for Pallet<T> {
 			}
 			sp_std::cmp::min(count, max_auctions_count)
 		};
-		let average_amount_per_lot = amount.checked_div(lots_count).expect("lots count is at least 1; qed");
-		let average_target_per_lot = target.checked_div(lots_count).expect("lots count is at least 1; qed");
+		let average_amount_per_lot =
+			amount.checked_div(lots_count).expect("lots count is at least 1; qed");
+		let average_target_per_lot =
+			target.checked_div(lots_count).expect("lots count is at least 1; qed");
 		let mut created_lots: Balance = Zero::zero();
 
 		while !unhandled_collateral_amount.is_zero() {
@@ -511,10 +540,12 @@ impl<T: Config> CDPTreasuryExtended<T::AccountId> for Pallet<T> {
 				lot_target,
 			)?;
 
-			unhandled_collateral_amount = unhandled_collateral_amount.saturating_sub(lot_collateral_amount);
+			unhandled_collateral_amount =
+				unhandled_collateral_amount.saturating_sub(lot_collateral_amount);
 			unhandled_target = unhandled_target.saturating_sub(lot_target);
 		}
-		let created_auctions: u32 = created_lots.try_into().map_err(|_| ArithmeticError::Overflow)?;
+		let created_auctions: u32 =
+			created_lots.try_into().map_err(|_| ArithmeticError::Overflow)?;
 		Ok(created_auctions)
 	}
 
@@ -522,9 +553,8 @@ impl<T: Config> CDPTreasuryExtended<T::AccountId> for Pallet<T> {
 		lp_currency_id: CurrencyId,
 		amount: Balance,
 	) -> sp_std::result::Result<(Balance, Balance), DispatchError> {
-		let (currency_id_0, currency_id_1) = lp_currency_id
-			.split_dex_share_currency_id()
-			.ok_or(Error::<T>::NotDexShare)?;
+		let (currency_id_0, currency_id_1) =
+			lp_currency_id.split_dex_share_currency_id().ok_or(Error::<T>::NotDexShare)?;
 		T::DEX::remove_liquidity(
 			&Self::account_id(),
 			currency_id_0,

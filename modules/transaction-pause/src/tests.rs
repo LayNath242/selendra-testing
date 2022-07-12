@@ -27,11 +27,8 @@ use sp_runtime::traits::BadOrigin;
 
 const BALANCE_TRANSFER: &<Runtime as frame_system::Config>::Call =
 	&mock::Call::Balances(pallet_balances::Call::transfer { dest: ALICE, value: 10 });
-const TOKENS_TRANSFER: &<Runtime as frame_system::Config>::Call = &mock::Call::Tokens(orml_tokens::Call::transfer {
-	dest: ALICE,
-	currency_id: KUSD,
-	amount: 10,
-});
+const TOKENS_TRANSFER: &<Runtime as frame_system::Config>::Call =
+	&mock::Call::Tokens(orml_tokens::Call::transfer { dest: ALICE, currency_id: KUSD, amount: 10 });
 
 #[test]
 fn pause_transaction_work() {
@@ -39,7 +36,11 @@ fn pause_transaction_work() {
 		System::set_block_number(1);
 
 		assert_noop!(
-			TransactionPause::pause_transaction(Origin::signed(5), b"Balances".to_vec(), b"transfer".to_vec()),
+			TransactionPause::pause_transaction(
+				Origin::signed(5),
+				b"Balances".to_vec(),
+				b"transfer".to_vec()
+			),
 			BadOrigin
 		);
 
@@ -101,7 +102,11 @@ fn unpause_transaction_work() {
 		);
 
 		assert_noop!(
-			TransactionPause::unpause_transaction(Origin::signed(5), b"Balances".to_vec(), b"transfer".to_vec()),
+			TransactionPause::unpause_transaction(
+				Origin::signed(5),
+				b"Balances".to_vec(),
+				b"transfer".to_vec()
+			),
 			BadOrigin
 		);
 

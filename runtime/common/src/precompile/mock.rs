@@ -23,8 +23,8 @@ use codec::{Decode, Encode, MaxEncodedLen};
 use frame_support::{
 	ord_parameter_types, parameter_types,
 	traits::{
-		ConstU128, ConstU32, ConstU64, EqualPrivilegeOnly, Everything, InstanceFilter, Nothing, OnFinalize,
-		OnInitialize, SortedMembers,
+		ConstU128, ConstU32, ConstU64, EqualPrivilegeOnly, Everything, InstanceFilter, Nothing,
+		OnFinalize, OnInitialize, SortedMembers,
 	},
 	weights::IdentityFee,
 	PalletId, RuntimeDebug,
@@ -34,22 +34,25 @@ use module_cdp_engine::CollateralCurrencyIds;
 use module_evm::{EvmChainId, EvmTask};
 use module_evm_accounts::EvmAddressMapping;
 use module_support::{
-	mocks::MockStableAsset, AddressMapping as AddressMappingT, AuctionManager, DEXIncentives, DispatchableTask,
-	EmergencyShutdown, ExchangeRate, ExchangeRateProvider, PoolId, PriceProvider, Rate,
-	SpecificJointsSwap,
+	mocks::MockStableAsset, AddressMapping as AddressMappingT, AuctionManager, DEXIncentives,
+	DispatchableTask, EmergencyShutdown, ExchangeRate, ExchangeRateProvider, PoolId, PriceProvider,
+	Rate, SpecificJointsSwap,
 };
 use orml_traits::{parameter_type_with_key, MultiReservableCurrency};
 pub use primitives::{
 	define_combined_task,
 	evm::{convert_decimals_to_evm, EvmAddress},
 	task::TaskResult,
-	Address, Amount, AuctionId, BlockNumber, CurrencyId, DexShare, EraIndex, Header, Lease, Moment, Nonce,
-	ReserveIdentifier, Signature, TokenSymbol, TradingPair,
+	Address, Amount, AuctionId, BlockNumber, CurrencyId, DexShare, EraIndex, Header, Lease, Moment,
+	Nonce, ReserveIdentifier, Signature, TokenSymbol, TradingPair,
 };
 use scale_info::TypeInfo;
 use sp_core::{H160, H256};
 use sp_runtime::{
-	traits::{AccountIdConversion, BlakeTwo256, BlockNumberProvider, Convert, IdentityLookup, One as OneT, Zero},
+	traits::{
+		AccountIdConversion, BlakeTwo256, BlockNumberProvider, Convert, IdentityLookup,
+		One as OneT, Zero,
+	},
 	AccountId32, DispatchResult, FixedPointNumber, FixedU128, Perbill, Percent, Permill,
 };
 use sp_std::prelude::*;
@@ -280,7 +283,19 @@ impl module_transaction_payment::Config for Test {
 	type DefaultFeeTokens = DefaultFeeTokens;
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, RuntimeDebug, MaxEncodedLen, TypeInfo)]
+#[derive(
+	Copy,
+	Clone,
+	Eq,
+	PartialEq,
+	Ord,
+	PartialOrd,
+	Encode,
+	Decode,
+	RuntimeDebug,
+	MaxEncodedLen,
+	TypeInfo,
+)]
 pub enum ProxyType {
 	Any,
 	JustTransfer,
@@ -295,7 +310,8 @@ impl InstanceFilter<Call> for ProxyType {
 	fn filter(&self, c: &Call) -> bool {
 		match self {
 			ProxyType::Any => true,
-			ProxyType::JustTransfer => matches!(c, Call::Balances(pallet_balances::Call::transfer { .. })),
+			ProxyType::JustTransfer =>
+				matches!(c, Call::Balances(pallet_balances::Call::transfer { .. })),
 			ProxyType::JustUtility => matches!(c, Call::Utility { .. }),
 		}
 	}
@@ -346,11 +362,19 @@ impl pallet_scheduler::Config for Test {
 
 pub struct MockDEXIncentives;
 impl DEXIncentives<AccountId, CurrencyId, Balance> for MockDEXIncentives {
-	fn do_deposit_dex_share(who: &AccountId, lp_currency_id: CurrencyId, amount: Balance) -> DispatchResult {
+	fn do_deposit_dex_share(
+		who: &AccountId,
+		lp_currency_id: CurrencyId,
+		amount: Balance,
+	) -> DispatchResult {
 		Tokens::reserve(lp_currency_id, who, amount)
 	}
 
-	fn do_withdraw_dex_share(who: &AccountId, lp_currency_id: CurrencyId, amount: Balance) -> DispatchResult {
+	fn do_withdraw_dex_share(
+		who: &AccountId,
+		lp_currency_id: CurrencyId,
+		amount: Balance,
+	) -> DispatchResult {
 		let _ = Tokens::unreserve(lp_currency_id, who, amount);
 		Ok(())
 	}
@@ -531,7 +555,8 @@ impl module_stable_asset::Config for Test {
 	type EnsurePoolAssetId = EnsurePoolAssetId;
 }
 
-pub type AdaptedBasicCurrency = module_currencies::BasicCurrencyAdapter<Test, Balances, Amount, BlockNumber>;
+pub type AdaptedBasicCurrency =
+	module_currencies::BasicCurrencyAdapter<Test, Balances, Amount, BlockNumber>;
 
 pub type EvmErc20InfoMapping = module_asset_registry::EvmErc20InfoMapping<Test>;
 
@@ -709,7 +734,8 @@ pub fn erc20_address_not_exists() -> EvmAddress {
 pub const INITIAL_BALANCE: Balance = 1_000_000_000_000;
 
 pub type SignedExtra = (frame_system::CheckWeight<Test>,);
-pub type UncheckedExtrinsic = sp_runtime::generic::UncheckedExtrinsic<Address, Call, Signature, SignedExtra>;
+pub type UncheckedExtrinsic =
+	sp_runtime::generic::UncheckedExtrinsic<Address, Call, Signature, SignedExtra>;
 pub type Block = sp_runtime::generic::Block<Header, UncheckedExtrinsic>;
 
 frame_support::construct_runtime!(
@@ -769,30 +795,19 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 
 	accounts.insert(
 		alice_evm_addr(),
-		module_evm::GenesisAccount {
-			nonce: 1,
-			balance: INITIAL_BALANCE,
-			..Default::default()
-		},
+		module_evm::GenesisAccount { nonce: 1, balance: INITIAL_BALANCE, ..Default::default() },
 	);
 	accounts.insert(
 		bob_evm_addr(),
-		module_evm::GenesisAccount {
-			nonce: 1,
-			balance: INITIAL_BALANCE,
-			..Default::default()
-		},
+		module_evm::GenesisAccount { nonce: 1, balance: INITIAL_BALANCE, ..Default::default() },
 	);
 
 	pallet_balances::GenesisConfig::<Test>::default()
 		.assimilate_storage(&mut storage)
 		.unwrap();
-	module_evm::GenesisConfig::<Test> {
-		chain_id: 595,
-		accounts,
-	}
-	.assimilate_storage(&mut storage)
-	.unwrap();
+	module_evm::GenesisConfig::<Test> { chain_id: 595, accounts }
+		.assimilate_storage(&mut storage)
+		.unwrap();
 	module_asset_registry::GenesisConfig::<Test> {
 		assets: vec![(SEL, ExistenceRequirement::get()), (RENBTC, 0)],
 	}
@@ -804,12 +819,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 		System::set_block_number(1);
 		Timestamp::set_timestamp(1);
 
-		assert_ok!(Currencies::update_balance(
-			Origin::root(),
-			ALICE,
-			RENBTC,
-			1_000_000_000_000
-		));
+		assert_ok!(Currencies::update_balance(Origin::root(), ALICE, RENBTC, 1_000_000_000_000));
 		assert_ok!(Currencies::update_balance(Origin::root(), ALICE, KUSD, 1_000_000_000));
 
 		assert_ok!(Currencies::update_balance(

@@ -31,8 +31,7 @@ use frame_support::{
 use frame_system::EnsureSignedBy;
 use orml_traits::parameter_type_with_key;
 use primitives::{evm::convert_decimals_to_evm, CurrencyId, ReserveIdentifier, TokenSymbol};
-use sp_core::H256;
-use sp_core::{H160, U256};
+use sp_core::{H160, H256, U256};
 use sp_runtime::{
 	testing::Header,
 	traits::{AccountIdConversion, IdentityLookup},
@@ -264,9 +263,18 @@ pub fn deploy_contracts() {
 		logs: vec![module_evm::Log {
 			address: H160::from_str("0x5dddfce53ee040d9eb21afbc0ae1bb4dbb0ba643").unwrap(),
 			topics: vec![
-				H256::from_str("0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef").unwrap(),
-				H256::from_str("0x0000000000000000000000000000000000000000000000000000000000000000").unwrap(),
-				H256::from_str("0x0000000000000000000000001000000000000000000000000000000000000001").unwrap(),
+				H256::from_str(
+					"0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+				)
+				.unwrap(),
+				H256::from_str(
+					"0x0000000000000000000000000000000000000000000000000000000000000000",
+				)
+				.unwrap(),
+				H256::from_str(
+					"0x0000000000000000000000001000000000000000000000000000000000000001",
+				)
+				.unwrap(),
 			],
 			data: {
 				let mut buf = [0u8; 32];
@@ -278,10 +286,7 @@ pub fn deploy_contracts() {
 		used_storage: 5462,
 	}));
 
-	assert_ok!(EVM::publish_free(
-		Origin::signed(CouncilAccount::get()),
-		erc20_address()
-	));
+	assert_ok!(EVM::publish_free(Origin::signed(CouncilAccount::get()), erc20_address()));
 }
 
 pub struct ExtBuilder {
@@ -310,9 +315,7 @@ impl ExtBuilder {
 	}
 
 	pub fn build(self) -> sp_io::TestExternalities {
-		let mut t = frame_system::GenesisConfig::default()
-			.build_storage::<Runtime>()
-			.unwrap();
+		let mut t = frame_system::GenesisConfig::default().build_storage::<Runtime>().unwrap();
 
 		pallet_balances::GenesisConfig::<Runtime> {
 			balances: self

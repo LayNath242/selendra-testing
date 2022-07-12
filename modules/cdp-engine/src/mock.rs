@@ -35,8 +35,7 @@ use sp_runtime::{
 	traits::{AccountIdConversion, IdentityLookup, One as OneT},
 };
 use sp_std::cell::RefCell;
-use support::mocks::MockStableAsset;
-use support::{AuctionManager, EmergencyShutdown, SpecificJointsSwap};
+use support::{mocks::MockStableAsset, AuctionManager, EmergencyShutdown, SpecificJointsSwap};
 
 pub type AccountId = u128;
 pub type BlockNumber = u64;
@@ -118,7 +117,8 @@ impl pallet_balances::Config for Runtime {
 	type ReserveIdentifier = [u8; 8];
 	type WeightInfo = ();
 }
-pub type AdaptedBasicCurrency = orml_currencies::BasicCurrencyAdapter<Runtime, PalletBalances, Amount, BlockNumber>;
+pub type AdaptedBasicCurrency =
+	orml_currencies::BasicCurrencyAdapter<Runtime, PalletBalances, Amount, BlockNumber>;
 
 parameter_types! {
 	pub const GetNativeCurrencyId: CurrencyId = SEL;
@@ -159,7 +159,7 @@ impl MockPriceSource {
 			DOT => DOT_PRICE.with(|v| *v.borrow_mut() = price),
 			LP_KUSD_DOT => LP_KUSD_DOT_PRICE.with(|v| *v.borrow_mut() = price),
 			LP_DOT_BTC => LP_DOT_BTC_PRICE.with(|v| *v.borrow_mut() = price),
-			_ => {}
+			_ => {},
 		}
 	}
 }
@@ -202,17 +202,11 @@ impl AuctionManager<AccountId> for MockAuctionManager {
 	}
 
 	fn get_total_target_in_auction() -> Self::Balance {
-		AUCTION
-			.with(|v| *v.borrow())
-			.map(|auction| auction.3)
-			.unwrap_or_default()
+		AUCTION.with(|v| *v.borrow()).map(|auction| auction.3).unwrap_or_default()
 	}
 
 	fn get_total_collateral_in_auction(_id: Self::CurrencyId) -> Self::Balance {
-		AUCTION
-			.with(|v| *v.borrow())
-			.map(|auction| auction.2)
-			.unwrap_or_default()
+		AUCTION.with(|v| *v.borrow()).map(|auction| auction.2).unwrap_or_default()
 	}
 }
 
@@ -380,21 +374,15 @@ impl Default for ExtBuilder {
 
 impl ExtBuilder {
 	pub fn build(self) -> sp_io::TestExternalities {
-		let mut t = frame_system::GenesisConfig::default()
-			.build_storage::<Runtime>()
+		let mut t = frame_system::GenesisConfig::default().build_storage::<Runtime>().unwrap();
+
+		pallet_balances::GenesisConfig::<Runtime> { balances: vec![(CAROL, 10000)] }
+			.assimilate_storage(&mut t)
 			.unwrap();
 
-		pallet_balances::GenesisConfig::<Runtime> {
-			balances: vec![(CAROL, 10000)],
-		}
-		.assimilate_storage(&mut t)
-		.unwrap();
-
-		orml_tokens::GenesisConfig::<Runtime> {
-			balances: self.balances,
-		}
-		.assimilate_storage(&mut t)
-		.unwrap();
+		orml_tokens::GenesisConfig::<Runtime> { balances: self.balances }
+			.assimilate_storage(&mut t)
+			.unwrap();
 
 		dex::GenesisConfig::<Runtime> {
 			initial_listing_trading_pairs: vec![],

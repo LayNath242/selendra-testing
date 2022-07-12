@@ -36,8 +36,7 @@ use sp_runtime::{
 };
 use sp_std::cell::RefCell;
 use std::collections::HashMap;
-use support::mocks::MockStableAsset;
-use support::{AuctionManager, RiskManager, SpecificJointsSwap};
+use support::{mocks::MockStableAsset, AuctionManager, RiskManager, SpecificJointsSwap};
 
 pub type AccountId = u128;
 pub type AuctionId = u32;
@@ -125,7 +124,8 @@ impl orml_currencies::Config for Runtime {
 	type GetNativeCurrencyId = GetNativeCurrencyId;
 	type WeightInfo = ();
 }
-pub type AdaptedBasicCurrency = orml_currencies::BasicCurrencyAdapter<Runtime, PalletBalances, Amount, BlockNumber>;
+pub type AdaptedBasicCurrency =
+	orml_currencies::BasicCurrencyAdapter<Runtime, PalletBalances, Amount, BlockNumber>;
 
 pub struct MockAuctionManager;
 impl AuctionManager<AccountId> for MockAuctionManager {
@@ -195,15 +195,14 @@ impl RiskManager<AccountId, CurrencyId, Balance, Balance> for MockRiskManager {
 		check_required_ratio: bool,
 	) -> DispatchResult {
 		match currency_id {
-			DOT => {
+			DOT =>
 				if check_required_ratio {
 					Err(sp_runtime::DispatchError::Other(
 						"mock below required collateral ratio error",
 					))
 				} else {
 					Err(sp_runtime::DispatchError::Other("mock below liquidation ratio error"))
-				}
-			}
+				},
 			BTC => Ok(()),
 			_ => Err(sp_runtime::DispatchError::Other("mock below liquidation ratio error")),
 		}
@@ -211,8 +210,10 @@ impl RiskManager<AccountId, CurrencyId, Balance, Balance> for MockRiskManager {
 
 	fn check_debit_cap(currency_id: CurrencyId, total_debit_balance: Balance) -> DispatchResult {
 		match (currency_id, total_debit_balance) {
-			(DOT, 1000) => Err(sp_runtime::DispatchError::Other("mock exceed debit value cap error")),
-			(BTC, 1000) => Err(sp_runtime::DispatchError::Other("mock exceed debit value cap error")),
+			(DOT, 1000) =>
+				Err(sp_runtime::DispatchError::Other("mock exceed debit value cap error")),
+			(BTC, 1000) =>
+				Err(sp_runtime::DispatchError::Other("mock exceed debit value cap error")),
 			(_, _) => Ok(()),
 		}
 	}
@@ -226,7 +227,8 @@ pub struct MockOnUpdateLoan;
 impl Happened<(AccountId, CurrencyId, Amount, Balance)> for MockOnUpdateLoan {
 	fn happened(info: &(AccountId, CurrencyId, Amount, Balance)) {
 		let (who, currency_id, adjustment, previous_amount) = info;
-		let adjustment_abs = TryInto::<Balance>::try_into(adjustment.saturating_abs()).unwrap_or_default();
+		let adjustment_abs =
+			TryInto::<Balance>::try_into(adjustment.saturating_abs()).unwrap_or_default();
 		let new_share_amount = if adjustment.is_positive() {
 			previous_amount.saturating_add(adjustment_abs)
 		} else {
@@ -293,14 +295,10 @@ impl Default for ExtBuilder {
 
 impl ExtBuilder {
 	pub fn build(self) -> sp_io::TestExternalities {
-		let mut t = frame_system::GenesisConfig::default()
-			.build_storage::<Runtime>()
+		let mut t = frame_system::GenesisConfig::default().build_storage::<Runtime>().unwrap();
+		orml_tokens::GenesisConfig::<Runtime> { balances: self.balances }
+			.assimilate_storage(&mut t)
 			.unwrap();
-		orml_tokens::GenesisConfig::<Runtime> {
-			balances: self.balances,
-		}
-		.assimilate_storage(&mut t)
-		.unwrap();
 		t.into()
 	}
 }

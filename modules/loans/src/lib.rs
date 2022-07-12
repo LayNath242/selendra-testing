@@ -96,11 +96,7 @@ pub mod module {
 			deduct_debit_amount: Balance,
 		},
 		/// Transfer loan.
-		TransferLoan {
-			from: T::AccountId,
-			to: T::AccountId,
-			currency_id: CurrencyId,
-		},
+		TransferLoan { from: T::AccountId, to: T::AccountId, currency_id: CurrencyId },
 	}
 
 	/// The collateralized debit positions, map from
@@ -109,8 +105,15 @@ pub mod module {
 	/// Positions: double_map CurrencyId, AccountId => Position
 	#[pallet::storage]
 	#[pallet::getter(fn positions)]
-	pub type Positions<T: Config> =
-		StorageDoubleMap<_, Twox64Concat, CurrencyId, Twox64Concat, T::AccountId, Position, ValueQuery>;
+	pub type Positions<T: Config> = StorageDoubleMap<
+		_,
+		Twox64Concat,
+		CurrencyId,
+		Twox64Concat,
+		T::AccountId,
+		Position,
+		ValueQuery,
+	>;
 
 	/// The total collateralized debit positions, map from
 	/// CollateralType -> Position
@@ -118,7 +121,8 @@ pub mod module {
 	/// TotalPositions: CurrencyId => Position
 	#[pallet::storage]
 	#[pallet::getter(fn total_positions)]
-	pub type TotalPositions<T: Config> = StorageMap<_, Twox64Concat, CurrencyId, Position, ValueQuery>;
+	pub type TotalPositions<T: Config> =
+		StorageMap<_, Twox64Concat, CurrencyId, Position, ValueQuery>;
 
 	#[pallet::pallet]
 	pub struct Pallet<T>(_);
@@ -150,7 +154,11 @@ impl<T: Config> Pallet<T> {
 		let debit_adjustment = Self::amount_try_from_balance(debit_decrease)?;
 
 		// transfer collateral to cdp treasury
-		T::CDPTreasury::deposit_collateral(&Self::account_id(), currency_id, collateral_confiscate)?;
+		T::CDPTreasury::deposit_collateral(
+			&Self::account_id(),
+			currency_id,
+			collateral_confiscate,
+		)?;
 
 		// deposit debit to cdp treasury
 		let bad_debt_value = T::RiskManager::get_debit_value(currency_id, debit_decrease);
@@ -187,14 +195,25 @@ impl<T: Config> Pallet<T> {
 		// Note: if a new position, will inc consumer
 		Self::update_loan(who, currency_id, collateral_adjustment, debit_adjustment)?;
 
-		let collateral_balance_adjustment = Self::balance_try_from_amount_abs(collateral_adjustment)?;
+		let collateral_balance_adjustment =
+			Self::balance_try_from_amount_abs(collateral_adjustment)?;
 		let debit_balance_adjustment = Self::balance_try_from_amount_abs(debit_adjustment)?;
 		let module_account = Self::account_id();
 
 		if collateral_adjustment.is_positive() {
-			T::Currency::transfer(currency_id, who, &module_account, collateral_balance_adjustment)?;
+			T::Currency::transfer(
+				currency_id,
+				who,
+				&module_account,
+				collateral_balance_adjustment,
+			)?;
 		} else if collateral_adjustment.is_negative() {
-			T::Currency::transfer(currency_id, &module_account, who, collateral_balance_adjustment)?;
+			T::Currency::transfer(
+				currency_id,
+				&module_account,
+				who,
+				collateral_balance_adjustment,
+			)?;
 		}
 
 		if debit_adjustment.is_positive() {
@@ -229,14 +248,16 @@ impl<T: Config> Pallet<T> {
 	}
 
 	/// transfer whole loan of `from` to `to`
-	pub fn transfer_loan(from: &T::AccountId, to: &T::AccountId, currency_id: CurrencyId) -> DispatchResult {
+	pub fn transfer_loan(
+		from: &T::AccountId,
+		to: &T::AccountId,
+		currency_id: CurrencyId,
+	) -> DispatchResult {
 		// get `from` position data
 		let Position { collateral, debit } = Self::positions(currency_id, from);
 
-		let Position {
-			collateral: to_collateral,
-			debit: to_debit,
-		} = Self::positions(currency_id, to);
+		let Position { collateral: to_collateral, debit: to_debit } =
+			Self::positions(currency_id, to);
 		let new_to_collateral_balance = to_collateral
 			.checked_add(collateral)
 			.expect("existing collateral balance cannot overflow; qed");
@@ -245,7 +266,12 @@ impl<T: Config> Pallet<T> {
 			.expect("existing debit balance cannot overflow; qed");
 
 		// check new position
-		T::RiskManager::check_position_valid(currency_id, new_to_collateral_balance, new_to_debit_balance, true)?;
+		T::RiskManager::check_position_valid(
+			currency_id,
+			new_to_collateral_balance,
+			new_to_debit_balance,
+			true,
+		)?;
 
 		// balance -> amount
 		let collateral_adjustment = Self::amount_try_from_balance(collateral)?;
@@ -280,13 +306,9 @@ impl<T: Config> Pallet<T> {
 		<Positions<T>>::try_mutate_exists(currency_id, who, |may_be_position| -> DispatchResult {
 			let mut p = may_be_position.take().unwrap_or_default();
 			let new_collateral = if collateral_adjustment.is_positive() {
-				p.collateral
-					.checked_add(collateral_balance)
-					.ok_or(ArithmeticError::Overflow)
+				p.collateral.checked_add(collateral_balance).ok_or(ArithmeticError::Overflow)
 			} else {
-				p.collateral
-					.checked_sub(collateral_balance)
-					.ok_or(ArithmeticError::Underflow)
+				p.collateral.checked_sub(collateral_balance).ok_or(ArithmeticError::Underflow)
 			}?;
 			let new_debit = if debit_adjustment.is_positive() {
 				p.debit.checked_add(debit_balance).ok_or(ArithmeticError::Overflow)
@@ -311,7 +333,12 @@ impl<T: Config> Pallet<T> {
 			// NOTE: but for SEL loans in Selendra, the debit amount was used before,
 			// and the data will been messed up, before migration or calibration,
 			// it is forbidden to turn on incentives for pool LoansIncentive(KSM).
-			T::OnUpdateLoan::happened(&(who.clone(), currency_id, collateral_adjustment, p.collateral));
+			T::OnUpdateLoan::happened(&(
+				who.clone(),
+				currency_id,
+				collateral_adjustment,
+				p.collateral,
+			));
 			p.collateral = new_collateral;
 			p.debit = new_debit;
 
@@ -374,6 +401,7 @@ impl<T: Config> Pallet<T> {
 
 	/// Convert the absolute value of `Amount` to `Balance`.
 	pub fn balance_try_from_amount_abs(a: Amount) -> Result<Balance, Error<T>> {
-		TryInto::<Balance>::try_into(a.saturating_abs()).map_err(|_| Error::<T>::AmountConvertFailed)
+		TryInto::<Balance>::try_into(a.saturating_abs())
+			.map_err(|_| Error::<T>::AmountConvertFailed)
 	}
 }

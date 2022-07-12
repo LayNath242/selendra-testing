@@ -76,13 +76,15 @@ pub mod module {
 
 	#[pallet::storage]
 	#[pallet::getter(fn bar)]
-	pub(crate) type Bar<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, T::Balance, ValueQuery>;
+	pub(crate) type Bar<T: Config> =
+		StorageMap<_, Blake2_128Concat, T::AccountId, T::Balance, ValueQuery>;
 
 	#[pallet::storage]
 	type Foo<T: Config> = StorageValue<_, T::Balance, ValueQuery, OnFooEmpty<T>>;
 
 	#[pallet::storage]
-	type Double<T: Config> = StorageDoubleMap<_, Blake2_128Concat, u32, Twox64Concat, u64, T::Balance, ValueQuery>;
+	type Double<T: Config> =
+		StorageDoubleMap<_, Blake2_128Concat, u32, Twox64Concat, u64, T::Balance, ValueQuery>;
 
 	#[pallet::genesis_config]
 	pub struct GenesisConfig<T: Config> {
@@ -132,7 +134,10 @@ pub mod module {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		#[pallet::weight(<T::Balance as Into<Weight>>::into(new_value.clone()))]
-		pub fn set_dummy(origin: OriginFor<T>, #[pallet::compact] new_value: T::Balance) -> DispatchResult {
+		pub fn set_dummy(
+			origin: OriginFor<T>,
+			#[pallet::compact] new_value: T::Balance,
+		) -> DispatchResult {
 			ensure_root(origin)?;
 
 			Dummy::<T>::put(&new_value);

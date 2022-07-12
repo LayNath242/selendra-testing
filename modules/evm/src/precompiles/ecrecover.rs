@@ -28,7 +28,10 @@ impl LinearCostPrecompile for ECRecover {
 	const BASE: u64 = 3000;
 	const WORD: u64 = 0;
 
-	fn execute(i: &[u8], _: u64) -> core::result::Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {
+	fn execute(
+		i: &[u8],
+		_: u64,
+	) -> core::result::Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {
 		let mut input = [0u8; 128];
 		input[..min(i.len(), 128)].copy_from_slice(&i[..min(i.len(), 128)]);
 
@@ -42,8 +45,8 @@ impl LinearCostPrecompile for ECRecover {
 		sig[64] = match input[63] {
 			v if v > 26 && input[32..63] == [0; 31] => v - 27,
 			_ => {
-				return Ok((ExitSucceed::Returned, [0u8; 0].to_vec()));
-			}
+				return Ok((ExitSucceed::Returned, [0u8; 0].to_vec()))
+			},
 		};
 
 		let result = match sp_io::crypto::secp256k1_ecdsa_recover(&sig, &msg) {
@@ -51,7 +54,7 @@ impl LinearCostPrecompile for ECRecover {
 				let mut address = sp_io::hashing::keccak_256(&pubkey);
 				address[0..12].copy_from_slice(&[0u8; 12]);
 				address.to_vec()
-			}
+			},
 			Err(_) => [0u8; 0].to_vec(),
 		};
 

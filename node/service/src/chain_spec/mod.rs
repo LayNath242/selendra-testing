@@ -78,4 +78,3 @@ fn testnet_accounts() -> Vec<AccountId> {
 		get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
 	]
 }
-

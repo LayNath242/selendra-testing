@@ -19,7 +19,9 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::all)]
 
-use primitives::evm::{AccessListItem, BlockLimits, CallInfo, CreateInfo, EstimateResourcesRequest};
+use primitives::evm::{
+	AccessListItem, BlockLimits, CallInfo, CreateInfo, EstimateResourcesRequest,
+};
 use sp_core::H160;
 use sp_runtime::{
 	codec::Codec,

@@ -27,10 +27,9 @@ use module_evm::{
 	runner::state::{PrecompileFailure, PrecompileOutput, PrecompileResult},
 	Context, ExitError, ExitRevert, ExitSucceed,
 };
+use module_stable_asset::{traits::StableAsset, WeightInfo};
 use module_support::Erc20InfoMapping;
 use num_enum::{IntoPrimitive, TryFromPrimitive};
-use module_stable_asset::traits::StableAsset;
-use module_stable_asset::WeightInfo;
 use primitives::{Balance, CurrencyId};
 use sp_core::H160;
 use sp_runtime::{traits::Convert, RuntimeDebug};
@@ -64,19 +63,24 @@ where
 		BlockNumber = Runtime::BlockNumber,
 	>,
 {
-	fn execute(input: &[u8], target_gas: Option<u64>, _context: &Context, _is_static: bool) -> PrecompileResult {
-		let input = Input::<Action, Runtime::AccountId, Runtime::AddressMapping, Runtime::Erc20InfoMapping>::new(
-			input,
-			target_gas_limit(target_gas),
-		);
+	fn execute(
+		input: &[u8],
+		target_gas: Option<u64>,
+		_context: &Context,
+		_is_static: bool,
+	) -> PrecompileResult {
+		let input = Input::<
+			Action,
+			Runtime::AccountId,
+			Runtime::AddressMapping,
+			Runtime::Erc20InfoMapping,
+		>::new(input, target_gas_limit(target_gas));
 
 		let mut gas_cost = Pricer::<Runtime>::cost(&input)?;
 
 		if let Some(gas_limit) = target_gas {
 			if gas_limit < gas_cost {
-				return Err(PrecompileFailure::Error {
-					exit_status: ExitError::OutOfGas,
-				});
+				return Err(PrecompileFailure::Error { exit_status: ExitError::OutOfGas })
 			}
 		}
 
@@ -86,7 +90,9 @@ where
 			Action::GetStableAssetPoolTokens => {
 				let pool_id = input.u32_at(1)?;
 
-				if let Some(pool_info) = <module_stable_asset::Pallet<Runtime> as StableAsset>::pool(pool_id) {
+				if let Some(pool_info) =
+					<module_stable_asset::Pallet<Runtime> as StableAsset>::pool(pool_id)
+				{
 					// dynamic gas cost calculation
 					// cost of reading asset currencies
 					gas_cost = gas_cost.saturating_add(
@@ -101,15 +107,18 @@ where
 						if gas_limit < gas_cost {
 							return Err(PrecompileFailure::Error {
 								exit_status: ExitError::OutOfGas,
-							});
+							})
 						}
 					}
 
-					let assets: Vec<H160> = pool_info
-						.assets
-						.iter()
-						.flat_map(|x| <Runtime as module_prices::Config>::Erc20InfoMapping::encode_evm_address(*x))
-						.collect();
+					let assets: Vec<H160> =
+						pool_info
+							.assets
+							.iter()
+							.flat_map(|x| {
+								<Runtime as module_prices::Config>::Erc20InfoMapping::encode_evm_address(*x)
+							})
+							.collect();
 
 					Ok(PrecompileOutput {
 						exit_status: ExitSucceed::Returned,
@@ -125,11 +134,13 @@ where
 						logs: Default::default(),
 					})
 				}
-			}
+			},
 			Action::GetStableAssetPoolTotalSupply => {
 				let pool_id = input.u32_at(1)?;
 
-				if let Some(pool_info) = <module_stable_asset::Pallet<Runtime> as StableAsset>::pool(pool_id) {
+				if let Some(pool_info) =
+					<module_stable_asset::Pallet<Runtime> as StableAsset>::pool(pool_id)
+				{
 					Ok(PrecompileOutput {
 						exit_status: ExitSucceed::Returned,
 						cost: gas_cost,
@@ -144,11 +155,13 @@ where
 						logs: Default::default(),
 					})
 				}
-			}
+			},
 			Action::GetStableAssetPoolPrecision => {
 				let pool_id = input.u32_at(1)?;
 
-				if let Some(pool_info) = <module_stable_asset::Pallet<Runtime> as StableAsset>::pool(pool_id) {
+				if let Some(pool_info) =
+					<module_stable_asset::Pallet<Runtime> as StableAsset>::pool(pool_id)
+				{
 					Ok(PrecompileOutput {
 						exit_status: ExitSucceed::Returned,
 						cost: gas_cost,
@@ -163,11 +176,13 @@ where
 						logs: Default::default(),
 					})
 				}
-			}
+			},
 			Action::GetStableAssetPoolMintFee => {
 				let pool_id = input.u32_at(1)?;
 
-				if let Some(pool_info) = <module_stable_asset::Pallet<Runtime> as StableAsset>::pool(pool_id) {
+				if let Some(pool_info) =
+					<module_stable_asset::Pallet<Runtime> as StableAsset>::pool(pool_id)
+				{
 					Ok(PrecompileOutput {
 						exit_status: ExitSucceed::Returned,
 						cost: gas_cost,
@@ -182,11 +197,13 @@ where
 						logs: Default::default(),
 					})
 				}
-			}
+			},
 			Action::GetStableAssetPoolSwapFee => {
 				let pool_id = input.u32_at(1)?;
 
-				if let Some(pool_info) = <module_stable_asset::Pallet<Runtime> as StableAsset>::pool(pool_id) {
+				if let Some(pool_info) =
+					<module_stable_asset::Pallet<Runtime> as StableAsset>::pool(pool_id)
+				{
 					Ok(PrecompileOutput {
 						exit_status: ExitSucceed::Returned,
 						cost: gas_cost,
@@ -201,11 +218,13 @@ where
 						logs: Default::default(),
 					})
 				}
-			}
+			},
 			Action::GetStableAssetPoolRedeemFee => {
 				let pool_id = input.u32_at(1)?;
 
-				if let Some(pool_info) = <module_stable_asset::Pallet<Runtime> as StableAsset>::pool(pool_id) {
+				if let Some(pool_info) =
+					<module_stable_asset::Pallet<Runtime> as StableAsset>::pool(pool_id)
+				{
 					Ok(PrecompileOutput {
 						exit_status: ExitSucceed::Returned,
 						cost: gas_cost,
@@ -220,7 +239,7 @@ where
 						logs: Default::default(),
 					})
 				}
-			}
+			},
 			Action::StableAssetSwap => {
 				let who = input.account_id_at(1)?;
 				let pool_id = input.u32_at(2)?;
@@ -250,7 +269,7 @@ where
 					output: Output::encode_uint_tuple(vec![input, output]),
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::StableAssetMint => {
 				let who = input.account_id_at(1)?;
 				let pool_id = input.u32_at(2)?;
@@ -279,7 +298,7 @@ where
 					output: Default::default(),
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::StableAssetRedeem => {
 				let who = input.account_id_at(1)?;
 				let pool_id = input.u32_at(2)?;
@@ -308,7 +327,7 @@ where
 					output: Default::default(),
 					logs: Default::default(),
 				})
-			}
+			},
 		}
 	}
 }
@@ -334,19 +353,21 @@ where
 		let cost: u64 = match action {
 			Action::GetStableAssetPoolTokens => {
 				// StableAsset::Pools (r: 1)
-				let cost = WeightToGas::convert(<Runtime as frame_system::Config>::DbWeight::get().reads(1));
+				let cost = WeightToGas::convert(
+					<Runtime as frame_system::Config>::DbWeight::get().reads(1),
+				);
 				// read asset currencies is calculation dynamically after reading pool_info
 				Self::BASE_COST.saturating_add(cost)
-			}
-			Action::GetStableAssetPoolTotalSupply
-			| Action::GetStableAssetPoolPrecision
-			| Action::GetStableAssetPoolMintFee
-			| Action::GetStableAssetPoolSwapFee
-			| Action::GetStableAssetPoolRedeemFee => {
+			},
+			Action::GetStableAssetPoolTotalSupply |
+			Action::GetStableAssetPoolPrecision |
+			Action::GetStableAssetPoolMintFee |
+			Action::GetStableAssetPoolSwapFee |
+			Action::GetStableAssetPoolRedeemFee => {
 				// StableAsset::Pools (r: 1)
 				let weight = <Runtime as frame_system::Config>::DbWeight::get().reads(1);
 				Self::BASE_COST.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 			Action::StableAssetSwap => {
 				let account_read = InputPricer::<Runtime>::read_accounts(1);
 				let path_len = input.u32_at(7)?;
@@ -354,7 +375,7 @@ where
 				Self::BASE_COST
 					.saturating_add(account_read)
 					.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 			Action::StableAssetMint => {
 				let account_read = InputPricer::<Runtime>::read_accounts(1);
 				let path_len = input.u32_at(5)?;
@@ -362,15 +383,18 @@ where
 				Self::BASE_COST
 					.saturating_add(account_read)
 					.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 			Action::StableAssetRedeem => {
 				let account_read = InputPricer::<Runtime>::read_accounts(1);
 				let path_len = input.u32_at(5)?;
-				let weight = <Runtime as module_stable_asset::Config>::WeightInfo::redeem_proportion(path_len);
+				let weight =
+					<Runtime as module_stable_asset::Config>::WeightInfo::redeem_proportion(
+						path_len,
+					);
 				Self::BASE_COST
 					.saturating_add(account_read)
 					.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 		};
 		Ok(cost)
 	}
@@ -379,7 +403,9 @@ where
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::precompile::mock::{alice_evm_addr, new_test_ext, Origin, StableAsset, Test, ALICE, KUSD, RENBTC};
+	use crate::precompile::mock::{
+		alice_evm_addr, new_test_ext, Origin, StableAsset, Test, ALICE, KUSD, RENBTC,
+	};
 	use frame_support::assert_ok;
 	use hex_literal::hex;
 
@@ -721,7 +747,8 @@ mod tests {
 				00000000000000000000000000000000 000000000000000000000000000f4240
 				00000000000000000000000000000000 000000000000000000000000000f4240
 			"};
-			let mint_resp = StableAssetPrecompile::execute(&mint_input, None, &context, false).unwrap();
+			let mint_resp =
+				StableAssetPrecompile::execute(&mint_input, None, &context, false).unwrap();
 			assert_eq!(mint_resp.exit_status, ExitSucceed::Returned);
 			assert!(mint_resp.output.is_empty());
 
@@ -743,7 +770,8 @@ mod tests {
 				00000000000000000000000000000000 00000000000000000000000000000001
 				00000000000000000000000000000000 00000000000000000000000000000002
 			"};
-			let redeem_resp = StableAssetPrecompile::execute(&redeem_input, None, &context, false).unwrap();
+			let redeem_resp =
+				StableAssetPrecompile::execute(&redeem_input, None, &context, false).unwrap();
 			assert_eq!(redeem_resp.exit_status, ExitSucceed::Returned);
 			assert!(redeem_resp.output.is_empty());
 		});

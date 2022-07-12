@@ -64,7 +64,12 @@ where
 	Runtime: module_evm::Config + module_dex::Config + module_prices::Config,
 	module_dex::Pallet<Runtime>: DEXManager<Runtime::AccountId, Balance, CurrencyId>,
 {
-	fn execute(input: &[u8], target_gas: Option<u64>, _context: &Context, _is_static: bool) -> PrecompileResult {
+	fn execute(
+		input: &[u8],
+		target_gas: Option<u64>,
+		_context: &Context,
+		_is_static: bool,
+	) -> PrecompileResult {
 		let input = Input::<
 			Action,
 			Runtime::AccountId,
@@ -76,9 +81,7 @@ where
 
 		if let Some(gas_limit) = target_gas {
 			if gas_limit < gas_cost {
-				return Err(PrecompileFailure::Error {
-					exit_status: ExitError::OutOfGas,
-				});
+				return Err(PrecompileFailure::Error { exit_status: ExitError::OutOfGas })
 			}
 		}
 
@@ -106,7 +109,7 @@ where
 					output: Output::encode_uint_tuple(vec![balance_a, balance_b]),
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::GetLiquidityTokenAddress => {
 				let currency_id_a = input.currency_id_at(1)?;
 				let currency_id_b = input.currency_id_at(2)?;
@@ -117,8 +120,12 @@ where
 				);
 
 				// If it does not exist, return address(0x0). Keep the behavior the same as mapping[key]
-				let address = <module_dex::Pallet<Runtime> as DEXManager<Runtime::AccountId, Balance, CurrencyId>>::get_liquidity_token_address(currency_id_a, currency_id_b)
-					.unwrap_or_default();
+				let address = <module_dex::Pallet<Runtime> as DEXManager<
+					Runtime::AccountId,
+					Balance,
+					CurrencyId,
+				>>::get_liquidity_token_address(currency_id_a, currency_id_b)
+				.unwrap_or_default();
 
 				Ok(PrecompileOutput {
 					exit_status: ExitSucceed::Returned,
@@ -126,7 +133,7 @@ where
 					output: Output::encode_address(address),
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::GetSwapTargetAmount => {
 				// solidity abi encode array will add an offset at input[1]
 				let supply_amount = input.balance_at(2)?;
@@ -142,7 +149,12 @@ where
 				);
 
 				// If get_swap_amount fail, return 0.
-				let target = <module_dex::Pallet<Runtime> as DEXManager<Runtime::AccountId, Balance, CurrencyId>>::get_swap_amount(&path, SwapLimit::ExactSupply(supply_amount, Balance::MIN))
+				let target =
+					<module_dex::Pallet<Runtime> as DEXManager<
+						Runtime::AccountId,
+						Balance,
+						CurrencyId,
+					>>::get_swap_amount(&path, SwapLimit::ExactSupply(supply_amount, Balance::MIN))
 					.map(|(_, target)| target)
 					.unwrap_or_default();
 
@@ -152,7 +164,7 @@ where
 					output: Output::encode_uint(target),
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::GetSwapSupplyAmount => {
 				// solidity abi encode array will add an offset at input[1]
 				let target_amount = input.balance_at(2)?;
@@ -168,7 +180,12 @@ where
 				);
 
 				// If get_swap_amount fail, return 0.
-				let supply = <module_dex::Pallet<Runtime> as DEXManager<Runtime::AccountId, Balance, CurrencyId>>::get_swap_amount(&path, SwapLimit::ExactTarget(Balance::MAX, target_amount))
+				let supply =
+					<module_dex::Pallet<Runtime> as DEXManager<
+						Runtime::AccountId,
+						Balance,
+						CurrencyId,
+					>>::get_swap_amount(&path, SwapLimit::ExactTarget(Balance::MAX, target_amount))
 					.map(|(supply, _)| supply)
 					.unwrap_or_default();
 
@@ -178,7 +195,7 @@ where
 					output: Output::encode_uint(supply),
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::SwapWithExactSupply => {
 				let who = input.account_id_at(1)?;
 				// solidity abi encode array will add an offset at input[2]
@@ -195,14 +212,20 @@ where
 					who, path, supply_amount, min_target_amount
 				);
 
-				let (_, value) =
-					<module_dex::Pallet<Runtime> as DEXManager<Runtime::AccountId, Balance, CurrencyId>>::swap_with_specific_path(&who, &path, SwapLimit::ExactSupply(supply_amount, min_target_amount))
-					.map_err(|e|
-							 PrecompileFailure::Revert {
-								 exit_status: ExitRevert::Reverted,
-								 output: Into::<&str>::into(e).as_bytes().to_vec(),
-								 cost: target_gas_limit(target_gas).unwrap_or_default(),
-							 })?;
+				let (_, value) = <module_dex::Pallet<Runtime> as DEXManager<
+					Runtime::AccountId,
+					Balance,
+					CurrencyId,
+				>>::swap_with_specific_path(
+					&who,
+					&path,
+					SwapLimit::ExactSupply(supply_amount, min_target_amount),
+				)
+				.map_err(|e| PrecompileFailure::Revert {
+					exit_status: ExitRevert::Reverted,
+					output: Into::<&str>::into(e).as_bytes().to_vec(),
+					cost: target_gas_limit(target_gas).unwrap_or_default(),
+				})?;
 
 				Ok(PrecompileOutput {
 					exit_status: ExitSucceed::Returned,
@@ -210,7 +233,7 @@ where
 					output: Output::encode_uint(value),
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::SwapWithExactTarget => {
 				let who = input.account_id_at(1)?;
 				// solidity abi encode array will add an offset at input[2]
@@ -227,14 +250,20 @@ where
 					who, path, target_amount, max_supply_amount
 				);
 
-				let (value, _) =
-					<module_dex::Pallet<Runtime> as DEXManager<Runtime::AccountId, Balance, CurrencyId>>::swap_with_specific_path(&who, &path, SwapLimit::ExactTarget(max_supply_amount, target_amount))
-					.map_err(|e|
-							 PrecompileFailure::Revert {
-								 exit_status: ExitRevert::Reverted,
-								 output: Into::<&str>::into(e).as_bytes().to_vec(),
-								 cost: target_gas_limit(target_gas).unwrap_or_default(),
-							 })?;
+				let (value, _) = <module_dex::Pallet<Runtime> as DEXManager<
+					Runtime::AccountId,
+					Balance,
+					CurrencyId,
+				>>::swap_with_specific_path(
+					&who,
+					&path,
+					SwapLimit::ExactTarget(max_supply_amount, target_amount),
+				)
+				.map_err(|e| PrecompileFailure::Revert {
+					exit_status: ExitRevert::Reverted,
+					output: Into::<&str>::into(e).as_bytes().to_vec(),
+					cost: target_gas_limit(target_gas).unwrap_or_default(),
+				})?;
 
 				Ok(PrecompileOutput {
 					exit_status: ExitSucceed::Returned,
@@ -242,7 +271,7 @@ where
 					output: Output::encode_uint(value),
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::AddLiquidity => {
 				let who = input.account_id_at(1)?;
 				let currency_id_a = input.currency_id_at(2)?;
@@ -257,7 +286,11 @@ where
 					who, currency_id_a, currency_id_b, max_amount_a, max_amount_b, min_share_increment,
 				);
 
-				<module_dex::Pallet<Runtime> as DEXManager<Runtime::AccountId, Balance, CurrencyId>>::add_liquidity(
+				<module_dex::Pallet<Runtime> as DEXManager<
+					Runtime::AccountId,
+					Balance,
+					CurrencyId,
+				>>::add_liquidity(
 					&who,
 					currency_id_a,
 					currency_id_b,
@@ -278,7 +311,7 @@ where
 					output: vec![],
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::RemoveLiquidity => {
 				let who = input.account_id_at(1)?;
 				let currency_id_a = input.currency_id_at(2)?;
@@ -293,7 +326,11 @@ where
 					who, currency_id_a, currency_id_b, remove_share, min_withdrawn_a, min_withdrawn_b,
 				);
 
-				<module_dex::Pallet<Runtime> as DEXManager<Runtime::AccountId, Balance, CurrencyId>>::remove_liquidity(
+				<module_dex::Pallet<Runtime> as DEXManager<
+					Runtime::AccountId,
+					Balance,
+					CurrencyId,
+				>>::remove_liquidity(
 					&who,
 					currency_id_a,
 					currency_id_b,
@@ -314,7 +351,7 @@ where
 					output: vec![],
 					logs: Default::default(),
 				})
-			}
+			},
 		}
 	}
 }
@@ -351,7 +388,7 @@ where
 					.saturating_add(read_currency_a)
 					.saturating_add(read_currency_b)
 					.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 			Action::GetLiquidityTokenAddress => {
 				let currency_id_a = input.currency_id_at(1)?;
 				let currency_id_b = input.currency_id_at(2)?;
@@ -366,7 +403,7 @@ where
 					.saturating_add(read_currency_a)
 					.saturating_add(read_currency_b)
 					.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 			Action::GetSwapTargetAmount => {
 				let path_len = input.u32_at(3)?;
 
@@ -384,7 +421,7 @@ where
 				Self::BASE_COST
 					.saturating_add(read_currency)
 					.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 			Action::GetSwapSupplyAmount => {
 				let path_len = input.u32_at(3)?;
 
@@ -402,7 +439,7 @@ where
 				Self::BASE_COST
 					.saturating_add(read_currency)
 					.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 			Action::SwapWithExactSupply => {
 				let path_len = input.u32_at(5)?;
 
@@ -414,13 +451,14 @@ where
 
 				let read_account = InputPricer::<Runtime>::read_accounts(1);
 
-				let weight = <Runtime as module_dex::Config>::WeightInfo::swap_with_exact_supply(path_len);
+				let weight =
+					<Runtime as module_dex::Config>::WeightInfo::swap_with_exact_supply(path_len);
 
 				Self::BASE_COST
 					.saturating_add(read_currency)
 					.saturating_add(read_account)
 					.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 			Action::SwapWithExactTarget => {
 				let path_len = input.u32_at(5)?;
 
@@ -432,13 +470,14 @@ where
 
 				let read_account = InputPricer::<Runtime>::read_accounts(1);
 
-				let weight = <Runtime as module_dex::Config>::WeightInfo::swap_with_exact_target(path_len);
+				let weight =
+					<Runtime as module_dex::Config>::WeightInfo::swap_with_exact_target(path_len);
 
 				Self::BASE_COST
 					.saturating_add(read_currency)
 					.saturating_add(read_account)
 					.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 			Action::AddLiquidity => {
 				let read_account = InputPricer::<Runtime>::read_accounts(1);
 				let currency_id_a = input.currency_id_at(2)?;
@@ -454,7 +493,7 @@ where
 					.saturating_add(read_currency_a)
 					.saturating_add(read_currency_b)
 					.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 			Action::RemoveLiquidity => {
 				let read_account = InputPricer::<Runtime>::read_accounts(1);
 				let currency_id_a = input.currency_id_at(2)?;
@@ -470,7 +509,7 @@ where
 					.saturating_add(read_currency_a)
 					.saturating_add(read_currency_b)
 					.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 		};
 		Ok(cost)
 	}
@@ -480,7 +519,9 @@ where
 mod tests {
 	use super::*;
 
-	use crate::precompile::mock::{alice_evm_addr, new_test_ext, DexModule, Origin, Test, ALICE, KUSD, RENBTC};
+	use crate::precompile::mock::{
+		alice_evm_addr, new_test_ext, DexModule, Origin, Test, ALICE, KUSD, RENBTC,
+	};
 	use frame_support::{assert_noop, assert_ok};
 	use hex_literal::hex;
 	use module_evm::ExitRevert;

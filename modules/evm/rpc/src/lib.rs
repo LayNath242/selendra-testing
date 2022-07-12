@@ -102,15 +102,16 @@ fn error_on_execution_failure(reason: &ExitReason, data: &[u8]) -> RpcResult<()>
 					Some("0x".to_string()),
 				))))
 			}
-		}
+		},
 		ExitReason::Revert(_) => {
 			let message = "VM Exception while processing transaction: execution revert".to_string();
 			Err(JsonRpseeError::Call(CallError::Custom(ErrorObject::owned(
 				ErrorCode::InternalError.code(),
-				decode_revert_message(data).map_or(message.clone(), |reason| format!("{} {}", message, reason)),
+				decode_revert_message(data)
+					.map_or(message.clone(), |reason| format!("{} {}", message, reason)),
 				Some(format!("0x{}", data.to_hex::<String>())),
 			))))
-		}
+		},
 		ExitReason::Fatal(e) => Err(JsonRpseeError::Call(CallError::Custom(ErrorObject::owned(
 			ErrorCode::InternalError.code(),
 			format!("execution fatal: {:?}", e),
@@ -128,11 +129,11 @@ fn decode_revert_message(data: &[u8]) -> Option<String> {
 		let msg_end = msg_start.checked_add(message_len)?;
 
 		if data.len() < msg_end {
-			return None;
+			return None
 		}
 		let body: &[u8] = &data[msg_start..msg_end];
 		if let Ok(reason) = std::str::from_utf8(body) {
-			return Some(reason.to_string());
+			return Some(reason.to_string())
 		}
 	}
 	None
@@ -146,11 +147,7 @@ pub struct EVM<B, C, Balance> {
 
 impl<B, C, Balance> EVM<B, C, Balance> {
 	pub fn new(client: Arc<C>, _deny_unsafe: DenyUnsafe) -> Self {
-		Self {
-			client,
-			_deny_unsafe,
-			_marker: Default::default(),
-		}
+		Self { client, _deny_unsafe, _marker: Default::default() }
 	}
 }
 
@@ -165,7 +162,15 @@ where
 	C: ProvideRuntimeApi<B> + HeaderBackend<B> + Send + Sync + 'static,
 	C::Api: EVMRuntimeRPCApi<B, Balance>,
 	C::Api: TransactionPaymentApi<B, Balance>,
-	Balance: Codec + MaybeDisplay + MaybeFromStr + Default + Send + Sync + 'static + TryFrom<u128> + Into<U256>,
+	Balance: Codec
+		+ MaybeDisplay
+		+ MaybeFromStr
+		+ Default
+		+ Send
+		+ Sync
+		+ 'static
+		+ TryFrom<u128>
+		+ Into<U256>,
 {
 	fn call(&self, request: CallRequest, at: Option<<B as BlockT>::Hash>) -> RpcResult<Bytes> {
 		let api = self.client.runtime_api();
@@ -183,20 +188,12 @@ where
 			return Err(internal_err(format!(
 				"Could not find `EVMRuntimeRPCApi` api for block `{:?}`.",
 				&block_id
-			)));
+			)))
 		}
 
 		log::debug!(target: "evm", "rpc call, request: {:?}", request);
 
-		let CallRequest {
-			from,
-			to,
-			gas_limit,
-			storage_limit,
-			value,
-			data,
-			access_list,
-		} = request;
+		let CallRequest { from, to, gas_limit, storage_limit, value, data, access_list } = request;
 
 		let block_limits = self.block_limits(at)?;
 
@@ -208,14 +205,14 @@ where
 			return Err(invalid_params(format!(
 				"GasLimit exceeds capped allowance: {}",
 				gas_limit_cap
-			)));
+			)))
 		}
 		let storage_limit = storage_limit.unwrap_or(block_limits.max_storage_limit);
 		if storage_limit > block_limits.max_storage_limit {
 			return Err(invalid_params(format!(
 				"StorageLimit exceeds allowance: {}",
 				block_limits.max_storage_limit
-			)));
+			)))
 		}
 		let data = data.map(|d| d.0).unwrap_or_default();
 
@@ -225,8 +222,8 @@ where
 			Ok(Default::default())
 		};
 
-		let balance_value =
-			balance_value.map_err(|_| invalid_params(format!("Invalid parameter value: {:?}", value)))?;
+		let balance_value = balance_value
+			.map_err(|_| invalid_params(format!("Invalid parameter value: {:?}", value)))?;
 
 		match to {
 			Some(to) => {
@@ -253,7 +250,7 @@ where
 				error_on_execution_failure(&info.exit_reason, &info.value)?;
 
 				Ok(Bytes(info.value))
-			}
+			},
 			None => {
 				let info = api
 					.create(
@@ -277,7 +274,7 @@ where
 				error_on_execution_failure(&info.exit_reason, &[])?;
 
 				Ok(Bytes(info.value[..].to_vec()))
-			}
+			},
 		}
 	}
 
@@ -300,7 +297,7 @@ where
 			return Err(internal_err(format!(
 				"Could not find `EVMRuntimeRPCApi` api for block `{:?}`.",
 				&block_id
-			)));
+			)))
 		}
 
 		let block_limits = self.block_limits(at)?;
@@ -350,19 +347,13 @@ where
 
 		// Create a helper to check if a gas allowance results in an executable transaction
 		let executable = move |request: CallRequest, gas: u64| -> RpcResult<ExecutableResult> {
-			let CallRequest {
-				from,
-				to,
-				gas_limit,
-				storage_limit,
-				value,
-				data,
-				access_list,
-			} = request;
+			let CallRequest { from, to, gas_limit, storage_limit, value, data, access_list } =
+				request;
 
-			let gas_limit = gas_limit.expect("Cannot be none, value set when request is constructed above; qed");
-			let storage_limit =
-				storage_limit.expect("Cannot be none, value set when request is constructed above; qed");
+			let gas_limit = gas_limit
+				.expect("Cannot be none, value set when request is constructed above; qed");
+			let storage_limit = storage_limit
+				.expect("Cannot be none, value set when request is constructed above; qed");
 			let data = data.map(|d| d.0).unwrap_or_default();
 
 			// Use request gas limit only if it less than gas_limit parameter
@@ -374,8 +365,8 @@ where
 				Ok(Default::default())
 			};
 
-			let balance_value =
-				balance_value.map_err(|_| invalid_params(format!("Invalid parameter value: {:?}", value)))?;
+			let balance_value = balance_value
+				.map_err(|_| invalid_params(format!("Invalid parameter value: {:?}", value)))?;
 
 			let (exit_reason, data, used_gas, used_storage) = match to {
 				Some(to) => {
@@ -397,7 +388,7 @@ where
 						.map_err(|err| internal_err(format!("execution fatal: {:?}", err)))?;
 
 					(info.exit_reason, info.value, info.used_gas.as_u64(), info.used_storage)
-				}
+				},
 				None => {
 					let info = self
 						.client
@@ -416,30 +407,20 @@ where
 						.map_err(|err| internal_err(format!("execution fatal: {:?}", err)))?;
 
 					(info.exit_reason, Vec::new(), info.used_gas.as_u64(), info.used_storage)
-				}
+				},
 			};
 
-			Ok(ExecutableResult {
-				exit_reason,
-				data,
-				used_gas,
-				used_storage,
-			})
+			Ok(ExecutableResult { exit_reason, data, used_gas, used_storage })
 		};
 
 		// Verify that the transaction succeed with highest capacity
 		let cap = highest;
-		let ExecutableResult {
-			data,
-			exit_reason,
-			used_gas,
-			used_storage,
-		} = executable(request.clone(), highest)?;
+		let ExecutableResult { data, exit_reason, used_gas, used_storage } =
+			executable(request.clone(), highest)?;
 		match exit_reason {
 			ExitReason::Succeed(_) => (),
-			ExitReason::Error(ExitError::OutOfGas) => {
-				return Err(internal_err(format!("gas required exceeds allowance {}", cap)))
-			}
+			ExitReason::Error(ExitError::OutOfGas) =>
+				return Err(internal_err(format!("gas required exceeds allowance {}", cap))),
 			// If the transaction reverts, there are two possible cases,
 			// it can revert because the called contract feels that it does not have enough
 			// gas left to continue, or it can revert for another reason unrelated to gas.
@@ -451,9 +432,11 @@ where
 					let ExecutableResult { data, exit_reason, .. } =
 						executable(request.clone(), block_limits.max_gas_limit)?;
 					match exit_reason {
-						ExitReason::Succeed(_) => {
-							return Err(internal_err(format!("gas required exceeds allowance {}", cap)))
-						}
+						ExitReason::Succeed(_) =>
+							return Err(internal_err(format!(
+								"gas required exceeds allowance {}",
+								cap
+							))),
 						// The execution has been done with block gas limit, so it is not a lack of gas from the user.
 						other => error_on_execution_failure(&other, &data)?,
 					}
@@ -462,7 +445,7 @@ where
 					// user.
 					error_on_execution_failure(&ExitReason::Revert(revert), &data)?
 				}
-			}
+			},
 			other => error_on_execution_failure(&other, &data)?,
 		};
 
@@ -484,13 +467,13 @@ where
 						// If the variation in the estimate is less than 10%,
 						// then the estimate is considered sufficiently accurate.
 						if (previous_highest - highest) * 10 / previous_highest < 1 {
-							break;
+							break
 						}
 						previous_highest = highest;
-					}
+					},
 					ExitReason::Revert(_) | ExitReason::Error(ExitError::OutOfGas) => {
 						lowest = mid;
-					}
+					},
 					other => error_on_execution_failure(&other, &data)?,
 				}
 				mid = (highest + lowest) / 2;
@@ -498,13 +481,17 @@ where
 		}
 
 		let uxt: <B as traits::Block>::Extrinsic = Decode::decode(&mut &*unsigned_extrinsic)
-			.map_err(|e| internal_err(format!("execution error: Unable to dry run extrinsic {:?}", e)))?;
+			.map_err(|e| {
+				internal_err(format!("execution error: Unable to dry run extrinsic {:?}", e))
+			})?;
 
 		let fee = self
 			.client
 			.runtime_api()
 			.query_fee_details(&block_id, uxt, unsigned_extrinsic.len() as u32)
-			.map_err(|e| internal_err(format!("runtime error: Unable to query fee details {:?}", e)))?;
+			.map_err(|e| {
+				internal_err(format!("runtime error: Unable to query fee details {:?}", e))
+			})?;
 
 		let adjusted_weight_fee = fee
 			.inclusion_fee
@@ -535,10 +522,9 @@ where
 			})?;
 
 		let block_limits = if version > 1 {
-			self.client
-				.runtime_api()
-				.block_limits(&block_id)
-				.map_err(|e| internal_err(format!("runtime error: Unable to query block limits {:?}", e)))?
+			self.client.runtime_api().block_limits(&block_id).map_err(|e| {
+				internal_err(format!("runtime error: Unable to query block limits {:?}", e))
+			})?
 		} else {
 			BlockLimits {
 				max_gas_limit: 20_000_000,    // 20M
@@ -555,7 +541,9 @@ fn decode_revert_message_should_work() {
 	use sp_core::bytes::from_hex;
 	assert_eq!(decode_revert_message(&[]), None);
 
-	let data = from_hex("0x8c379a00000000000000000000000000000000000000000000000000000000000000020").unwrap();
+	let data =
+		from_hex("0x8c379a00000000000000000000000000000000000000000000000000000000000000020")
+			.unwrap();
 	assert_eq!(decode_revert_message(&data), None);
 
 	let data = from_hex("0x8c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000d6572726f72206d65737361676").unwrap();

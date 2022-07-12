@@ -67,11 +67,7 @@ impl<'a, Action, AccountId, AddressMapping, Erc20InfoMapping>
 	Input<'a, Action, AccountId, AddressMapping, Erc20InfoMapping>
 {
 	pub fn new(content: &'a [u8], target_gas: Option<u64>) -> Self {
-		Self {
-			content,
-			target_gas,
-			_marker: PhantomData,
-		}
+		Self { content, target_gas, _marker: PhantomData }
 	}
 }
 
@@ -112,11 +108,12 @@ where
 
 	fn action(&self) -> Result<Self::Action, Self::Error> {
 		let param = self.nth_param(ACTION_INDEX, None)?;
-		let action = u32::from_be_bytes(param.try_into().map_err(|_| PrecompileFailure::Revert {
-			exit_status: ExitRevert::Reverted,
-			output: "invalid action".into(),
-			cost: self.target_gas.unwrap_or_default(),
-		})?);
+		let action =
+			u32::from_be_bytes(param.try_into().map_err(|_| PrecompileFailure::Revert {
+				exit_status: ExitRevert::Reverted,
+				output: "invalid action".into(),
+				cost: self.target_gas.unwrap_or_default(),
+			})?);
 
 		action.try_into().map_err(|_| PrecompileFailure::Revert {
 			exit_status: ExitRevert::Reverted,
@@ -290,7 +287,7 @@ where
 					Self::BASE_COST
 				};
 				cost_a.saturating_add(cost_b)
-			}
+			},
 			_ => Self::BASE_COST,
 		}
 	}
@@ -305,12 +302,12 @@ fn decode_i128(bytes: &[u8]) -> Option<i128> {
 	if bytes[0..HALF_PARAM_BYTES] == [0xff; HALF_PARAM_BYTES] {
 		if let Ok(v) = i128::try_from(!U256::from(bytes)) {
 			if let Some(v) = v.checked_neg() {
-				return v.checked_sub(1);
+				return v.checked_sub(1)
 			}
 		}
-		return None;
+		return None
 	} else if bytes[0..HALF_PARAM_BYTES] == [0x00; HALF_PARAM_BYTES] {
-		return i128::try_from(U256::from_big_endian(bytes)).ok();
+		return i128::try_from(U256::from_big_endian(bytes)).ok()
 	}
 	None
 }
@@ -395,15 +392,21 @@ mod tests {
 		let input = TestInput::new(&data[..], None);
 		assert_ok!(
 			input.account_id_at(1),
-			MockAddressMapping::get_account_id(&H160::from_str("ff00000000000000000000000000000000000001").unwrap())
+			MockAddressMapping::get_account_id(
+				&H160::from_str("ff00000000000000000000000000000000000001").unwrap()
+			)
 		);
 		assert_ok!(
 			input.account_id_at(2),
-			MockAddressMapping::get_account_id(&H160::from_str("0000000000000000000000000000000000000002").unwrap())
+			MockAddressMapping::get_account_id(
+				&H160::from_str("0000000000000000000000000000000000000002").unwrap()
+			)
 		);
 		assert_ok!(
 			input.account_id_at(3),
-			MockAddressMapping::get_account_id(&H160::from_str("ff00000000000000000000000000000000000003").unwrap())
+			MockAddressMapping::get_account_id(
+				&H160::from_str("ff00000000000000000000000000000000000003").unwrap()
+			)
 		);
 	}
 
@@ -603,26 +606,11 @@ mod tests {
 				"fffffffffffffffffffffffffffffffff0000000000000000000000000000000",
 				Some(-21267647932558653966460912964485513216i128),
 			),
-			(
-				"0000000000000000000000000000000000000000000000000000000000000000",
-				Some(0),
-			),
-			(
-				"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-				Some(-1),
-			),
-			(
-				"0000000000000000000000000000000000000000000000000000000000000001",
-				Some(1),
-			),
-			(
-				"fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0",
-				Some(-16),
-			),
-			(
-				"00000000000000000000000000000000000000000000000000000000000000ff",
-				Some(255),
-			),
+			("0000000000000000000000000000000000000000000000000000000000000000", Some(0)),
+			("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", Some(-1)),
+			("0000000000000000000000000000000000000000000000000000000000000001", Some(1)),
+			("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0", Some(-16)),
+			("00000000000000000000000000000000000000000000000000000000000000ff", Some(255)),
 			(
 				"ffffffffffffffffffffffffffffffffffffffffffff000000000000000000ff",
 				Some(-1208925819614629174705921),
@@ -631,14 +619,8 @@ mod tests {
 				"00000000000000000000000000000000000000000000ffffffffffffffffff00",
 				Some(1208925819614629174705920),
 			),
-			(
-				"ffffffffffffffffffffffffffffffff80000000000000000000000000000000",
-				Some(i128::MIN),
-			),
-			(
-				"000000000000000000000000000000007fffffffffffffffffffffffffffffff",
-				Some(i128::MAX),
-			),
+			("ffffffffffffffffffffffffffffffff80000000000000000000000000000000", Some(i128::MIN)),
+			("000000000000000000000000000000007fffffffffffffffffffffffffffffff", Some(i128::MAX)),
 			("00000000000000000000000000000000ffffffffffffffffffffffffffffffff", None),
 			("ffffffffffffffffffffffffffffffff00000000000000000000000000000000", None),
 		];

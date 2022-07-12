@@ -27,12 +27,14 @@ use frame_support::{
 	ConsensusEngineId, PalletId,
 };
 use frame_system::EnsureSignedBy;
-use module_support::mocks::MockErc20InfoMapping;
-use module_support::{mocks::MockAddressMapping, DEXIncentives, Price, PriceProvider};
+use module_support::{
+	mocks::{MockAddressMapping, MockErc20InfoMapping},
+	DEXIncentives, Price, PriceProvider,
+};
 use orml_traits::{parameter_type_with_key, MultiReservableCurrency};
 pub use primitives::{
-	define_combined_task, Address, Amount, Block, BlockNumber, CurrencyId, Header, Multiplier, ReserveIdentifier,
-	Signature, TokenSymbol,
+	define_combined_task, Address, Amount, Block, BlockNumber, CurrencyId, Header, Multiplier,
+	ReserveIdentifier, Signature, TokenSymbol,
 };
 use sp_core::{H160, H256};
 use sp_runtime::{
@@ -126,7 +128,8 @@ impl orml_currencies::Config for Runtime {
 	type GetNativeCurrencyId = GetNativeCurrencyId;
 	type WeightInfo = ();
 }
-pub type AdaptedBasicCurrency = orml_currencies::BasicCurrencyAdapter<Runtime, Balances, Amount, BlockNumber>;
+pub type AdaptedBasicCurrency =
+	orml_currencies::BasicCurrencyAdapter<Runtime, Balances, Amount, BlockNumber>;
 
 define_combined_task! {
 	#[derive(Clone, Encode, Decode, PartialEq, RuntimeDebug, TypeInfo)]
@@ -264,11 +267,19 @@ impl module_transaction_payment::Config for Runtime {
 
 pub struct MockDEXIncentives;
 impl DEXIncentives<AccountId32, CurrencyId, Balance> for MockDEXIncentives {
-	fn do_deposit_dex_share(who: &AccountId32, lp_currency_id: CurrencyId, amount: Balance) -> DispatchResult {
+	fn do_deposit_dex_share(
+		who: &AccountId32,
+		lp_currency_id: CurrencyId,
+		amount: Balance,
+	) -> DispatchResult {
 		Tokens::reserve(lp_currency_id, who, amount)
 	}
 
-	fn do_withdraw_dex_share(who: &AccountId32, lp_currency_id: CurrencyId, amount: Balance) -> DispatchResult {
+	fn do_withdraw_dex_share(
+		who: &AccountId32,
+		lp_currency_id: CurrencyId,
+		amount: Balance,
+	) -> DispatchResult {
 		let _ = Tokens::unreserve(lp_currency_id, who, amount);
 		Ok(())
 	}
@@ -294,7 +305,8 @@ impl module_dex::Config for Runtime {
 }
 
 pub type SignedExtra = (frame_system::CheckWeight<Runtime>,);
-pub type UncheckedExtrinsic = sp_runtime::generic::UncheckedExtrinsic<Address, Call, Signature, SignedExtra>;
+pub type UncheckedExtrinsic =
+	sp_runtime::generic::UncheckedExtrinsic<Address, Call, Signature, SignedExtra>;
 
 construct_runtime!(
 	pub enum Runtime where

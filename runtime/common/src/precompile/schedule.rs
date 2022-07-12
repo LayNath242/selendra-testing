@@ -77,23 +77,29 @@ pub enum Action {
 	Reschedule = "rescheduleCall(address,uint256,bytes)",
 }
 
-type PalletBalanceOf<T> =
-	<<T as module_evm::Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
-type NegativeImbalanceOf<T> =
-	<<T as module_evm::Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::NegativeImbalance;
+type PalletBalanceOf<T> = <<T as module_evm::Config>::Currency as Currency<
+	<T as frame_system::Config>::AccountId,
+>>::Balance;
+type NegativeImbalanceOf<T> = <<T as module_evm::Config>::Currency as Currency<
+	<T as frame_system::Config>::AccountId,
+>>::NegativeImbalance;
 
 impl<Runtime> Precompile for SchedulePrecompile<Runtime>
 where
 	PalletBalanceOf<Runtime>: IsType<Balance>,
-	module_transaction_payment::ChargeTransactionPayment<Runtime>:
-		TransactionPayment<Runtime::AccountId, PalletBalanceOf<Runtime>, NegativeImbalanceOf<Runtime>>,
+	module_transaction_payment::ChargeTransactionPayment<Runtime>: TransactionPayment<
+		Runtime::AccountId,
+		PalletBalanceOf<Runtime>,
+		NegativeImbalanceOf<Runtime>,
+	>,
 	Runtime: module_evm::Config
 		+ module_prices::Config
 		+ module_transaction_payment::Config
 		+ pallet_scheduler::Config
 		+ Send
 		+ Sync,
-	<Runtime as pallet_scheduler::Config>::Call: Dispatchable + Debug + From<module_evm::Call<Runtime>>,
+	<Runtime as pallet_scheduler::Config>::Call:
+		Dispatchable + Debug + From<module_evm::Call<Runtime>>,
 	<<Runtime as pallet_scheduler::Config>::Call as Dispatchable>::Origin: IsType<<Runtime as frame_system::Config>::Origin>
 		+ OriginTrait<
 			AccountId = Runtime::AccountId,
@@ -106,19 +112,24 @@ where
 		Address = TaskAddress<BlockNumber>,
 	>,
 {
-	fn execute(input: &[u8], target_gas: Option<u64>, _context: &Context, _is_static: bool) -> PrecompileResult {
-		let input = Input::<Action, Runtime::AccountId, Runtime::AddressMapping, Runtime::Erc20InfoMapping>::new(
-			input,
-			target_gas_limit(target_gas),
-		);
+	fn execute(
+		input: &[u8],
+		target_gas: Option<u64>,
+		_context: &Context,
+		_is_static: bool,
+	) -> PrecompileResult {
+		let input = Input::<
+			Action,
+			Runtime::AccountId,
+			Runtime::AddressMapping,
+			Runtime::Erc20InfoMapping,
+		>::new(input, target_gas_limit(target_gas));
 
 		let gas_cost = Pricer::<Runtime>::cost(&input)?;
 
 		if let Some(gas_limit) = target_gas {
 			if gas_limit < gas_cost {
-				return Err(PrecompileFailure::Error {
-					exit_status: ExitError::OutOfGas,
-				});
+				return Err(PrecompileFailure::Error { exit_status: ExitError::OutOfGas })
 			}
 		}
 
@@ -184,11 +195,12 @@ where
 				.into();
 
 				let current_id = EvmSchedulerNextID::get();
-				let next_id = current_id.checked_add(1).ok_or_else(|| PrecompileFailure::Revert {
-					exit_status: ExitRevert::Reverted,
-					output: "Scheduler next id overflow".into(),
-					cost: target_gas_limit(target_gas).unwrap_or_default(),
-				})?;
+				let next_id =
+					current_id.checked_add(1).ok_or_else(|| PrecompileFailure::Revert {
+						exit_status: ExitRevert::Reverted,
+						output: "Scheduler next id overflow".into(),
+						cost: target_gas_limit(target_gas).unwrap_or_default(),
+					})?;
 				EvmSchedulerNextID::set(&next_id);
 
 				let task_id = TaskInfo {
@@ -231,7 +243,7 @@ where
 					output: Output::encode_bytes(&task_id),
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::Cancel => {
 				let from = input.evm_address_at(1)?;
 				// solidity abi encode bytes will add an length at input[2]
@@ -245,11 +257,12 @@ where
 					task_id,
 				);
 
-				let task_info = TaskInfo::decode(&mut &task_id[..]).map_err(|_| PrecompileFailure::Revert {
-					exit_status: ExitRevert::Reverted,
-					output: "Decode task_id failed".into(),
-					cost: target_gas_limit(target_gas).unwrap_or_default(),
-				})?;
+				let task_info =
+					TaskInfo::decode(&mut &task_id[..]).map_err(|_| PrecompileFailure::Revert {
+						exit_status: ExitRevert::Reverted,
+						output: "Decode task_id failed".into(),
+						cost: target_gas_limit(target_gas).unwrap_or_default(),
+					})?;
 				ensure!(
 					task_info.sender == from,
 					PrecompileFailure::Revert {
@@ -287,7 +300,7 @@ where
 					output: vec![],
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::Reschedule => {
 				let from = input.evm_address_at(1)?;
 				let min_delay = input.u32_at(2)?;
@@ -303,11 +316,12 @@ where
 					min_delay,
 				);
 
-				let task_info = TaskInfo::decode(&mut &task_id[..]).map_err(|_| PrecompileFailure::Revert {
-					exit_status: ExitRevert::Reverted,
-					output: "Decode task_id failed".into(),
-					cost: target_gas_limit(target_gas).unwrap_or_default(),
-				})?;
+				let task_info =
+					TaskInfo::decode(&mut &task_id[..]).map_err(|_| PrecompileFailure::Revert {
+						exit_status: ExitRevert::Reverted,
+						output: "Decode task_id failed".into(),
+						cost: target_gas_limit(target_gas).unwrap_or_default(),
+					})?;
 				ensure!(
 					task_info.sender == from,
 					PrecompileFailure::Revert {
@@ -334,7 +348,7 @@ where
 					output: vec![],
 					logs: Default::default(),
 				})
-			}
+			},
 		}
 	}
 }
@@ -343,12 +357,20 @@ struct Pricer<R>(PhantomData<R>);
 
 impl<Runtime> Pricer<Runtime>
 where
-	Runtime: module_evm::Config + module_prices::Config + module_transaction_payment::Config + pallet_scheduler::Config,
+	Runtime: module_evm::Config
+		+ module_prices::Config
+		+ module_transaction_payment::Config
+		+ pallet_scheduler::Config,
 {
 	const BASE_COST: u64 = 200;
 
 	fn cost(
-		input: &Input<Action, Runtime::AccountId, Runtime::AddressMapping, Runtime::Erc20InfoMapping>,
+		input: &Input<
+			Action,
+			Runtime::AccountId,
+			Runtime::AddressMapping,
+			Runtime::Erc20InfoMapping,
+		>,
 	) -> Result<u64, PrecompileFailure> {
 		let _action = input.action()?;
 		// TODO: gas cost
@@ -361,7 +383,8 @@ mod tests {
 	use super::*;
 
 	use crate::precompile::mock::{
-		alice_evm_addr, bob_evm_addr, new_test_ext, run_to_block, Balances, Event as TestEvent, System, Test,
+		alice_evm_addr, bob_evm_addr, new_test_ext, run_to_block, Balances, Event as TestEvent,
+		System, Test,
 	};
 	use hex_literal::hex;
 	use sp_core::H160;

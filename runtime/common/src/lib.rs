@@ -44,24 +44,24 @@ use static_assertions::const_assert;
 pub use check_nonce::CheckNonce;
 pub use module_support::{ExchangeRate, PrecompileCallerFilter, Price, Rate, Ratio};
 pub use precompile::{
-	AllPrecompiles, DEXPrecompile, EVMPrecompile, MultiCurrencyPrecompile, NFTPrecompile, OraclePrecompile,
-	SchedulePrecompile, StableAssetPrecompile,
+	AllPrecompiles, DEXPrecompile, EVMPrecompile, MultiCurrencyPrecompile, NFTPrecompile,
+	OraclePrecompile, SchedulePrecompile, StableAssetPrecompile,
 };
 pub use primitives::{
-	currency::{TokenInfo, SEL, KUSD, LSEL, KSM, DOT, RENBTC, DAI},
-	AccountId, BlockNumber
+	currency::{TokenInfo, DAI, DOT, KSM, KUSD, LSEL, RENBTC, SEL},
+	AccountId, BlockNumber,
 };
 
 pub mod bench;
 pub mod check_nonce;
-pub mod precompile;
-pub mod origin;
 pub mod currency;
 pub mod evm;
+pub mod origin;
+pub mod precompile;
 
-pub use origin::*;
 pub use currency::*;
 pub use evm::*;
+pub use origin::*;
 
 mod gas_to_weight_ratio;
 #[cfg(test)]
@@ -133,7 +133,19 @@ parameter_types! {
 }
 
 /// The type used to represent the kinds of proxying allowed.
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, RuntimeDebug, MaxEncodedLen, TypeInfo)]
+#[derive(
+	Copy,
+	Clone,
+	Eq,
+	PartialEq,
+	Ord,
+	PartialOrd,
+	Encode,
+	Decode,
+	RuntimeDebug,
+	MaxEncodedLen,
+	TypeInfo,
+)]
 pub enum ProxyType {
 	Any,
 	CancelProxy,
@@ -151,7 +163,6 @@ impl Default for ProxyType {
 		Self::Any
 	}
 }
-
 
 /// Macro to set a value (e.g. when using the `parameter_types` macro) to either a production value
 /// or to an environment variable or testing value (in case the `fast-runtime` feature is selected).
@@ -194,8 +205,9 @@ mod tests {
 
 	#[test]
 	fn check_max_normal_priority() {
-		let max_normal_priority: TransactionPriority = (MaxTipsOfPriority::get() / TipPerWeightStep::get()
-			* RuntimeBlockWeights::get()
+		let max_normal_priority: TransactionPriority = (MaxTipsOfPriority::get() /
+			TipPerWeightStep::get() *
+			RuntimeBlockWeights::get()
 				.max_block
 				.min(*RuntimeBlockLength::get().max.get(DispatchClass::Normal) as u64) as u128)
 			.try_into()

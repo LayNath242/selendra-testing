@@ -164,21 +164,11 @@ fn adjust_loan_by_debit_value_should_work() {
 			Change::NewValue(10000),
 		));
 
-		assert_ok!(FunanModule::adjust_loan_by_debit_value(
-			Origin::signed(ALICE),
-			BTC,
-			100,
-			50
-		));
+		assert_ok!(FunanModule::adjust_loan_by_debit_value(Origin::signed(ALICE), BTC, 100, 50));
 		assert_eq!(LoansModule::positions(BTC, ALICE).collateral, 100);
 		assert_eq!(LoansModule::positions(BTC, ALICE).debit, 500);
 
-		assert_ok!(FunanModule::adjust_loan_by_debit_value(
-			Origin::signed(ALICE),
-			BTC,
-			-10,
-			-5
-		));
+		assert_ok!(FunanModule::adjust_loan_by_debit_value(Origin::signed(ALICE), BTC, -10, -5));
 		assert_eq!(LoansModule::positions(BTC, ALICE).collateral, 90);
 		assert_eq!(LoansModule::positions(BTC, ALICE).debit, 450);
 	});
@@ -219,11 +209,7 @@ fn close_loan_has_debit_by_dex_work() {
 		assert_eq!(LoansModule::positions(BTC, ALICE).collateral, 100);
 		assert_eq!(LoansModule::positions(BTC, ALICE).debit, 50);
 
-		assert_ok!(FunanModule::close_loan_has_debit_by_dex(
-			Origin::signed(ALICE),
-			BTC,
-			100,
-		));
+		assert_ok!(FunanModule::close_loan_has_debit_by_dex(Origin::signed(ALICE), BTC, 100,));
 		assert_eq!(LoansModule::positions(BTC, ALICE).collateral, 0);
 		assert_eq!(LoansModule::positions(BTC, ALICE).debit, 0);
 	});

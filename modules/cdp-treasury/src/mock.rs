@@ -26,9 +26,9 @@ use frame_support::{
 	traits::{ConstU128, ConstU32, ConstU64, EnsureOneOf, Everything, Nothing},
 };
 use frame_system::{EnsureRoot, EnsureSignedBy};
-use module_stable_asset::traits::StableAsset;
 use module_stable_asset::{
-	PoolTokenIndex, RedeemProportionResult, StableAssetPoolId, StableAssetPoolInfo, SwapResult,
+	traits::StableAsset, PoolTokenIndex, RedeemProportionResult, StableAssetPoolId,
+	StableAssetPoolInfo, SwapResult,
 };
 use orml_traits::parameter_type_with_key;
 use primitives::{DexShare, TokenSymbol, TradingPair};
@@ -117,7 +117,8 @@ impl pallet_balances::Config for Runtime {
 	type ReserveIdentifier = [u8; 8];
 	type WeightInfo = ();
 }
-pub type AdaptedBasicCurrency = orml_currencies::BasicCurrencyAdapter<Runtime, PalletBalances, Amount, BlockNumber>;
+pub type AdaptedBasicCurrency =
+	orml_currencies::BasicCurrencyAdapter<Runtime, PalletBalances, Amount, BlockNumber>;
 
 parameter_types! {
 	pub const GetNativeCurrencyId: CurrencyId = SEL;
@@ -264,15 +265,11 @@ impl Default for ExtBuilder {
 
 impl ExtBuilder {
 	pub fn build(self) -> sp_io::TestExternalities {
-		let mut t = frame_system::GenesisConfig::default()
-			.build_storage::<Runtime>()
-			.unwrap();
+		let mut t = frame_system::GenesisConfig::default().build_storage::<Runtime>().unwrap();
 
-		orml_tokens::GenesisConfig::<Runtime> {
-			balances: self.balances,
-		}
-		.assimilate_storage(&mut t)
-		.unwrap();
+		orml_tokens::GenesisConfig::<Runtime> { balances: self.balances }
+			.assimilate_storage(&mut t)
+			.unwrap();
 
 		module_dex::GenesisConfig::<Runtime> {
 			initial_listing_trading_pairs: vec![],
@@ -301,7 +298,15 @@ impl StableAsset for MockStableAsset {
 
 	fn pool(
 		_id: StableAssetPoolId,
-	) -> Option<StableAssetPoolInfo<Self::AssetId, Self::Balance, Self::Balance, Self::AccountId, Self::BlockNumber>> {
+	) -> Option<
+		StableAssetPoolInfo<
+			Self::AssetId,
+			Self::Balance,
+			Self::Balance,
+			Self::AccountId,
+			Self::BlockNumber,
+		>,
+	> {
 		Some(StableAssetPoolInfo {
 			pool_asset: CurrencyId::StableAssetPoolToken(0),
 			assets: vec![
@@ -429,7 +434,11 @@ impl StableAsset for MockStableAsset {
 		unimplemented!()
 	}
 
-	fn modify_a(_pool_id: StableAssetPoolId, _a: Self::Balance, _future_a_block: Self::BlockNumber) -> DispatchResult {
+	fn modify_a(
+		_pool_id: StableAssetPoolId,
+		_a: Self::Balance,
+		_future_a_block: Self::BlockNumber,
+	) -> DispatchResult {
 		unimplemented!()
 	}
 
@@ -441,7 +450,15 @@ impl StableAsset for MockStableAsset {
 			Self::AccountId,
 			Self::BlockNumber,
 		>,
-	) -> Option<StableAssetPoolInfo<Self::AssetId, Self::Balance, Self::Balance, Self::AccountId, Self::BlockNumber>> {
+	) -> Option<
+		StableAssetPoolInfo<
+			Self::AssetId,
+			Self::Balance,
+			Self::Balance,
+			Self::AccountId,
+			Self::BlockNumber,
+		>,
+	> {
 		Some(StableAssetPoolInfo {
 			pool_asset: CurrencyId::StableAssetPoolToken(0),
 			assets: vec![
@@ -473,7 +490,15 @@ impl StableAsset for MockStableAsset {
 			Self::AccountId,
 			Self::BlockNumber,
 		>,
-	) -> Option<StableAssetPoolInfo<Self::AssetId, Self::Balance, Self::Balance, Self::AccountId, Self::BlockNumber>> {
+	) -> Option<
+		StableAssetPoolInfo<
+			Self::AssetId,
+			Self::Balance,
+			Self::Balance,
+			Self::AccountId,
+			Self::BlockNumber,
+		>,
+	> {
 		Some(StableAssetPoolInfo {
 			pool_asset: CurrencyId::StableAssetPoolToken(0),
 			assets: vec![

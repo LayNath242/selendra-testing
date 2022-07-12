@@ -81,7 +81,8 @@ pub mod module {
 	/// Cumulatives: map TradingPair => (Cumulative0, Cumulative1, LastUpdateTimestamp)
 	#[pallet::storage]
 	#[pallet::getter(fn cumulatives)]
-	pub type Cumulatives<T: Config> = StorageMap<_, Twox64Concat, TradingPair, (U256, U256, MomentOf<T>), ValueQuery>;
+	pub type Cumulatives<T: Config> =
+		StorageMap<_, Twox64Concat, TradingPair, (U256, U256, MomentOf<T>), ValueQuery>;
 
 	/// Average prices for TradingPair.
 	///
@@ -108,15 +109,25 @@ pub mod module {
 			let mut iterate_count: u32 = 0;
 			let mut update_count: u32 = 0;
 
-			for (trading_pair, (_, _, last_cumulative_0, last_cumulative_1, last_update_price_time, update_interval)) in
-				AveragePrices::<T>::iter()
+			for (
+				trading_pair,
+				(
+					_,
+					_,
+					last_cumulative_0,
+					last_cumulative_1,
+					last_update_price_time,
+					update_interval,
+				),
+			) in AveragePrices::<T>::iter()
 			{
 				iterate_count += 1;
 				let elapsed_time = now.saturating_sub(last_update_price_time);
 
 				if elapsed_time >= update_interval {
 					// try update cumulative before calculate average price.
-					let (pool_0, pool_1) = T::DEX::get_liquidity_pool(trading_pair.first(), trading_pair.second());
+					let (pool_0, pool_1) =
+						T::DEX::get_liquidity_pool(trading_pair.first(), trading_pair.second());
 					Self::try_update_cumulative(&trading_pair, pool_0, pool_1);
 
 					let (cumulative_0, cumulative_1, _) = Self::cumulatives(&trading_pair);
@@ -152,7 +163,10 @@ pub mod module {
 				}
 			}
 
-			<T as Config>::WeightInfo::on_initialize_with_update_average_prices(iterate_count, update_count)
+			<T as Config>::WeightInfo::on_initialize_with_update_average_prices(
+				iterate_count,
+				update_count,
+			)
 		}
 	}
 
@@ -175,8 +189,8 @@ pub mod module {
 		) -> DispatchResult {
 			T::UpdateOrigin::ensure_origin(origin)?;
 
-			let trading_pair =
-				TradingPair::from_currency_ids(currency_id_a, currency_id_b).ok_or(Error::<T>::InvalidCurrencyId)?;
+			let trading_pair = TradingPair::from_currency_ids(currency_id_a, currency_id_b)
+				.ok_or(Error::<T>::InvalidCurrencyId)?;
 			ensure!(
 				Self::average_prices(&trading_pair).is_none(),
 				Error::<T>::AveragePriceAlreadyEnabled
@@ -200,7 +214,10 @@ pub mod module {
 					interval,
 				),
 			);
-			Cumulatives::<T>::insert(&trading_pair, (initial_cumulative_0, initial_cumulative_1, now));
+			Cumulatives::<T>::insert(
+				&trading_pair,
+				(initial_cumulative_0, initial_cumulative_1, now),
+			);
 
 			Ok(())
 		}
@@ -220,8 +237,8 @@ pub mod module {
 		) -> DispatchResult {
 			T::UpdateOrigin::ensure_origin(origin)?;
 
-			let trading_pair =
-				TradingPair::from_currency_ids(currency_id_a, currency_id_b).ok_or(Error::<T>::InvalidCurrencyId)?;
+			let trading_pair = TradingPair::from_currency_ids(currency_id_a, currency_id_b)
+				.ok_or(Error::<T>::InvalidCurrencyId)?;
 			AveragePrices::<T>::take(&trading_pair).ok_or(Error::<T>::AveragePriceMustBeEnabled)?;
 			Cumulatives::<T>::remove(&trading_pair);
 
@@ -244,11 +261,12 @@ pub mod module {
 			new_interval: MomentOf<T>,
 		) -> DispatchResult {
 			T::UpdateOrigin::ensure_origin(origin)?;
-			let trading_pair =
-				TradingPair::from_currency_ids(currency_id_a, currency_id_b).ok_or(Error::<T>::InvalidCurrencyId)?;
+			let trading_pair = TradingPair::from_currency_ids(currency_id_a, currency_id_b)
+				.ok_or(Error::<T>::InvalidCurrencyId)?;
 
 			AveragePrices::<T>::try_mutate_exists(&trading_pair, |maybe| -> DispatchResult {
-				let (_, _, _, _, _, update_interval) = maybe.as_mut().ok_or(Error::<T>::AveragePriceMustBeEnabled)?;
+				let (_, _, _, _, _, update_interval) =
+					maybe.as_mut().ok_or(Error::<T>::AveragePriceMustBeEnabled)?;
 				ensure!(!new_interval.is_zero(), Error::<T>::IntervalIsZero);
 				*update_interval = new_interval;
 				Ok(())
@@ -297,8 +315,10 @@ impl<T: Config> Pallet<T> {
 	}
 
 	fn get_current_price(trading_pair: &TradingPair) -> Option<(ExchangeRate, ExchangeRate)> {
-		let (pool_0, pool_1) = T::DEX::get_liquidity_pool(trading_pair.first(), trading_pair.second());
-		ExchangeRate::checked_from_rational(pool_1, pool_0).zip(ExchangeRate::checked_from_rational(pool_0, pool_1))
+		let (pool_0, pool_1) =
+			T::DEX::get_liquidity_pool(trading_pair.first(), trading_pair.second());
+		ExchangeRate::checked_from_rational(pool_1, pool_0)
+			.zip(ExchangeRate::checked_from_rational(pool_0, pool_1))
 	}
 
 	fn get_average_price(trading_pair: &TradingPair) -> Option<(ExchangeRate, ExchangeRate)> {
@@ -318,15 +338,13 @@ pub struct CurrentDEXPriceProvider<T>(PhantomData<T>);
 impl<T: Config> DEXPriceProvider<CurrencyId> for CurrentDEXPriceProvider<T> {
 	fn get_relative_price(base: CurrencyId, quote: CurrencyId) -> Option<ExchangeRate> {
 		let trading_pair = TradingPair::from_currency_ids(base, quote)?;
-		Pallet::<T>::get_current_price(&trading_pair).map(
-			|(price_0, price_1)| {
-				if base == trading_pair.first() {
-					price_0
-				} else {
-					price_1
-				}
-			},
-		)
+		Pallet::<T>::get_current_price(&trading_pair).map(|(price_0, price_1)| {
+			if base == trading_pair.first() {
+				price_0
+			} else {
+				price_1
+			}
+		})
 	}
 }
 
@@ -335,15 +353,13 @@ pub struct AverageDEXPriceProvider<T>(PhantomData<T>);
 impl<T: Config> DEXPriceProvider<CurrencyId> for AverageDEXPriceProvider<T> {
 	fn get_relative_price(base: CurrencyId, quote: CurrencyId) -> Option<ExchangeRate> {
 		let trading_pair = TradingPair::from_currency_ids(base, quote)?;
-		Pallet::<T>::get_average_price(&trading_pair).map(
-			|(price_0, price_1)| {
-				if base == trading_pair.first() {
-					price_0
-				} else {
-					price_1
-				}
-			},
-		)
+		Pallet::<T>::get_average_price(&trading_pair).map(|(price_0, price_1)| {
+			if base == trading_pair.first() {
+				price_0
+			} else {
+				price_1
+			}
+		})
 	}
 }
 
@@ -355,14 +371,6 @@ impl<T: Config> DEXPriceProvider<CurrencyId> for PriorityAverageDEXPriceProvider
 		let trading_pair = TradingPair::from_currency_ids(base, quote)?;
 		Pallet::<T>::get_average_price(&trading_pair)
 			.or_else(|| Pallet::<T>::get_current_price(&trading_pair))
-			.map(
-				|(price_0, price_1)| {
-					if base == trading_pair.first() {
-						price_0
-					} else {
-						price_1
-					}
-				},
-			)
+			.map(|(price_0, price_1)| if base == trading_pair.first() { price_0 } else { price_1 })
 	}
 }

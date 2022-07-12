@@ -1,9 +1,11 @@
 use crate::{
-	parameter_types, Rate, BlockNumber, Currencies, Event, Auction, GetStableCurrencyId, CdpTreasury, EmergencyShutdown,
-	weights, MINUTES, HOURS, LoansPalletId, Balances, ExchangeRate, Runtime, Balance, dollar, SEL, CollateralCurrencyIds,
-	AccountId, FunanTreasuryPalletId, AuctionManager, EnsureRootOrHalfFinancialCouncil, Dex, ConstU32, CDPTreasuryPalletId,
-	RebasedStableAsset, Ratio, CdpEngine, KUSD, ExistentialDepositsTimesOneHundred, GetNativeCurrencyId, NativeTokenExistentialDeposit,
-	Timestamp, ExistentialDeposits, Prices, EnsureRootOrHalfCouncil, FixedPointNumber, AccountIdConversion
+	dollar, parameter_types, weights, AccountId, AccountIdConversion, Auction, AuctionManager,
+	Balance, Balances, BlockNumber, CDPTreasuryPalletId, CdpEngine, CdpTreasury,
+	CollateralCurrencyIds, ConstU32, Currencies, Dex, EmergencyShutdown, EnsureRootOrHalfCouncil,
+	EnsureRootOrHalfFinancialCouncil, Event, ExchangeRate, ExistentialDeposits,
+	ExistentialDepositsTimesOneHundred, FixedPointNumber, FunanTreasuryPalletId,
+	GetNativeCurrencyId, GetStableCurrencyId, LoansPalletId, NativeTokenExistentialDeposit, Prices,
+	Rate, Ratio, RebasedStableAsset, Runtime, Timestamp, HOURS, KUSD, MINUTES, SEL,
 };
 
 parameter_types! {
@@ -84,8 +86,11 @@ impl module_cdp_engine::Config for Runtime {
 	type DefaultDebitExchangeRate = DefaultDebitExchangeRate;
 	type DefaultLiquidationPenalty = DefaultLiquidationPenalty;
 	type MinimumDebitValue = MinimumDebitValue;
-	type MinimumCollateralAmount =
-		ExistentialDepositsTimesOneHundred<GetNativeCurrencyId, NativeTokenExistentialDeposit, ExistentialDeposits>;
+	type MinimumCollateralAmount = ExistentialDepositsTimesOneHundred<
+		GetNativeCurrencyId,
+		NativeTokenExistentialDeposit,
+		ExistentialDeposits,
+	>;
 	type GetStableCurrencyId = GetStableCurrencyId;
 	type CDPTreasury = CdpTreasury;
 	type UpdateOrigin = EnsureRootOrHalfFinancialCouncil;

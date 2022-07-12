@@ -35,10 +35,11 @@ use frame_support::pallet_prelude::InvalidTransaction;
 pub use frame_support::{
 	construct_runtime, log, parameter_types,
 	traits::{
-		ConstBool, ConstU128, ConstU16, ConstU32, Contains, ContainsLengthBound, Currency as PalletCurrency,
-		EnsureOrigin, EqualPrivilegeOnly, Everything, Get, Imbalance, InstanceFilter, IsSubType, IsType,
-		KeyOwnerProofSystem, LockIdentifier, Nothing, OnRuntimeUpgrade, OnUnbalanced, Randomness, SortedMembers,
-		U128CurrencyToVote, WithdrawReasons,
+		ConstBool, ConstU128, ConstU16, ConstU32, Contains, ContainsLengthBound,
+		Currency as PalletCurrency, EnsureOrigin, EqualPrivilegeOnly, Everything, Get, Imbalance,
+		InstanceFilter, IsSubType, IsType, KeyOwnerProofSystem, LockIdentifier, Nothing,
+		OnRuntimeUpgrade, OnUnbalanced, Randomness, SortedMembers, U128CurrencyToVote,
+		WithdrawReasons,
 	},
 	weights::{
 		constants::{BlockExecutionWeight, RocksDbWeight, WEIGHT_PER_SECOND},
@@ -47,42 +48,42 @@ pub use frame_support::{
 	PalletId, RuntimeDebug, StorageValue,
 };
 use frame_system::{EnsureRoot, RawOrigin};
-use module_asset_registry::{AssetIdMaps, EvmErc20InfoMapping};
+use module_asset_registry::AssetIdMaps;
 use module_cdp_engine::CollateralCurrencyIds;
 use module_currencies::BasicCurrencyAdapter;
 use module_evm::{runner::RunnerExtended, CallInfo, CreateInfo};
 use module_evm_accounts::EvmAddressMapping;
-use module_support::{AssetIdMapping, DispatchableTask, PoolId, ExchangeRateProvider};
+use module_support::{AssetIdMapping, DispatchableTask, PoolId};
 use module_transaction_payment::TargetedFeeAdjustment;
 
-use orml_tokens::CurrencyAdapter;
 use orml_traits::{
-	create_median_value_data_provider, parameter_type_with_key, DataFeeder, DataProviderExtended, GetByKey,
+	create_median_value_data_provider, parameter_type_with_key, DataFeeder, DataProviderExtended,
+	GetByKey,
 };
+use pallet_grandpa::{
+	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
+};
+use pallet_session::historical::{self as pallet_session_historical};
+#[cfg(feature = "std")]
+pub use pallet_staking::StakerStatus;
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
 use primitives::{
 	evm::{AccessListItem, EthereumTransactionMessage},
 	unchecked_extrinsic::SelendraUncheckedExtrinsic,
 };
-#[cfg(feature = "std")]
-pub use pallet_staking::StakerStatus;
 use sp_api::impl_runtime_apis;
+use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata, H160};
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
 	traits::{
-		AccountIdConversion, BadOrigin, BlakeTwo256, Block as BlockT, Convert, SaturatedConversion, StaticLookup,
-		Verify, Bounded, NumberFor
+		AccountIdConversion, BadOrigin, BlakeTwo256, Block as BlockT, Bounded, Convert, NumberFor,
+		SaturatedConversion, StaticLookup, Verify,
 	},
 	transaction_validity::{TransactionSource, TransactionValidity},
 	ApplyExtrinsicResult, DispatchResult, FixedPointNumber,
 };
 use sp_std::prelude::*;
-use pallet_session::historical::{self as pallet_session_historical};
-use pallet_grandpa::{
-	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
-};
-use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
@@ -98,37 +99,40 @@ pub use constants::{fee::*, time::*};
 pub use primitives::{
 	currency::AssetIds,
 	evm::{BlockLimits, EstimateResourcesRequest},
-	AccountId, AccountIndex, Address, Amount, AuctionId, AuthoritysOriginId, Balance, BlockNumber, CurrencyId,
-	DataProviderId, EraIndex, Hash, Lease, Moment, Multiplier, Nonce, ReserveIdentifier, Share, Signature, TokenSymbol,
-	TradingPair,
+	AccountId, AccountIndex, Address, Amount, AuctionId, AuthoritysOriginId, Balance, BlockNumber,
+	CurrencyId, DataProviderId, EraIndex, Hash, Lease, Moment, Multiplier, Nonce,
+	ReserveIdentifier, Share, Signature, TokenSymbol, TradingPair,
 };
 pub use runtime_common::{
-	cent, dollar, microcent, millicent, AllPrecompiles, EnsureRootOrAllCouncil,
-	EnsureRootOrAllTechnicalCommittee, EnsureRootOrHalfFinancialCouncil, EnsureRootOrHalfCouncil,
-	EnsureRootOrOneCouncil, EnsureRootOrOneThirdsTechnicalCommittee,
-	EnsureRootOrThreeFourthsCouncil, EnsureRootOrTwoThirdsCouncil,
-	EnsureRootOrTwoThirdsTechnicalCommittee, ExchangeRate, ExistentialDepositsTimesOneHundred,
-	FinancialCouncilInstance, FinancialCouncilMembershipInstance, GasToWeight, CouncilInstance,
-	CouncilMembershipInstance, MaxTipsOfPriority, BlockHashCount,
-	OffchainSolutionWeightLimit, OperationalFeeMultiplier, OperatorMembershipInstanceSelendra, Price, ProxyType, Rate,
-	Ratio, RuntimeBlockLength, RuntimeBlockWeights, SystemContractsFilter, TechnicalCommitteeInstance,
-	TechnicalMembershipInstance, TimeStampedPrice, TipPerWeightStep, SEL, KUSD, DOT, LSEL, KSM, RENBTC,
-	DAI,
+	cent, dollar, microcent, millicent, AllPrecompiles, BlockHashCount, CouncilInstance,
+	CouncilMembershipInstance, EnsureRootOrAllCouncil, EnsureRootOrAllTechnicalCommittee,
+	EnsureRootOrHalfCouncil, EnsureRootOrHalfFinancialCouncil, EnsureRootOrOneCouncil,
+	EnsureRootOrOneThirdsTechnicalCommittee, EnsureRootOrThreeFourthsCouncil,
+	EnsureRootOrTwoThirdsCouncil, EnsureRootOrTwoThirdsTechnicalCommittee, ExchangeRate,
+	ExistentialDepositsTimesOneHundred, FinancialCouncilInstance,
+	FinancialCouncilMembershipInstance, GasToWeight, MaxTipsOfPriority,
+	OffchainSolutionWeightLimit, OperationalFeeMultiplier, OperatorMembershipInstanceSelendra,
+	Price, ProxyType, Rate, Ratio, RuntimeBlockLength, RuntimeBlockWeights, SystemContractsFilter,
+	TechnicalCommitteeInstance, TechnicalMembershipInstance, TimeStampedPrice, TipPerWeightStep,
+	DAI, DOT, KSM, KUSD, LSEL, RENBTC, SEL,
 };
 
 mod authority;
 pub mod constants;
-mod weights;
 mod voter_bags;
+mod weights;
 
 // runtime config
 mod config;
 
-pub use config::consensus_config::{EpochDuration, MaxNominations};
+use crate::config::{
+	consensus_config::EpochDuration,
+	dex_config::TradingPathLimit,
+	evm_config::{StorageDepositPerByte, TxFeePerGas},
+	funan_config::MaxSwapSlippageCompareToOracle,
+};
 #[cfg(test)]
 use config::evm_config::NewContractExtraBytes;
-use config::evm_config::{StorageDepositPerByte, TxFeePerGas};
-use crate::config::funan_config::MaxSwapSlippageCompareToOracle;
 
 /// This runtime version.
 #[sp_version::runtime_version]
@@ -147,10 +151,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 /// natively.
 #[cfg(feature = "std")]
 pub fn native_version() -> NativeVersion {
-	NativeVersion {
-		runtime_version: VERSION,
-		can_author_with: Default::default(),
-	}
+	NativeVersion { runtime_version: VERSION, can_author_with: Default::default() }
 }
 
 /// The BABE epoch configuration at genesis.
@@ -212,8 +213,8 @@ parameter_types! {
 pub struct BaseCallFilter;
 impl Contains<Call> for BaseCallFilter {
 	fn contains(call: &Call) -> bool {
-		!module_transaction_pause::PausedTransactionFilter::<Runtime>::contains(call)
-			&& !matches!(call, Call::Democracy(pallet_democracy::Call::propose { .. }),)
+		!module_transaction_pause::PausedTransactionFilter::<Runtime>::contains(call) &&
+			!matches!(call, Call::Democracy(pallet_democracy::Call::propose { .. }),)
 	}
 }
 
@@ -235,10 +236,8 @@ impl frame_system::Config for Runtime {
 	type PalletInfo = PalletInfo;
 	type AccountData = pallet_balances::AccountData<Balance>;
 	type OnNewAccount = ();
-	type OnKilledAccount = (
-		module_evm::CallKillAccount<Runtime>,
-		module_evm_accounts::CallKillAccount<Runtime>,
-	);
+	type OnKilledAccount =
+		(module_evm::CallKillAccount<Runtime>, module_evm_accounts::CallKillAccount<Runtime>);
 	type DbWeight = RocksDbWeight;
 	type BaseCallFilter = BaseCallFilter;
 	type SystemWeightInfo = ();
@@ -290,126 +289,6 @@ parameter_types! {
 impl pallet_sudo::Config for Runtime {
 	type Event = Event;
 	type Call = Call;
-}
-
-parameter_types! {
-	pub const CouncilMotionDuration: BlockNumber = 7 * DAYS;
-	pub const CouncilDefaultMaxProposals: u32 = 100;
-	pub const CouncilDefaultMaxMembers: u32 = 100;
-}
-
-impl pallet_collective::Config<CouncilInstance> for Runtime {
-	type Origin = Origin;
-	type Proposal = Call;
-	type Event = Event;
-	type MotionDuration = CouncilMotionDuration;
-	type MaxProposals = CouncilDefaultMaxProposals;
-	type MaxMembers = CouncilDefaultMaxMembers;
-	type DefaultVote = pallet_collective::PrimeDefaultVote;
-	type WeightInfo = ();
-}
-
-impl pallet_membership::Config<CouncilMembershipInstance> for Runtime {
-	type Event = Event;
-	type AddOrigin = EnsureRootOrThreeFourthsCouncil;
-	type RemoveOrigin = EnsureRootOrThreeFourthsCouncil;
-	type SwapOrigin = EnsureRootOrThreeFourthsCouncil;
-	type ResetOrigin = EnsureRootOrThreeFourthsCouncil;
-	type PrimeOrigin = EnsureRootOrThreeFourthsCouncil;
-	type MembershipInitialized = Council;
-	type MembershipChanged = Council;
-	type MaxMembers = CouncilDefaultMaxMembers;
-	type WeightInfo = ();
-}
-
-parameter_types! {
-	pub const FinancialCouncilMotionDuration: BlockNumber = 7 * DAYS;
-}
-
-impl pallet_collective::Config<FinancialCouncilInstance> for Runtime {
-	type Origin = Origin;
-	type Proposal = Call;
-	type Event = Event;
-	type MotionDuration = FinancialCouncilMotionDuration;
-	type MaxProposals = CouncilDefaultMaxProposals;
-	type MaxMembers = CouncilDefaultMaxMembers;
-	type DefaultVote = pallet_collective::PrimeDefaultVote;
-	type WeightInfo = ();
-}
-
-impl pallet_membership::Config<FinancialCouncilMembershipInstance> for Runtime {
-	type Event = Event;
-	type AddOrigin = EnsureRootOrTwoThirdsCouncil;
-	type RemoveOrigin = EnsureRootOrTwoThirdsCouncil;
-	type SwapOrigin = EnsureRootOrTwoThirdsCouncil;
-	type ResetOrigin = EnsureRootOrTwoThirdsCouncil;
-	type PrimeOrigin = EnsureRootOrTwoThirdsCouncil;
-	type MembershipInitialized = FinancialCouncil;
-	type MembershipChanged = FinancialCouncil;
-	type MaxMembers = CouncilDefaultMaxMembers;
-	type WeightInfo = ();
-}
-
-parameter_types! {
-	pub const TechnicalCommitteeMotionDuration: BlockNumber = 7 * DAYS;
-}
-
-impl pallet_collective::Config<TechnicalCommitteeInstance> for Runtime {
-	type Origin = Origin;
-	type Proposal = Call;
-	type Event = Event;
-	type MotionDuration = TechnicalCommitteeMotionDuration;
-	type MaxProposals = CouncilDefaultMaxProposals;
-	type MaxMembers = CouncilDefaultMaxMembers;
-	type DefaultVote = pallet_collective::PrimeDefaultVote;
-	type WeightInfo = ();
-}
-
-impl pallet_membership::Config<TechnicalMembershipInstance> for Runtime {
-	type Event = Event;
-	type AddOrigin = EnsureRootOrTwoThirdsCouncil;
-	type RemoveOrigin = EnsureRootOrTwoThirdsCouncil;
-	type SwapOrigin = EnsureRootOrTwoThirdsCouncil;
-	type ResetOrigin = EnsureRootOrTwoThirdsCouncil;
-	type PrimeOrigin = EnsureRootOrTwoThirdsCouncil;
-	type MembershipInitialized = TechnicalCommittee;
-	type MembershipChanged = TechnicalCommittee;
-	type MaxMembers = CouncilDefaultMaxMembers;
-	type WeightInfo = ();
-}
-
-impl pallet_membership::Config<OperatorMembershipInstanceSelendra> for Runtime {
-	type Event = Event;
-	type AddOrigin = EnsureRootOrTwoThirdsCouncil;
-	type RemoveOrigin = EnsureRootOrTwoThirdsCouncil;
-	type SwapOrigin = EnsureRootOrTwoThirdsCouncil;
-	type ResetOrigin = EnsureRootOrTwoThirdsCouncil;
-	type PrimeOrigin = EnsureRootOrTwoThirdsCouncil;
-	type MembershipInitialized = ();
-	type MembershipChanged = SelendraOracle;
-	type MaxMembers = ConstU32<50>;
-	type WeightInfo = ();
-}
-
-pub struct CouncilProvider;
-impl SortedMembers<AccountId> for CouncilProvider {
-	fn sorted_members() -> Vec<AccountId> {
-		Council::members()
-	}
-
-	#[cfg(feature = "runtime-benchmarks")]
-	fn add(_: &AccountId) {
-		todo!()
-	}
-}
-
-impl ContainsLengthBound for CouncilProvider {
-	fn max_len() -> usize {
-		100
-	}
-	fn min_len() -> usize {
-		0
-	}
 }
 
 parameter_types! {
@@ -473,63 +352,11 @@ impl pallet_tips::Config for Runtime {
 	type Event = Event;
 	type DataDepositPerByte = DataDepositPerByte;
 	type MaximumReasonLength = MaximumReasonLength;
-	type Tippers = CouncilProvider;
+	type Tippers = PhragmenElection;
 	type TipCountdown = TipCountdown;
 	type TipFindersFee = TipFindersFee;
 	type TipReportDepositBase = TipReportDepositBase;
 	type WeightInfo = ();
-}
-
-parameter_types! {
-	pub const LaunchPeriod: BlockNumber = 2 * HOURS;
-	pub const VotingPeriod: BlockNumber = HOURS;
-	pub const FastTrackVotingPeriod: BlockNumber = HOURS;
-	pub MinimumDeposit: Balance = 100 * cent(SEL);
-	pub const EnactmentPeriod: BlockNumber = MINUTES;
-	pub const CooloffPeriod: BlockNumber = MINUTES;
-}
-
-impl pallet_democracy::Config for Runtime {
-	type Proposal = Call;
-	type Event = Event;
-	type Currency = Balances;
-	type EnactmentPeriod = EnactmentPeriod;
-	type LaunchPeriod = LaunchPeriod;
-	type VotingPeriod = VotingPeriod;
-	type VoteLockingPeriod = EnactmentPeriod; // Same as EnactmentPeriod
-	type MinimumDeposit = MinimumDeposit;
-	/// A straight majority of the council can decide what their next motion is.
-	type ExternalOrigin = EnsureRootOrHalfCouncil;
-	/// A majority can have the next scheduled referendum be a straight majority-carries vote.
-	type ExternalMajorityOrigin = EnsureRootOrHalfCouncil;
-	/// A unanimous council can have the next scheduled referendum be a straight default-carries
-	/// (NTB) vote.
-	type ExternalDefaultOrigin = EnsureRootOrAllCouncil;
-	/// Two thirds of the technical committee can have an ExternalMajority/ExternalDefault vote
-	/// be tabled immediately and with a shorter voting/enactment period.
-	type FastTrackOrigin = EnsureRootOrTwoThirdsTechnicalCommittee;
-	type InstantOrigin = EnsureRootOrAllTechnicalCommittee;
-	type InstantAllowed = ConstBool<true>;
-	type FastTrackVotingPeriod = FastTrackVotingPeriod;
-	// To cancel a proposal which has been passed, 2/3 of the council must agree to it.
-	type CancellationOrigin = EnsureRootOrTwoThirdsCouncil;
-	type BlacklistOrigin = EnsureRoot<AccountId>;
-	// To cancel a proposal before it has been passed, the technical committee must be unanimous or
-	// Root must agree.
-	type CancelProposalOrigin = EnsureRootOrAllTechnicalCommittee;
-	// Any single technical committee member may veto a coming council proposal, however they can
-	// only do it once and it lasts only for the cooloff period.
-	type VetoOrigin = pallet_collective::EnsureMember<AccountId, TechnicalCommitteeInstance>;
-	type CooloffPeriod = CooloffPeriod;
-	type PreimageByteDeposit = PreimageByteDeposit;
-	type OperationalPreimageOrigin = pallet_collective::EnsureMember<AccountId, CouncilInstance>;
-	type Slash = Treasury;
-	type Scheduler = Scheduler;
-	type PalletsOrigin = OriginCaller;
-	type MaxVotes = ConstU32<100>;
-	//TODO: might need to weight for Selendra
-	type WeightInfo = pallet_democracy::weights::SubstrateWeight<Runtime>;
-	type MaxProposals = CouncilDefaultMaxProposals;
 }
 
 impl orml_auction::Config for Runtime {
@@ -538,42 +365,6 @@ impl orml_auction::Config for Runtime {
 	type AuctionId = AuctionId;
 	type Handler = AuctionManager;
 	type WeightInfo = weights::orml_auction::WeightInfo<Runtime>;
-}
-
-impl orml_authority::Config for Runtime {
-	type Event = Event;
-	type Origin = Origin;
-	type PalletsOrigin = OriginCaller;
-	type Call = Call;
-	type Scheduler = Scheduler;
-	type AsOriginId = AuthoritysOriginId;
-	type AuthorityConfig = AuthorityConfigImpl;
-	type WeightInfo = weights::orml_authority::WeightInfo<Runtime>;
-}
-
-parameter_types! {
-	pub CandidacyBond: Balance = 10 * dollar(SEL);
-	pub VotingBondBase: Balance = 2 * dollar(SEL);
-	pub VotingBondFactor: Balance = dollar(SEL);
-	pub const TermDuration: BlockNumber = 7 * DAYS;
-}
-
-impl pallet_elections_phragmen::Config for Runtime {
-	type PalletId = PhragmenElectionPalletId;
-	type Event = Event;
-	type Currency = CurrencyAdapter<Runtime, GetLiquidCurrencyId>;
-	type CurrencyToVote = U128CurrencyToVote;
-	type ChangeMembers = Council;
-	type InitializeMembers = Council;
-	type CandidacyBond = CandidacyBond;
-	type VotingBondBase = VotingBondBase;
-	type VotingBondFactor = VotingBondFactor;
-	type TermDuration = TermDuration;
-	type DesiredMembers = ConstU32<13>;
-	type DesiredRunnersUp = ConstU32<7>;
-	type LoserCandidate = ();
-	type KickedMember = ();
-	type WeightInfo = ();
 }
 
 parameter_types! {
@@ -586,7 +377,8 @@ type SelendraDataProvider = orml_oracle::Instance1;
 impl orml_oracle::Config<SelendraDataProvider> for Runtime {
 	type Event = Event;
 	type OnNewData = ();
-	type CombineData = orml_oracle::DefaultCombineData<Runtime, MinimumCount, ExpiresIn, SelendraDataProvider>;
+	type CombineData =
+		orml_oracle::DefaultCombineData<Runtime, MinimumCount, ExpiresIn, SelendraDataProvider>;
 	type Time = Timestamp;
 	type OracleKey = CurrencyId;
 	type OracleValue = Price;
@@ -678,40 +470,6 @@ impl orml_tokens::Config for Runtime {
 }
 
 parameter_types! {
-	pub StableCurrencyFixedPrice: Price = Price::saturating_from_rational(1, 1);
-	pub RewardRatePerRelaychainBlock: Rate = Rate::saturating_from_rational(2_492, 100_000_000_000u128);
-}
-
-parameter_type_with_key! {
-	pub PricingPegged: |_currency_id: CurrencyId| -> Option<CurrencyId> {
-		None
-	};
-}
-
-pub struct LiquidNativeExchangeProvider;
-impl ExchangeRateProvider for LiquidNativeExchangeProvider {
-	fn get_exchange_rate() -> ExchangeRate {
-		ExchangeRate::saturating_from_rational(1, 10)
-	}
-}
-
-impl module_prices::Config for Runtime {
-	type Event = Event;
-	type Source = AggregatedDataProvider;
-	type GetStableCurrencyId = GetStableCurrencyId;
-	type StableCurrencyFixedPrice = StableCurrencyFixedPrice;
-	type GetNativeCurrencyId = GetNativeCurrencyId;
-	type GetLiquidCurrencyId = GetLiquidCurrencyId;
-	type LiquidNativeExchangeRateProvider = LiquidNativeExchangeProvider;
-	type LockOrigin = EnsureRootOrTwoThirdsCouncil;
-	type DEX = Dex;
-	type Currency = Currencies;
-	type Erc20InfoMapping = EvmErc20InfoMapping<Runtime>;
-	type PricingPegged = PricingPegged;
-	type WeightInfo = weights::module_prices::WeightInfo<Runtime>;
-}
-
-parameter_types! {
 	pub const GetNativeCurrencyId: CurrencyId = SEL;
 	pub const GetStableCurrencyId: CurrencyId = KUSD;
 	pub Erc20HoldingAccount: H160 = primitives::evm::ERC20_HOLDING_ACCOUNT;
@@ -744,15 +502,16 @@ impl EnsureOrigin<Origin> for EnsureRootOrTreasury {
 				} else {
 					Err(Origin::from(Some(caller)))
 				}
-			}
+			},
 			r => Err(Origin::from(r)),
 		})
 	}
 
 	#[cfg(feature = "runtime-benchmarks")]
 	fn successful_origin() -> Origin {
-		let zero_account_id = AccountId::decode(&mut sp_runtime::traits::TrailingZeroInput::zeroes())
-			.expect("infinite length input; no invalid inputs for type; qed");
+		let zero_account_id =
+			AccountId::decode(&mut sp_runtime::traits::TrailingZeroInput::zeroes())
+				.expect("infinite length input; no invalid inputs for type; qed");
 		Origin::from(RawOrigin::Signed(zero_account_id))
 	}
 }
@@ -793,8 +552,6 @@ impl pallet_preimage::Config for Runtime {
 	type ByteDeposit = PreimageByteDeposit;
 }
 
-
-
 impl<LocalCall> frame_system::offchain::CreateSignedTransaction<LocalCall> for Runtime
 where
 	Call: From<LocalCall>,
@@ -804,15 +561,10 @@ where
 		public: <Signature as sp_runtime::traits::Verify>::Signer,
 		account: AccountId,
 		nonce: Nonce,
-	) -> Option<(
-		Call,
-		<UncheckedExtrinsic as sp_runtime::traits::Extrinsic>::SignaturePayload,
-	)> {
+	) -> Option<(Call, <UncheckedExtrinsic as sp_runtime::traits::Extrinsic>::SignaturePayload)> {
 		// take the biggest period possible.
-		let period = BlockHashCount::get()
-			.checked_next_power_of_two()
-			.map(|c| c / 2)
-			.unwrap_or(2) as u64;
+		let period =
+			BlockHashCount::get().checked_next_power_of_two().map(|c| c / 2).unwrap_or(2) as u64;
 		let current_block = System::block_number()
 			.saturated_into::<u64>()
 			// The `System::block_number` is initialized with `n+1`,
@@ -858,52 +610,6 @@ where
 	type Extrinsic = UncheckedExtrinsic;
 }
 
-parameter_types! {
-	pub const GetExchangeFee: (u32, u32) = (1, 1000);	// 0.1%
-	pub const ExtendedProvisioningBlocks: BlockNumber = 2 * DAYS;
-	pub const TradingPathLimit: u32 = 4;
-	pub AlternativeSwapPathJointList: Vec<Vec<CurrencyId>> = vec![
-		vec![SEL],
-		vec![LSEL],
-	];
-}
-
-impl module_dex::Config for Runtime {
-	type Event = Event;
-	type Currency = Currencies;
-	type GetExchangeFee = GetExchangeFee;
-	type TradingPathLimit = TradingPathLimit;
-	type PalletId = DEXPalletId;
-	type Erc20InfoMapping = EvmErc20InfoMapping<Runtime>;
-	type DEXIncentives = Incentives;
-	type WeightInfo = weights::module_dex::WeightInfo<Runtime>;
-	type ListingOrigin = EnsureRootOrHalfCouncil;
-	type ExtendedProvisioningBlocks = ExtendedProvisioningBlocks;
-	type OnLiquidityPoolUpdated = ();
-}
-
-impl module_aggregated_dex::Config for Runtime {
-	type DEX = Dex;
-	type StableAsset = RebasedStableAsset;
-	type GovernanceOrigin = EnsureRootOrHalfCouncil;
-	type DexSwapJointList = AlternativeSwapPathJointList;
-	type SwapPathLimit = ConstU32<3>;
-	type WeightInfo = ();
-}
-
-pub type RebasedStableAsset = module_support::RebasedStableAsset<
-	StableAsset,
-	ConvertBalanceSelendra,
-	module_aggregated_dex::RebasedStableAssetErrorConvertor<Runtime>,
->;
-
-impl module_dex_oracle::Config for Runtime {
-	type DEX = Dex;
-	type Time = Timestamp;
-	type UpdateOrigin = EnsureRootOrHalfCouncil;
-	type WeightInfo = weights::module_dex_oracle::WeightInfo<Runtime>;
-}
-
 impl module_transaction_pause::Config for Runtime {
 	type Event = Event;
 	type UpdateOrigin = EnsureRootOrThreeFourthsCouncil;
@@ -929,7 +635,8 @@ impl module_transaction_payment::Config for Runtime {
 	type MaxTipsOfPriority = MaxTipsOfPriority;
 	type WeightToFee = WeightToFee;
 	type TransactionByteFee = TransactionByteFee;
-	type FeeMultiplierUpdate = TargetedFeeAdjustment<Self, TargetBlockFullness, AdjustmentVariable, MinimumMultiplier>;
+	type FeeMultiplierUpdate =
+		TargetedFeeAdjustment<Self, TargetBlockFullness, AdjustmentVariable, MinimumMultiplier>;
 	type DEX = Dex;
 	type MaxSwapSlippageCompareToOracle = MaxSwapSlippageCompareToOracle;
 	type TradingPathLimit = TradingPathLimit;
@@ -942,8 +649,6 @@ impl module_transaction_payment::Config for Runtime {
 	type AlternativeFeeSurplus = AlternativeFeeSurplus;
 	type DefaultFeeTokens = DefaultFeeTokens;
 }
-
-
 
 impl module_asset_registry::Config for Runtime {
 	type Event = Event;
@@ -1019,7 +724,6 @@ impl module_stable_asset::traits::ValidateAssetId<CurrencyId> for EnsurePoolAsse
 	}
 }
 
-
 pub struct ConvertBalanceSelendra;
 impl orml_tokens::ConvertBalance<Balance, Balance> for ConvertBalanceSelendra {
 	type AssetId = CurrencyId;
@@ -1053,8 +757,20 @@ impl Contains<CurrencyId> for IsLiquidToken {
 type RebaseTokens = orml_tokens::Combiner<
 	AccountId,
 	IsLiquidToken,
-	orml_tokens::Mapper<AccountId, Currencies, ConvertBalanceSelendra, Balance, GetLiquidCurrencyId>,
+	orml_tokens::Mapper<
+		AccountId,
+		Currencies,
+		ConvertBalanceSelendra,
+		Balance,
+		GetLiquidCurrencyId,
+	>,
 	Currencies,
+>;
+
+pub type RebasedStableAsset = module_support::RebasedStableAsset<
+	StableAsset,
+	ConvertBalanceSelendra,
+	module_aggregated_dex::RebasedStableAssetErrorConvertor<Runtime>,
 >;
 
 impl module_stable_asset::Config for Runtime {
@@ -1077,8 +793,11 @@ impl module_stable_asset::Config for Runtime {
 #[derive(Clone, Encode, Decode, PartialEq, Eq, RuntimeDebug)]
 pub struct ConvertEthereumTx;
 
-impl Convert<(Call, SignedExtra), Result<(EthereumTransactionMessage, SignedExtra), InvalidTransaction>>
-	for ConvertEthereumTx
+impl
+	Convert<
+		(Call, SignedExtra),
+		Result<(EthereumTransactionMessage, SignedExtra), InvalidTransaction>,
+	> for ConvertEthereumTx
 {
 	fn convert(
 		(call, mut extra): (Call, SignedExtra),
@@ -1094,14 +813,14 @@ impl Convert<(Call, SignedExtra), Result<(EthereumTransactionMessage, SignedExtr
 				valid_until,
 			}) => {
 				if System::block_number() > valid_until {
-					return Err(InvalidTransaction::Stale);
+					return Err(InvalidTransaction::Stale)
 				}
 
 				let (_, _, _, _, mortality, check_nonce, _, charge, ..) = extra.clone();
 
 				if mortality != frame_system::CheckEra::from(sp_runtime::generic::Era::Immortal) {
 					// require immortal
-					return Err(InvalidTransaction::BadProof);
+					return Err(InvalidTransaction::BadProof)
 				}
 
 				let nonce = check_nonce.nonce;
@@ -1125,7 +844,7 @@ impl Convert<(Call, SignedExtra), Result<(EthereumTransactionMessage, SignedExtr
 					},
 					extra,
 				))
-			}
+			},
 			_ => Err(InvalidTransaction::BadProof),
 		}
 	}
@@ -1148,9 +867,12 @@ impl Convert<(Call, SignedExtra), Result<(), InvalidTransaction>> for PayerSigna
 				.try_into()
 				.map_err(|_| InvalidTransaction::BadSigner)?;
 			// payer signature is aim at inner call of `with_fee_paid_by` call.
-			let raw_payload = SignedPayload::new(*call, extra).map_err(|_| InvalidTransaction::BadSigner)?;
-			if !raw_payload.using_encoded(|payload| payer_sig.verify(payload, &payer_account.into())) {
-				return Err(InvalidTransaction::BadProof);
+			let raw_payload =
+				SignedPayload::new(*call, extra).map_err(|_| InvalidTransaction::BadSigner)?;
+			if !raw_payload
+				.using_encoded(|payload| payer_sig.verify(payload, &payer_account.into()))
+			{
+				return Err(InvalidTransaction::BadProof)
 			}
 		}
 		Ok(())
@@ -1191,8 +913,14 @@ pub type SignedPayload = generic::SignedPayload<Call, SignedExtra>;
 /// Extrinsic type that has already been checked.
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExtra>;
 /// Executive: handles dispatch to the various modules.
-pub type Executive =
-	frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem, ()>;
+pub type Executive = frame_executive::Executive<
+	Runtime,
+	Block,
+	frame_system::ChainContext<Runtime>,
+	Runtime,
+	AllPalletsWithSystem,
+	(),
+>;
 
 construct_runtime!(
 	pub enum Runtime where
@@ -1260,12 +988,12 @@ construct_runtime!(
 		SelendraOracle: orml_oracle::<Instance1> = 80,
 		OperatorMembershipSelendra: pallet_membership::<Instance5> = 82,
 
-		// ORML Core
+		// Selendra Core
 		Auction: orml_auction = 100,
 		Rewards: orml_rewards = 101,
 		OrmlNFT: orml_nft exclude_parts { Call } = 102,
 
-		// Selendra Core
+		// Dex
 		Prices: module_prices = 110,
 		Dex: module_dex = 111,
 		DexOracle: module_dex_oracle = 112,
@@ -1751,7 +1479,8 @@ mod tests {
 		// ExistentialDeposit.
 		assert!(
 			Balance::from(NewContractExtraBytes::get()).saturating_mul(
-				<StorageDepositPerByte as frame_support::traits::Get<Balance>>::get() / 10u128.saturating_pow(6)
+				<StorageDepositPerByte as frame_support::traits::Get<Balance>>::get() /
+					10u128.saturating_pow(6)
 			) >= NativeTokenExistentialDeposit::get()
 		);
 	}
@@ -1778,10 +1507,7 @@ mod tests {
 			// set evm nonce to 3
 			module_evm::Accounts::<Runtime>::insert(
 				&address,
-				module_evm::AccountInfo {
-					nonce: 3,
-					contract_info: None,
-				},
+				module_evm::AccountInfo { nonce: 3, contract_info: None },
 			);
 
 			let call = Call::EVM(module_evm::Call::eth_call {
@@ -1870,9 +1596,7 @@ mod tests {
 	}
 
 	fn new_test_ext() -> sp_io::TestExternalities {
-		let t = frame_system::GenesisConfig::default()
-			.build_storage::<Runtime>()
-			.unwrap();
+		let t = frame_system::GenesisConfig::default().build_storage::<Runtime>().unwrap();
 		let mut ext = sp_io::TestExternalities::new(t);
 		ext.execute_with(|| System::set_block_number(1));
 		ext
@@ -1906,11 +1630,12 @@ mod tests {
 			let raw_payload = SignedPayload::new(call.clone(), extra.clone()).unwrap();
 			let payer_signature = raw_payload.using_encoded(|payload| payer.pair().sign(payload));
 
-			let fee_call = Call::TransactionPayment(module_transaction_payment::Call::with_fee_paid_by {
-				call: Box::new(call),
-				payer_addr: payer.to_account_id(),
-				payer_sig: sp_runtime::MultiSignature::Sr25519(payer_signature),
-			});
+			let fee_call =
+				Call::TransactionPayment(module_transaction_payment::Call::with_fee_paid_by {
+					call: Box::new(call),
+					payer_addr: payer.to_account_id(),
+					payer_sig: sp_runtime::MultiSignature::Sr25519(payer_signature),
+				});
 			assert!(PayerSignatureVerification::convert((fee_call, extra.clone())).is_ok());
 		});
 
@@ -1923,18 +1648,21 @@ mod tests {
 				value: 100,
 			});
 			let hacker_call = Call::Balances(pallet_balances::Call::transfer {
-				dest: sp_runtime::MultiAddress::Id(sp_keyring::AccountKeyring::Dave.to_account_id()),
+				dest: sp_runtime::MultiAddress::Id(
+					sp_keyring::AccountKeyring::Dave.to_account_id(),
+				),
 				value: 100,
 			});
 
 			let raw_payload = SignedPayload::new(hacker_call.clone(), extra.clone()).unwrap();
 			let payer_signature = raw_payload.using_encoded(|payload| hacker.pair().sign(payload));
 
-			let fee_call = Call::TransactionPayment(module_transaction_payment::Call::with_fee_paid_by {
-				call: Box::new(call),
-				payer_addr: hacker.to_account_id(),
-				payer_sig: sp_runtime::MultiSignature::Sr25519(payer_signature),
-			});
+			let fee_call =
+				Call::TransactionPayment(module_transaction_payment::Call::with_fee_paid_by {
+					call: Box::new(call),
+					payer_addr: hacker.to_account_id(),
+					payer_sig: sp_runtime::MultiSignature::Sr25519(payer_signature),
+				});
 			assert!(PayerSignatureVerification::convert((fee_call, extra)).is_err());
 		});
 	}

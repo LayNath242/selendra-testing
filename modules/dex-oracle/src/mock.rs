@@ -103,7 +103,10 @@ pub fn set_pool(trading_pair: &TradingPair, pool_0: Balance, pool_1: Balance) {
 
 pub struct MockDEX;
 impl DEXManager<AccountId, Balance, CurrencyId> for MockDEX {
-	fn get_liquidity_pool(currency_id_0: CurrencyId, currency_id_1: CurrencyId) -> (Balance, Balance) {
+	fn get_liquidity_pool(
+		currency_id_0: CurrencyId,
+		currency_id_1: CurrencyId,
+	) -> (Balance, Balance) {
 		TradingPair::from_currency_ids(currency_id_0, currency_id_1)
 			.map(|trading_pair| {
 				if trading_pair == KUSDDOTPair::get() {
@@ -117,7 +120,10 @@ impl DEXManager<AccountId, Balance, CurrencyId> for MockDEX {
 			.unwrap_or_else(|| (0, 0))
 	}
 
-	fn get_liquidity_token_address(_currency_id_a: CurrencyId, _currency_id_b: CurrencyId) -> Option<H160> {
+	fn get_liquidity_token_address(
+		_currency_id_a: CurrencyId,
+		_currency_id_b: CurrencyId,
+	) -> Option<H160> {
 		unimplemented!()
 	}
 
@@ -203,9 +209,7 @@ impl Default for ExtBuilder {
 
 impl ExtBuilder {
 	pub fn build(self) -> sp_io::TestExternalities {
-		let t = frame_system::GenesisConfig::default()
-			.build_storage::<Runtime>()
-			.unwrap();
+		let t = frame_system::GenesisConfig::default().build_storage::<Runtime>().unwrap();
 
 		t.into()
 	}

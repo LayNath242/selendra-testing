@@ -29,8 +29,8 @@ use frame_support::log;
 use hex_literal::hex;
 use module_evm::{
 	precompiles::{
-		Blake2F, Bn128Add, Bn128Mul, Bn128Pairing, ECRecover, ECRecoverPublicKey, Identity, IstanbulModexp, Modexp,
-		Precompile, Ripemd160, Sha256, Sha3FIPS256, Sha3FIPS512,
+		Blake2F, Bn128Add, Bn128Mul, Bn128Pairing, ECRecover, ECRecoverPublicKey, Identity,
+		IstanbulModexp, Modexp, Precompile, Ripemd160, Sha256, Sha3FIPS256, Sha3FIPS512,
 	},
 	runner::state::{PrecompileFailure, PrecompileResult, PrecompileSet},
 	Context, ExitRevert,
@@ -159,7 +159,7 @@ where
 		is_static: bool,
 	) -> Option<PrecompileResult> {
 		if !self.is_precompile(address) {
-			return None;
+			return None
 		}
 
 		// Filter known precompile addresses except Ethereum officials
@@ -168,7 +168,7 @@ where
 				exit_status: ExitRevert::Reverted,
 				output: "cannot be called with DELEGATECALL or CALLCODE".into(),
 				cost: target_gas.unwrap_or_default(),
-			}));
+			}))
 		}
 
 		log::trace!(target: "evm", "Precompile begin, address: {:?}, input: {:?}, target_gas: {:?}, context: {:?}", address, input, target_gas, context);
@@ -213,7 +213,7 @@ where
 					exit_status: ExitRevert::Reverted,
 					output: "NoPermission".into(),
 					cost: target_gas.unwrap_or_default(),
-				}));
+				}))
 			}
 
 			if !module_evm::Pallet::<R>::is_contract(&context.caller) {
@@ -222,13 +222,11 @@ where
 					exit_status: ExitRevert::Reverted,
 					output: "Caller is not a system contract".into(),
 					cost: target_gas.unwrap_or_default(),
-				}));
+				}))
 			}
 
 			if address == MULTI_CURRENCY {
-				Some(MultiCurrencyPrecompile::<R>::execute(
-					input, target_gas, context, is_static,
-				))
+				Some(MultiCurrencyPrecompile::<R>::execute(input, target_gas, context, is_static))
 			} else if address == NFT {
 				Some(NFTPrecompile::<R>::execute(input, target_gas, context, is_static))
 			} else if address == EVM {
@@ -240,19 +238,13 @@ where
 			} else if address == DEX {
 				Some(DEXPrecompile::<R>::execute(input, target_gas, context, is_static))
 			} else if address == STABLE_ASSET {
-				Some(StableAssetPrecompile::<R>::execute(
-					input, target_gas, context, is_static,
-				))
+				Some(StableAssetPrecompile::<R>::execute(input, target_gas, context, is_static))
 			} else if address == EVM_ACCOUNTS {
-				Some(EVMAccountsPrecompile::<R>::execute(
-					input, target_gas, context, is_static,
-				))
+				Some(EVMAccountsPrecompile::<R>::execute(input, target_gas, context, is_static))
 			} else if address == FUNAN {
 				Some(FunanPrecompile::<R>::execute(input, target_gas, context, is_static))
 			} else if address == INCENTIVES {
-				Some(IncentivesPrecompile::<R>::execute(
-					input, target_gas, context, is_static,
-				))
+				Some(IncentivesPrecompile::<R>::execute(input, target_gas, context, is_static))
 			} else {
 				None
 			}

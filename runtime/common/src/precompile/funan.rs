@@ -64,19 +64,24 @@ where
 	Runtime: module_evm::Config + module_funan::Config + module_prices::Config,
 	module_funan::Pallet<Runtime>: FunanManager<Runtime::AccountId, CurrencyId, Amount, Balance>,
 {
-	fn execute(input: &[u8], target_gas: Option<u64>, _context: &Context, _is_static: bool) -> PrecompileResult {
-		let input = Input::<Action, Runtime::AccountId, Runtime::AddressMapping, Runtime::Erc20InfoMapping>::new(
-			input,
-			target_gas_limit(target_gas),
-		);
+	fn execute(
+		input: &[u8],
+		target_gas: Option<u64>,
+		_context: &Context,
+		_is_static: bool,
+	) -> PrecompileResult {
+		let input = Input::<
+			Action,
+			Runtime::AccountId,
+			Runtime::AddressMapping,
+			Runtime::Erc20InfoMapping,
+		>::new(input, target_gas_limit(target_gas));
 
 		let gas_cost = Pricer::<Runtime>::cost(&input)?;
 
 		if let Some(gas_limit) = target_gas {
 			if gas_limit < gas_cost {
-				return Err(PrecompileFailure::Error {
-					exit_status: ExitError::OutOfGas,
-				});
+				return Err(PrecompileFailure::Error { exit_status: ExitError::OutOfGas })
 			}
 		}
 
@@ -100,13 +105,12 @@ where
 					CurrencyId,
 					Amount,
 					Balance,
-				>>::adjust_loan(&who, currency_id, collateral_adjustment, debit_adjustment).map_err(|e|
-					PrecompileFailure::Revert {
-						exit_status: ExitRevert::Reverted,
-						output: Into::<&str>::into(e).as_bytes().to_vec(),
-						cost: target_gas_limit(target_gas).unwrap_or_default(),
-					}
-				)?;
+				>>::adjust_loan(&who, currency_id, collateral_adjustment, debit_adjustment)
+				.map_err(|e| PrecompileFailure::Revert {
+					exit_status: ExitRevert::Reverted,
+					output: Into::<&str>::into(e).as_bytes().to_vec(),
+					cost: target_gas_limit(target_gas).unwrap_or_default(),
+				})?;
 
 				Ok(PrecompileOutput {
 					exit_status: ExitSucceed::Returned,
@@ -114,7 +118,7 @@ where
 					output: vec![],
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::CloseLoanByDex => {
 				let who = input.account_id_at(1)?;
 				let currency_id = input.currency_id_at(2)?;
@@ -131,13 +135,12 @@ where
 					CurrencyId,
 					Amount,
 					Balance,
-				>>::close_loan_by_dex(who, currency_id, max_collateral_amount).map_err(|e|
-					PrecompileFailure::Revert {
-						exit_status: ExitRevert::Reverted,
-						output: Into::<&str>::into(e).as_bytes().to_vec(),
-						cost: target_gas_limit(target_gas).unwrap_or_default(),
-					}
-				)?;
+				>>::close_loan_by_dex(who, currency_id, max_collateral_amount)
+				.map_err(|e| PrecompileFailure::Revert {
+					exit_status: ExitRevert::Reverted,
+					output: Into::<&str>::into(e).as_bytes().to_vec(),
+					cost: target_gas_limit(target_gas).unwrap_or_default(),
+				})?;
 
 				Ok(PrecompileOutput {
 					exit_status: ExitSucceed::Returned,
@@ -145,17 +148,18 @@ where
 					output: vec![],
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::GetPosition => {
 				let who = input.account_id_at(1)?;
 				let currency_id = input.currency_id_at(2)?;
 
-				let Position { collateral, debit } = <module_funan::Pallet<Runtime> as FunanManager<
-					Runtime::AccountId,
-					CurrencyId,
-					Amount,
-					Balance,
-				>>::get_position(&who, currency_id);
+				let Position { collateral, debit } =
+					<module_funan::Pallet<Runtime> as FunanManager<
+						Runtime::AccountId,
+						CurrencyId,
+						Amount,
+						Balance,
+					>>::get_position(&who, currency_id);
 
 				Ok(PrecompileOutput {
 					exit_status: ExitSucceed::Returned,
@@ -163,7 +167,7 @@ where
 					output: Output::encode_uint_tuple(vec![collateral, debit]),
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::GetLiquidationRatio => {
 				let currency_id = input.currency_id_at(1)?;
 				let ratio = <module_funan::Pallet<Runtime> as FunanManager<
@@ -180,7 +184,7 @@ where
 					output: Output::encode_uint(ratio.into_inner()),
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::GetCurrentCollateralRatio => {
 				let who = input.account_id_at(1)?;
 				let currency_id = input.currency_id_at(2)?;
@@ -198,7 +202,7 @@ where
 					output: Output::encode_uint(ratio.into_inner()),
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::GetDebitExchangeRate => {
 				let currency_id = input.currency_id_at(1)?;
 				let exchange_rate = <module_funan::Pallet<Runtime> as FunanManager<
@@ -214,7 +218,7 @@ where
 					output: Output::encode_uint(exchange_rate.into_inner()),
 					logs: Default::default(),
 				})
-			}
+			},
 		}
 	}
 }
@@ -228,7 +232,12 @@ where
 	const BASE_COST: u64 = 200;
 
 	fn cost(
-		input: &Input<Action, Runtime::AccountId, Runtime::AddressMapping, Runtime::Erc20InfoMapping>,
+		input: &Input<
+			Action,
+			Runtime::AccountId,
+			Runtime::AddressMapping,
+			Runtime::Erc20InfoMapping,
+		>,
 	) -> Result<u64, PrecompileFailure> {
 		let action = input.action()?;
 
@@ -244,19 +253,20 @@ where
 					.saturating_add(read_account)
 					.saturating_add(read_currency)
 					.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 			Action::CloseLoanByDex => {
 				let read_account = InputPricer::<Runtime>::read_accounts(1);
 				let currency_id = input.currency_id_at(2)?;
 				let read_currency = InputPricer::<Runtime>::read_currency(currency_id);
 
-				let weight = <Runtime as module_funan::Config>::WeightInfo::close_loan_has_debit_by_dex();
+				let weight =
+					<Runtime as module_funan::Config>::WeightInfo::close_loan_has_debit_by_dex();
 
 				Self::BASE_COST
 					.saturating_add(read_account)
 					.saturating_add(read_currency)
 					.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 			Action::GetPosition => {
 				let read_account = InputPricer::<Runtime>::read_accounts(1);
 				let currency_id = input.currency_id_at(2)?;
@@ -267,7 +277,7 @@ where
 					.saturating_add(read_account)
 					.saturating_add(read_currency)
 					.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 			Action::GetLiquidationRatio => {
 				let currency_id = input.currency_id_at(1)?;
 				let read_currency = InputPricer::<Runtime>::read_currency(currency_id);
@@ -276,7 +286,7 @@ where
 				Self::BASE_COST
 					.saturating_add(read_currency)
 					.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 			Action::GetCurrentCollateralRatio => {
 				let read_account = InputPricer::<Runtime>::read_accounts(1);
 				let currency_id = input.currency_id_at(2)?;
@@ -287,7 +297,7 @@ where
 					.saturating_add(read_account)
 					.saturating_add(read_currency)
 					.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 			Action::GetDebitExchangeRate => {
 				let currency_id = input.currency_id_at(1)?;
 				let read_currency = InputPricer::<Runtime>::read_currency(currency_id);
@@ -296,7 +306,7 @@ where
 				Self::BASE_COST
 					.saturating_add(read_currency)
 					.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 		};
 		Ok(cost)
 	}
@@ -307,8 +317,8 @@ mod tests {
 	use super::*;
 
 	use crate::precompile::mock::{
-		alice, alice_evm_addr, new_test_ext, CDPEngine, Currencies, DexModule, Funan, Loans, One, Origin, Test, KUSD,
-		BOB, DOT,
+		alice, alice_evm_addr, new_test_ext, CDPEngine, Currencies, DexModule, Funan, Loans, One,
+		Origin, Test, BOB, DOT, KUSD,
 	};
 	use frame_support::assert_ok;
 	use hex_literal::hex;
@@ -330,12 +340,7 @@ mod tests {
 				Change::NewValue(Some(Ratio::saturating_from_rational(9, 5))),
 				Change::NewValue(10000)
 			));
-			assert_ok!(Currencies::update_balance(
-				Origin::root(),
-				alice(),
-				DOT,
-				1_000_000_000_000
-			));
+			assert_ok!(Currencies::update_balance(Origin::root(), alice(), DOT, 1_000_000_000_000));
 
 			let context = Context {
 				address: Default::default(),
@@ -374,12 +379,7 @@ mod tests {
 				Change::NewValue(Some(Ratio::saturating_from_rational(9, 5))),
 				Change::NewValue(1_000_000_000)
 			));
-			assert_ok!(Currencies::update_balance(
-				Origin::root(),
-				alice(),
-				DOT,
-				1_000_000_000_000
-			));
+			assert_ok!(Currencies::update_balance(Origin::root(), alice(), DOT, 1_000_000_000_000));
 			assert_ok!(Funan::adjust_loan(
 				Origin::signed(alice()),
 				DOT,
@@ -439,12 +439,7 @@ mod tests {
 				Change::NewValue(Some(Ratio::saturating_from_rational(9, 5))),
 				Change::NewValue(1_000_000_000)
 			));
-			assert_ok!(Currencies::update_balance(
-				Origin::root(),
-				alice(),
-				DOT,
-				1_000_000_000_000
-			));
+			assert_ok!(Currencies::update_balance(Origin::root(), alice(), DOT, 1_000_000_000_000));
 			assert_ok!(Funan::adjust_loan(
 				Origin::signed(alice()),
 				DOT,
@@ -526,12 +521,7 @@ mod tests {
 				Change::NewValue(Some(Ratio::saturating_from_rational(9, 5))),
 				Change::NewValue(1_000_000_000)
 			));
-			assert_ok!(Currencies::update_balance(
-				Origin::root(),
-				alice(),
-				DOT,
-				1_000_000_000_000
-			));
+			assert_ok!(Currencies::update_balance(Origin::root(), alice(), DOT, 1_000_000_000_000));
 			assert_ok!(Funan::adjust_loan(
 				Origin::signed(alice()),
 				DOT,

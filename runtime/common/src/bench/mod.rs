@@ -33,28 +33,17 @@ fn whitelist_keys(b: &mut Bencher, caller: Option<H160>) {
 	if let Some(caller) = caller {
 		b.whitelist(module_evm::Accounts::<Test>::hashed_key_for(&caller), true, true);
 		let caller_account = <Test as module_evm::Config>::AddressMapping::get_account_id(&caller);
-		b.whitelist(
-			pallet_balances::Reserves::<Test>::hashed_key_for(&caller_account),
-			true,
-			true,
-		);
-		b.whitelist(
-			frame_system::Account::<Test>::hashed_key_for(&caller_account),
-			true,
-			true,
-		);
+		b.whitelist(pallet_balances::Reserves::<Test>::hashed_key_for(&caller_account), true, true);
+		b.whitelist(frame_system::Account::<Test>::hashed_key_for(&caller_account), true, true);
 	}
 
 	// unknown key
-	b.whitelist(
-		hex_literal::hex!("3a7472616e73616374696f6e5f6c6576656c3a").to_vec(),
-		true,
-		true,
-	);
+	b.whitelist(hex_literal::hex!("3a7472616e73616374696f6e5f6c6576656c3a").to_vec(), true, true);
 
 	// System::Number
 	b.whitelist(
-		hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef702a5c1b19ab7a04f536c519aca4983ac").to_vec(),
+		hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef702a5c1b19ab7a04f536c519aca4983ac")
+			.to_vec(),
 		true,
 		true,
 	);
@@ -84,11 +73,8 @@ fn oracle_get_price(b: &mut Bencher) {
 	let caller = alice_evm_addr();
 	whitelist_keys(b, Some(caller));
 
-	let context = Context {
-		address: Default::default(),
-		caller,
-		apparent_value: Default::default(),
-	};
+	let context =
+		Context { address: Default::default(), caller, apparent_value: Default::default() };
 
 	let price = Price::from(30_000);
 	assert_ok!(Oracle::feed_value(ALICE, RENBTC, price));
@@ -126,11 +112,8 @@ fn evm_query_new_contract_extra_bytes(b: &mut Bencher) {
 	let caller = alice_evm_addr();
 	whitelist_keys(b, None);
 
-	let context = Context {
-		address: Default::default(),
-		caller,
-		apparent_value: Default::default(),
-	};
+	let context =
+		Context { address: Default::default(), caller, apparent_value: Default::default() };
 
 	// newContractExtraBytes() -> 0xa23e8b82
 	let input = hex! {"
@@ -153,11 +136,8 @@ fn evm_query_storage_deposit_per_byte(b: &mut Bencher) {
 	let caller = alice_evm_addr();
 	whitelist_keys(b, None);
 
-	let context = Context {
-		address: Default::default(),
-		caller,
-		apparent_value: Default::default(),
-	};
+	let context =
+		Context { address: Default::default(), caller, apparent_value: Default::default() };
 
 	// storageDepositPerByte() -> 0x6e043998
 	let input = hex! {"
@@ -180,11 +160,8 @@ fn evm_query_maintainer(b: &mut Bencher) {
 	let caller = alice_evm_addr();
 	whitelist_keys(b, None);
 
-	let context = Context {
-		address: Default::default(),
-		caller,
-		apparent_value: Default::default(),
-	};
+	let context =
+		Context { address: Default::default(), caller, apparent_value: Default::default() };
 
 	let contract_address = H160::from(hex!("2000000000000000000000000000000000000001"));
 	module_evm::Accounts::<Test>::insert(
@@ -221,11 +198,8 @@ fn evm_query_developer_deposit(b: &mut Bencher) {
 	let caller = alice_evm_addr();
 	whitelist_keys(b, None);
 
-	let context = Context {
-		address: Default::default(),
-		caller,
-		apparent_value: Default::default(),
-	};
+	let context =
+		Context { address: Default::default(), caller, apparent_value: Default::default() };
 
 	// developerDeposit() -> 0x68a18855
 	let input = hex! {"
@@ -247,11 +221,8 @@ fn evm_query_publication_fee(b: &mut Bencher) {
 	let caller = alice_evm_addr();
 	whitelist_keys(b, None);
 
-	let context = Context {
-		address: Default::default(),
-		caller,
-		apparent_value: Default::default(),
-	};
+	let context =
+		Context { address: Default::default(), caller, apparent_value: Default::default() };
 
 	// publicationFee() -> 0x6e0e540c
 	let input = hex! {"
@@ -273,11 +244,8 @@ fn evm_query_developer_status(b: &mut Bencher) {
 	let caller = alice_evm_addr();
 	whitelist_keys(b, None);
 
-	let context = Context {
-		address: Default::default(),
-		caller,
-		apparent_value: Default::default(),
-	};
+	let context =
+		Context { address: Default::default(), caller, apparent_value: Default::default() };
 
 	// developerStatus(address) -> 0x710f50ff
 	// who

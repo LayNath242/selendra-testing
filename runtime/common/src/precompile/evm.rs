@@ -67,19 +67,24 @@ where
 	Runtime: module_evm::Config + module_prices::Config,
 	module_evm::Pallet<Runtime>: EVMManager<Runtime::AccountId, Balance>,
 {
-	fn execute(input: &[u8], target_gas: Option<u64>, _context: &Context, _is_static: bool) -> PrecompileResult {
-		let input = Input::<Action, Runtime::AccountId, Runtime::AddressMapping, Runtime::Erc20InfoMapping>::new(
-			input,
-			target_gas_limit(target_gas),
-		);
+	fn execute(
+		input: &[u8],
+		target_gas: Option<u64>,
+		_context: &Context,
+		_is_static: bool,
+	) -> PrecompileResult {
+		let input = Input::<
+			Action,
+			Runtime::AccountId,
+			Runtime::AddressMapping,
+			Runtime::Erc20InfoMapping,
+		>::new(input, target_gas_limit(target_gas));
 
 		let gas_cost = Pricer::<Runtime>::cost(&input)?;
 
 		if let Some(gas_limit) = target_gas {
 			if gas_limit < gas_cost {
-				return Err(PrecompileFailure::Error {
-					exit_status: ExitError::OutOfGas,
-				});
+				return Err(PrecompileFailure::Error { exit_status: ExitError::OutOfGas })
 			}
 		}
 
@@ -94,7 +99,7 @@ where
 					output: Output::encode_uint(output),
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::QueryStorageDepositPerByte => {
 				let deposit = module_evm::Pallet::<Runtime>::query_storage_deposit_per_byte();
 				Ok(PrecompileOutput {
@@ -103,17 +108,16 @@ where
 					output: Output::encode_uint(deposit),
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::QueryMaintainer => {
 				let contract = input.evm_address_at(1)?;
 
-				let maintainer = module_evm::Pallet::<Runtime>::query_maintainer(contract).map_err(|e| {
-					PrecompileFailure::Revert {
+				let maintainer = module_evm::Pallet::<Runtime>::query_maintainer(contract)
+					.map_err(|e| PrecompileFailure::Revert {
 						exit_status: ExitRevert::Reverted,
 						output: Into::<&str>::into(e).as_bytes().to_vec(),
 						cost: target_gas_limit(target_gas).unwrap_or_default(),
-					}
-				})?;
+					})?;
 
 				Ok(PrecompileOutput {
 					exit_status: ExitSucceed::Returned,
@@ -121,7 +125,7 @@ where
 					output: Output::encode_address(maintainer),
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::QueryDeveloperDeposit => {
 				let deposit = module_evm::Pallet::<Runtime>::query_developer_deposit();
 				Ok(PrecompileOutput {
@@ -130,7 +134,7 @@ where
 					output: Output::encode_uint(deposit),
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::QueryPublicationFee => {
 				let fee = module_evm::Pallet::<Runtime>::query_publication_fee();
 				Ok(PrecompileOutput {
@@ -139,7 +143,7 @@ where
 					output: Output::encode_uint(fee),
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::TransferMaintainer => {
 				let from = input.account_id_at(1)?;
 				let contract = input.evm_address_at(2)?;
@@ -168,16 +172,15 @@ where
 					output: vec![],
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::PublishContract => {
 				let who = input.account_id_at(1)?;
 				let contract_address = input.evm_address_at(2)?;
-				<module_evm::Pallet<Runtime>>::publish_contract_precompile(who, contract_address).map_err(|e| {
-					PrecompileFailure::Revert {
-						exit_status: ExitRevert::Reverted,
-						output: Into::<&str>::into(e).as_bytes().to_vec(),
-						cost: target_gas_limit(target_gas).unwrap_or_default(),
-					}
+				<module_evm::Pallet<Runtime>>::publish_contract_precompile(who, contract_address)
+					.map_err(|e| PrecompileFailure::Revert {
+					exit_status: ExitRevert::Reverted,
+					output: Into::<&str>::into(e).as_bytes().to_vec(),
+					cost: target_gas_limit(target_gas).unwrap_or_default(),
 				})?;
 
 				Ok(PrecompileOutput {
@@ -186,16 +189,16 @@ where
 					output: vec![],
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::DisableDeveloperAccount => {
 				let who = input.account_id_at(1)?;
-				<module_evm::Pallet<Runtime>>::disable_account_contract_development(who).map_err(|e| {
-					PrecompileFailure::Revert {
+				<module_evm::Pallet<Runtime>>::disable_account_contract_development(who).map_err(
+					|e| PrecompileFailure::Revert {
 						exit_status: ExitRevert::Reverted,
 						output: Into::<&str>::into(e).as_bytes().to_vec(),
 						cost: target_gas_limit(target_gas).unwrap_or_default(),
-					}
-				})?;
+					},
+				)?;
 
 				Ok(PrecompileOutput {
 					exit_status: ExitSucceed::Returned,
@@ -203,16 +206,16 @@ where
 					output: vec![],
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::EnableDeveloperAccount => {
 				let who = input.account_id_at(1)?;
-				<module_evm::Pallet<Runtime>>::enable_account_contract_development(who).map_err(|e| {
-					PrecompileFailure::Revert {
+				<module_evm::Pallet<Runtime>>::enable_account_contract_development(who).map_err(
+					|e| PrecompileFailure::Revert {
 						exit_status: ExitRevert::Reverted,
 						output: Into::<&str>::into(e).as_bytes().to_vec(),
 						cost: target_gas_limit(target_gas).unwrap_or_default(),
-					}
-				})?;
+					},
+				)?;
 
 				Ok(PrecompileOutput {
 					exit_status: ExitSucceed::Returned,
@@ -220,7 +223,7 @@ where
 					output: vec![],
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::QueryDeveloperStatus => {
 				let who = input.account_id_at(1)?;
 				let developer_status = <module_evm::Pallet<Runtime>>::query_developer_status(who);
@@ -230,7 +233,7 @@ where
 					output: Output::encode_bool(developer_status),
 					logs: Default::default(),
 				})
-			}
+			},
 		}
 	}
 }
@@ -244,62 +247,69 @@ where
 	const BASE_COST: u64 = 50;
 
 	fn cost(
-		input: &Input<Action, Runtime::AccountId, Runtime::AddressMapping, Runtime::Erc20InfoMapping>,
+		input: &Input<
+			Action,
+			Runtime::AccountId,
+			Runtime::AddressMapping,
+			Runtime::Erc20InfoMapping,
+		>,
 	) -> Result<u64, PrecompileFailure> {
 		let action = input.action()?;
 		let cost = match action {
 			Action::QueryNewContractExtraBytes => {
 				let weight = PrecompileWeights::<Runtime>::evm_query_new_contract_extra_bytes();
 				WeightToGas::convert(weight)
-			}
+			},
 			Action::QueryStorageDepositPerByte => {
 				let weight = PrecompileWeights::<Runtime>::evm_query_storage_deposit_per_byte();
 				WeightToGas::convert(weight)
-			}
+			},
 			Action::QueryMaintainer => {
 				let weight = PrecompileWeights::<Runtime>::evm_query_maintainer();
 				WeightToGas::convert(weight)
-			}
+			},
 			Action::QueryDeveloperDeposit => {
 				let weight = PrecompileWeights::<Runtime>::evm_query_developer_deposit();
 				WeightToGas::convert(weight)
-			}
+			},
 			Action::QueryPublicationFee => {
 				let weight = PrecompileWeights::<Runtime>::evm_query_publication_fee();
 				WeightToGas::convert(weight)
-			}
+			},
 			Action::TransferMaintainer => {
 				let read_accounts = InputPricer::<Runtime>::read_accounts(1);
 				let weight = <Runtime as module_evm::Config>::WeightInfo::transfer_maintainer();
 				Self::BASE_COST
 					.saturating_add(read_accounts)
 					.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 			Action::PublishContract => {
 				let read_accounts = InputPricer::<Runtime>::read_accounts(1);
 				let weight = <Runtime as module_evm::Config>::WeightInfo::publish_contract();
 				Self::BASE_COST
 					.saturating_add(read_accounts)
 					.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 			Action::DisableDeveloperAccount => {
 				let read_accounts = InputPricer::<Runtime>::read_accounts(1);
-				let weight = <Runtime as module_evm::Config>::WeightInfo::disable_contract_development();
+				let weight =
+					<Runtime as module_evm::Config>::WeightInfo::disable_contract_development();
 				Self::BASE_COST
 					.saturating_add(read_accounts)
 					.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 			Action::EnableDeveloperAccount => {
 				let read_accounts = InputPricer::<Runtime>::read_accounts(1);
-				let weight = <Runtime as module_evm::Config>::WeightInfo::enable_contract_development();
+				let weight =
+					<Runtime as module_evm::Config>::WeightInfo::enable_contract_development();
 				Self::BASE_COST
 					.saturating_add(read_accounts)
 					.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 			Action::QueryDeveloperStatus => {
 				let weight = PrecompileWeights::<Runtime>::evm_query_developer_status();
 				WeightToGas::convert(weight)
-			}
+			},
 		};
 		Ok(cost)
 	}
@@ -310,7 +320,8 @@ mod tests {
 	use super::*;
 
 	use crate::precompile::mock::{
-		alice_evm_addr, bob, bob_evm_addr, new_test_ext, EVMModule, Event as TestEvent, Origin, System, Test,
+		alice_evm_addr, bob, bob_evm_addr, new_test_ext, EVMModule, Event as TestEvent, Origin,
+		System, Test,
 	};
 	use frame_support::assert_ok;
 	use hex_literal::hex;

@@ -48,12 +48,16 @@ use sp_runtime::{
 	},
 	traits::{CheckedDiv, Saturating, Zero},
 	transaction_validity::{
-		InvalidTransaction, TransactionPriority, TransactionSource, TransactionValidity, ValidTransaction,
+		InvalidTransaction, TransactionPriority, TransactionSource, TransactionValidity,
+		ValidTransaction,
 	},
 	DispatchError, DispatchResult, FixedPointNumber, RuntimeDebug,
 };
 use sp_std::prelude::*;
-use support::{AuctionManager, CDPTreasury, CDPTreasuryExtended, EmergencyShutdown, PriceProvider, Rate, SwapLimit};
+use support::{
+	AuctionManager, CDPTreasury, CDPTreasuryExtended, EmergencyShutdown, PriceProvider, Rate,
+	SwapLimit,
+};
 
 mod mock;
 mod tests;
@@ -117,9 +121,12 @@ impl<AccountId, BlockNumber> CollateralAuctionItem<AccountId, BlockNumber> {
 	/// price
 	fn collateral_amount(&self, last_bid_price: Balance, new_bid_price: Balance) -> Balance {
 		if self.in_reverse_stage(new_bid_price) && new_bid_price > last_bid_price {
-			Rate::checked_from_rational(sp_std::cmp::max(last_bid_price, self.target), new_bid_price)
-				.and_then(|n| n.checked_mul_int(self.amount))
-				.unwrap_or(self.amount)
+			Rate::checked_from_rational(
+				sp_std::cmp::max(last_bid_price, self.target),
+				new_bid_price,
+			)
+			.and_then(|n| n.checked_mul_int(self.amount))
+			.unwrap_or(self.amount)
 		} else {
 			self.amount
 		}
@@ -155,10 +162,19 @@ pub mod module {
 		type Currency: MultiCurrency<Self::AccountId, CurrencyId = CurrencyId, Balance = Balance>;
 
 		/// Auction to manager the auction process
-		type Auction: Auction<Self::AccountId, Self::BlockNumber, AuctionId = AuctionId, Balance = Balance>;
+		type Auction: Auction<
+			Self::AccountId,
+			Self::BlockNumber,
+			AuctionId = AuctionId,
+			Balance = Balance,
+		>;
 
 		/// CDP treasury to escrow assets related to auction
-		type CDPTreasury: CDPTreasuryExtended<Self::AccountId, Balance = Balance, CurrencyId = CurrencyId>;
+		type CDPTreasury: CDPTreasuryExtended<
+			Self::AccountId,
+			Balance = Balance,
+			CurrencyId = CurrencyId,
+		>;
 
 		/// The price source of currencies
 		type PriceSource: PriceProvider<CurrencyId>;
@@ -236,8 +252,13 @@ pub mod module {
 	/// CollateralAuctions: map AuctionId => Option<CollateralAuctionItem>
 	#[pallet::storage]
 	#[pallet::getter(fn collateral_auctions)]
-	pub type CollateralAuctions<T: Config> =
-		StorageMap<_, Twox64Concat, AuctionId, CollateralAuctionItem<T::AccountId, T::BlockNumber>, OptionQuery>;
+	pub type CollateralAuctions<T: Config> = StorageMap<
+		_,
+		Twox64Concat,
+		AuctionId,
+		CollateralAuctionItem<T::AccountId, T::BlockNumber>,
+		OptionQuery,
+	>;
 
 	/// Record of the total collateral amount of all active collateral auctions
 	/// under specific collateral type CollateralType -> TotalAmount
@@ -245,7 +266,8 @@ pub mod module {
 	/// TotalCollateralInAuction: map CurrencyId => Balance
 	#[pallet::storage]
 	#[pallet::getter(fn total_collateral_in_auction)]
-	pub type TotalCollateralInAuction<T: Config> = StorageMap<_, Twox64Concat, CurrencyId, Balance, ValueQuery>;
+	pub type TotalCollateralInAuction<T: Config> =
+		StorageMap<_, Twox64Concat, CurrencyId, Balance, ValueQuery>;
 
 	/// Record of total target sales of all active collateral auctions
 	///
@@ -302,18 +324,18 @@ pub mod module {
 		fn validate_unsigned(_source: TransactionSource, call: &Self::Call) -> TransactionValidity {
 			if let Call::cancel { id: auction_id } = call {
 				if !T::EmergencyShutdown::is_shutdown() {
-					return InvalidTransaction::Call.into();
+					return InvalidTransaction::Call.into()
 				}
 
 				if let Some(collateral_auction) = Self::collateral_auctions(auction_id) {
 					if let Some((_, bid_price)) = Self::get_last_bid(*auction_id) {
 						// if collateral auction is in reverse stage, shouldn't cancel
 						if collateral_auction.in_reverse_stage(bid_price) {
-							return InvalidTransaction::Stale.into();
+							return InvalidTransaction::Stale.into()
 						}
 					}
 				} else {
-					return InvalidTransaction::Stale.into();
+					return InvalidTransaction::Stale.into()
 				}
 
 				ValidTransaction::with_tag_prefix("AuctionManagerOffchainWorker")
@@ -336,7 +358,8 @@ impl<T: Config> Pallet<T> {
 
 	fn submit_cancel_auction_tx(auction_id: AuctionId) {
 		let call = Call::<T>::cancel { id: auction_id };
-		if let Err(err) = SubmitTransaction::<T, Call<T>>::submit_unsigned_transaction(call.into()) {
+		if let Err(err) = SubmitTransaction::<T, Call<T>>::submit_unsigned_transaction(call.into())
+		{
 			log::info!(
 				target: "auction-manager",
 				"offchain worker: submit unsigned auction cancel tx for AuctionId {:?} failed: {:?}",
@@ -348,7 +371,8 @@ impl<T: Config> Pallet<T> {
 	fn _offchain_worker() -> Result<(), OffchainErr> {
 		// acquire offchain worker lock.
 		let lock_expiration = Duration::from_millis(LOCK_DURATION);
-		let mut lock = StorageLock::<'_, Time>::with_deadline(OFFCHAIN_WORKER_LOCK, lock_expiration);
+		let mut lock =
+			StorageLock::<'_, Time>::with_deadline(OFFCHAIN_WORKER_LOCK, lock_expiration);
 		let mut guard = lock.try_lock().map_err(|_| OffchainErr::OffchainLock)?;
 
 		let mut to_be_continue = StorageValueRef::persistent(OFFCHAIN_WORKER_DATA);
@@ -391,16 +415,16 @@ impl<T: Config> Pallet<T> {
 				if collateral_auction.in_reverse_stage(last_bid_price) {
 					if iteration_count == max_iterations {
 						finished = false;
-						break;
+						break
 					}
-					continue;
+					continue
 				}
 			}
 			Self::submit_cancel_auction_tx(collateral_auction_id);
 
 			if iteration_count == max_iterations {
 				finished = false;
-				break;
+				break
 			}
 			guard.extend_lock().map_err(|_| OffchainErr::OffchainLock)?;
 		}
@@ -425,16 +449,15 @@ impl<T: Config> Pallet<T> {
 
 		// collateral auction must not be in reverse stage
 		if let Some((_, bid_price)) = last_bid {
-			ensure!(
-				!collateral_auction.in_reverse_stage(bid_price),
-				Error::<T>::InReverseStage,
-			);
+			ensure!(!collateral_auction.in_reverse_stage(bid_price), Error::<T>::InReverseStage,);
 		}
 
 		// calculate how much collateral to offset target in settle price
-		let settle_price =
-			T::PriceSource::get_relative_price(T::GetStableCurrencyId::get(), collateral_auction.currency_id)
-				.ok_or(Error::<T>::InvalidFeedPrice)?;
+		let settle_price = T::PriceSource::get_relative_price(
+			T::GetStableCurrencyId::get(),
+			collateral_auction.currency_id,
+		)
+		.ok_or(Error::<T>::InvalidFeedPrice)?;
 		let confiscate_collateral_amount = if collateral_auction.always_forward() {
 			collateral_auction.amount
 		} else {
@@ -443,7 +466,8 @@ impl<T: Config> Pallet<T> {
 				collateral_auction.amount,
 			)
 		};
-		let refund_collateral_amount = collateral_auction.amount.saturating_sub(confiscate_collateral_amount);
+		let refund_collateral_amount =
+			collateral_auction.amount.saturating_sub(confiscate_collateral_amount);
 
 		// refund remain collateral to refund recipient from CDP treasury
 		T::CDPTreasury::withdraw_collateral(
@@ -468,7 +492,9 @@ impl<T: Config> Pallet<T> {
 		TotalCollateralInAuction::<T>::mutate(collateral_auction.currency_id, |balance| {
 			*balance = balance.saturating_sub(collateral_auction.amount)
 		});
-		TotalTargetInAuction::<T>::mutate(|balance| *balance = balance.saturating_sub(collateral_auction.target));
+		TotalTargetInAuction::<T>::mutate(|balance| {
+			*balance = balance.saturating_sub(collateral_auction.target)
+		});
 
 		Ok(())
 	}
@@ -503,7 +529,10 @@ impl<T: Config> Pallet<T> {
 		}
 	}
 
-	fn get_auction_time_to_close(now: T::BlockNumber, start_block: T::BlockNumber) -> T::BlockNumber {
+	fn get_auction_time_to_close(
+		now: T::BlockNumber,
+		start_block: T::BlockNumber,
+	) -> T::BlockNumber {
 		if now >= start_block + T::AuctionDurationSoftCap::get() {
 			// halve the extended time of bid when reach soft cap
 			T::AuctionTimeToClose::get()
@@ -531,7 +560,8 @@ impl<T: Config> Pallet<T> {
 		<CollateralAuctions<T>>::try_mutate_exists(
 			id,
 			|collateral_auction| -> sp_std::result::Result<T::BlockNumber, DispatchError> {
-				let mut collateral_auction = collateral_auction.as_mut().ok_or(Error::<T>::AuctionNotExists)?;
+				let mut collateral_auction =
+					collateral_auction.as_mut().ok_or(Error::<T>::AuctionNotExists)?;
 				let last_bid_price = last_bid.clone().map_or(Zero::zero(), |(_, price)| price); // get last bid price
 
 				// ensure new bid price is valid
@@ -552,7 +582,12 @@ impl<T: Config> Pallet<T> {
 				// if there's bid before, return stablecoin from new bidder to last bidder
 				if let Some(last_bidder) = last_bidder {
 					let refund = collateral_auction.payment_amount(last_bid_price);
-					T::Currency::transfer(T::GetStableCurrencyId::get(), &new_bidder, last_bidder, refund)?;
+					T::Currency::transfer(
+						T::GetStableCurrencyId::get(),
+						&new_bidder,
+						last_bidder,
+						refund,
+					)?;
 
 					payment = payment
 						.checked_sub(refund)
@@ -567,8 +602,10 @@ impl<T: Config> Pallet<T> {
 				// if collateral auction will be in reverse stage, refund collateral to it's
 				// origin from auction CDP treasury
 				if collateral_auction.in_reverse_stage(new_bid_price) {
-					let new_collateral_amount = collateral_auction.collateral_amount(last_bid_price, new_bid_price);
-					let refund_collateral_amount = collateral_auction.amount.saturating_sub(new_collateral_amount);
+					let new_collateral_amount =
+						collateral_auction.collateral_amount(last_bid_price, new_bid_price);
+					let refund_collateral_amount =
+						collateral_auction.amount.saturating_sub(new_collateral_amount);
 
 					if !refund_collateral_amount.is_zero() {
 						T::CDPTreasury::withdraw_collateral(
@@ -578,9 +615,10 @@ impl<T: Config> Pallet<T> {
 						)?;
 
 						// update total collateral in auction after refund
-						TotalCollateralInAuction::<T>::mutate(collateral_auction.currency_id, |balance| {
-							*balance = balance.saturating_sub(refund_collateral_amount)
-						});
+						TotalCollateralInAuction::<T>::mutate(
+							collateral_auction.currency_id,
+							|balance| *balance = balance.saturating_sub(refund_collateral_amount),
+						);
 						collateral_auction.amount = new_collateral_amount;
 					}
 				}
@@ -611,8 +649,11 @@ impl<T: Config> Pallet<T> {
 
 		// if DEX give a price no less than the last_bidder for swap target
 		if let Ok((actual_supply_amount, actual_target_amount)) =
-			T::CDPTreasury::swap_collateral_to_stable(collateral_auction.currency_id, swap_limit, true)
-		{
+			T::CDPTreasury::swap_collateral_to_stable(
+				collateral_auction.currency_id,
+				swap_limit,
+				true,
+			) {
 			Self::try_refund_collateral(
 				collateral_auction.currency_id,
 				&collateral_auction.refund_recipient,
@@ -643,7 +684,11 @@ impl<T: Config> Pallet<T> {
 			// if these's bid which is gte target, auction should dealt by the last bidder.
 			let winner = last_bidder.expect("ensured last bidder not empty; qed");
 
-			Self::try_refund_collateral(collateral_auction.currency_id, &winner, collateral_auction.amount);
+			Self::try_refund_collateral(
+				collateral_auction.currency_id,
+				&winner,
+				collateral_auction.amount,
+			);
 			let payment_amount = collateral_auction.payment_amount(bid_price);
 
 			Self::deposit_event(Event::CollateralAuctionDealt {
@@ -673,7 +718,9 @@ impl<T: Config> Pallet<T> {
 		TotalCollateralInAuction::<T>::mutate(collateral_auction.currency_id, |balance| {
 			*balance = balance.saturating_sub(collateral_auction.amount)
 		});
-		TotalTargetInAuction::<T>::mutate(|balance| *balance = balance.saturating_sub(collateral_auction.target));
+		TotalTargetInAuction::<T>::mutate(|balance| {
+			*balance = balance.saturating_sub(collateral_auction.target)
+		});
 	}
 
 	// Refund stable to the last_bidder.
@@ -683,7 +730,11 @@ impl<T: Config> Pallet<T> {
 	) {
 		if let Some((bidder, bid_price)) = last_bid {
 			// If failed, just the bid did not get the stable. It can be fixed by treasury council.
-			let res = T::CDPTreasury::issue_debit(&bidder, collateral_auction.payment_amount(bid_price), false);
+			let res = T::CDPTreasury::issue_debit(
+				&bidder,
+				collateral_auction.payment_amount(bid_price),
+				false,
+			);
 			if let Err(e) = res {
 				log::warn!(
 					target: "auction-manager",
@@ -697,11 +748,19 @@ impl<T: Config> Pallet<T> {
 	}
 
 	// Refund collateral to the refund_recipient.
-	fn try_refund_collateral(collateral_type: CurrencyId, refund_recipient: &T::AccountId, refund_collateral: Balance) {
+	fn try_refund_collateral(
+		collateral_type: CurrencyId,
+		refund_recipient: &T::AccountId,
+		refund_collateral: Balance,
+	) {
 		if !refund_collateral.is_zero() {
 			// If failed, just the refund_recipient did not get the refund collateral. It can be fixed by
 			// treasury council.
-			let res = T::CDPTreasury::withdraw_collateral(refund_recipient, collateral_type, refund_collateral);
+			let res = T::CDPTreasury::withdraw_collateral(
+				refund_recipient,
+				collateral_type,
+				refund_collateral,
+			);
 			if let Err(e) = res {
 				log::warn!(
 					target: "auction-manager",
@@ -749,10 +808,7 @@ impl<T: Config> AuctionHandler<T::AccountId, Balance, T::BlockNumber, AuctionId>
 				accept_bid: true,
 				auction_end_change: Change::NewValue(Some(new_auction_end_time)),
 			},
-			Err(_) => OnNewBidResult {
-				accept_bid: false,
-				auction_end_change: Change::NoChange,
-			},
+			Err(_) => OnNewBidResult { accept_bid: false, auction_end_change: Change::NoChange },
 		}
 	}
 
@@ -833,7 +889,8 @@ impl<T: Config> AuctionManager<T::AccountId> for Pallet<T> {
 	}
 
 	fn cancel_auction(id: Self::AuctionId) -> DispatchResult {
-		let collateral_auction = <CollateralAuctions<T>>::take(id).ok_or(Error::<T>::AuctionNotExists)?;
+		let collateral_auction =
+			<CollateralAuctions<T>>::take(id).ok_or(Error::<T>::AuctionNotExists)?;
 		Self::cancel_collateral_auction(id, collateral_auction)?;
 		T::Auction::remove_auction(id);
 		Ok(())

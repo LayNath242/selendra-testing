@@ -1,4 +1,4 @@
-use super::{CurrencyId, Balance, TokenInfo, PhantomData, GetByKey, Get};
+use super::{Balance, CurrencyId, Get, GetByKey, PhantomData, TokenInfo};
 
 // TODO: make those const fn
 pub fn dollar(currency_id: CurrencyId) -> Balance {
@@ -21,8 +21,12 @@ pub struct ExistentialDepositsTimesOneHundred<NativeCurrencyId, NativeED, OtherE
 	PhantomData<(NativeCurrencyId, NativeED, OtherEDs)>,
 );
 
-impl<NativeCurrencyId: Get<CurrencyId>, NativeED: Get<Balance>, OtherEDs: GetByKey<CurrencyId, Balance>>
-	GetByKey<CurrencyId, Balance> for ExistentialDepositsTimesOneHundred<NativeCurrencyId, NativeED, OtherEDs>
+impl<
+		NativeCurrencyId: Get<CurrencyId>,
+		NativeED: Get<Balance>,
+		OtherEDs: GetByKey<CurrencyId, Balance>,
+	> GetByKey<CurrencyId, Balance>
+	for ExistentialDepositsTimesOneHundred<NativeCurrencyId, NativeED, OtherEDs>
 {
 	fn get(currency_id: &CurrencyId) -> Balance {
 		if *currency_id == NativeCurrencyId::get() {

@@ -133,14 +133,20 @@ impl ExchangeRateProvider for MockLiquidNativeExchangeProvider {
 
 pub struct MockDEX;
 impl DEXManager<AccountId, Balance, CurrencyId> for MockDEX {
-	fn get_liquidity_pool(currency_id_a: CurrencyId, currency_id_b: CurrencyId) -> (Balance, Balance) {
+	fn get_liquidity_pool(
+		currency_id_a: CurrencyId,
+		currency_id_b: CurrencyId,
+	) -> (Balance, Balance) {
 		match (currency_id_a, currency_id_b) {
 			(KUSD, DOT) => (10000, 200),
 			_ => (0, 0),
 		}
 	}
 
-	fn get_liquidity_token_address(_currency_id_a: CurrencyId, _currency_id_b: CurrencyId) -> Option<H160> {
+	fn get_liquidity_token_address(
+		_currency_id_a: CurrencyId,
+		_currency_id_b: CurrencyId,
+	) -> Option<H160> {
 		unimplemented!()
 	}
 
@@ -274,9 +280,7 @@ impl Default for ExtBuilder {
 
 impl ExtBuilder {
 	pub fn build(self) -> sp_io::TestExternalities {
-		let t = frame_system::GenesisConfig::default()
-			.build_storage::<Runtime>()
-			.unwrap();
+		let t = frame_system::GenesisConfig::default().build_storage::<Runtime>().unwrap();
 
 		t.into()
 	}

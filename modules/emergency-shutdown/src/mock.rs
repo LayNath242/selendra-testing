@@ -35,8 +35,9 @@ use sp_runtime::{
 	traits::{AccountIdConversion, IdentityLookup},
 	DispatchResult,
 };
-use support::mocks::MockStableAsset;
-use support::{AuctionManager, LockablePrice, RiskManager, SpecificJointsSwap};
+use support::{
+	mocks::MockStableAsset, AuctionManager, LockablePrice, RiskManager, SpecificJointsSwap,
+};
 
 pub type AccountId = u128;
 pub type AuctionId = u32;
@@ -113,7 +114,8 @@ impl pallet_balances::Config for Runtime {
 	type ReserveIdentifier = [u8; 8];
 	type WeightInfo = ();
 }
-pub type AdaptedBasicCurrency = orml_currencies::BasicCurrencyAdapter<Runtime, PalletBalances, Amount, BlockNumber>;
+pub type AdaptedBasicCurrency =
+	orml_currencies::BasicCurrencyAdapter<Runtime, PalletBalances, Amount, BlockNumber>;
 
 parameter_types! {
 	pub const GetNativeCurrencyId: CurrencyId = SEL;
@@ -276,15 +278,11 @@ impl Default for ExtBuilder {
 
 impl ExtBuilder {
 	pub fn build(self) -> sp_io::TestExternalities {
-		let mut t = frame_system::GenesisConfig::default()
-			.build_storage::<Runtime>()
-			.unwrap();
+		let mut t = frame_system::GenesisConfig::default().build_storage::<Runtime>().unwrap();
 
-		orml_tokens::GenesisConfig::<Runtime> {
-			balances: self.balances,
-		}
-		.assimilate_storage(&mut t)
-		.unwrap();
+		orml_tokens::GenesisConfig::<Runtime> { balances: self.balances }
+			.assimilate_storage(&mut t)
+			.unwrap();
 
 		t.into()
 	}

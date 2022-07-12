@@ -24,8 +24,8 @@ use crate::{
 		state::{Accessed, StackExecutor, StackState as StackStateT, StackSubstateMetadata},
 		Runner as RunnerT, RunnerExtended,
 	},
-	AccountInfo, AccountStorages, Accounts, BalanceOf, CallInfo, Config, CreateInfo, Error, ExecutionInfo, One, Pallet,
-	STORAGE_SIZE,
+	AccountInfo, AccountStorages, Accounts, BalanceOf, CallInfo, Config, CreateInfo, Error,
+	ExecutionInfo, One, Pallet, STORAGE_SIZE,
 };
 use frame_support::{
 	dispatch::DispatchError,
@@ -73,15 +73,16 @@ impl<T: Config> Runner<T> {
 	) -> Result<ExecutionInfo<R>, sp_runtime::DispatchError>
 	where
 		F: FnOnce(
-			&mut StackExecutor<'config, 'precompiles, SubstrateStackState<'_, 'config, T>, T::PrecompilesType>,
+			&mut StackExecutor<
+				'config,
+				'precompiles,
+				SubstrateStackState<'_, 'config, T>,
+				T::PrecompilesType,
+			>,
 		) -> (ExitReason, R),
 	{
 		let gas_price = U256::one();
-		let vicinity = Vicinity {
-			gas_price,
-			origin,
-			..Default::default()
-		};
+		let vicinity = Vicinity { gas_price, origin, ..Default::default() };
 
 		let metadata = StackSubstateMetadata::new(gas_limit, storage_limit, config);
 		let state = SubstrateStackState::new(&vicinity, metadata);
@@ -89,7 +90,8 @@ impl<T: Config> Runner<T> {
 
 		ensure!(
 			convert_decimals_from_evm(
-				TryInto::<BalanceOf<T>>::try_into(value).map_err(|_| Error::<T>::InvalidDecimals)?
+				TryInto::<BalanceOf<T>>::try_into(value)
+					.map_err(|_| Error::<T>::InvalidDecimals)?
 			)
 			.is_some(),
 			Error::<T>::InvalidDecimals
@@ -125,11 +127,8 @@ impl<T: Config> Runner<T> {
 		let state = executor.into_state();
 
 		// charge storage
-		let actual_storage = state
-			.metadata()
-			.storage_meter()
-			.finish()
-			.ok_or(Error::<T>::OutOfStorage)?;
+		let actual_storage =
+			state.metadata().storage_meter().finish().ok_or(Error::<T>::OutOfStorage)?;
 		let used_storage = state.metadata().storage_meter().total_used();
 		let refunded_storage = state.metadata().storage_meter().total_refunded();
 		log::debug!(
@@ -160,7 +159,7 @@ impl<T: Config> Runner<T> {
 				"ChargeStorageFailed [actual_storage: {:?}, sum_storage: {:?}]",
 				actual_storage, sum_storage
 			);
-			return Err(Error::<T>::ChargeStorageFailed.into());
+			return Err(Error::<T>::ChargeStorageFailed.into())
 		}
 
 		if !skip_storage_rent {
@@ -227,10 +226,7 @@ impl<T: Config> RunnerT<T> for Runner<T> {
 	) -> Result<CallInfo, DispatchError> {
 		// if the contract not published, the caller must be developer or contract or maintainer.
 		// if the contract not exists, let evm try to execute it and handle the error.
-		ensure!(
-			Pallet::<T>::can_call_contract(&target, &source),
-			Error::<T>::NoPermission
-		);
+		ensure!(Pallet::<T>::can_call_contract(&target, &source), Error::<T>::NoPermission);
 
 		let precompiles = T::PrecompilesValue::get();
 		let value = U256::from(UniqueSaturatedInto::<u128>::unique_saturated_into(value));
@@ -273,10 +269,7 @@ impl<T: Config> RunnerT<T> for Runner<T> {
 				let address = executor
 					.create_address(evm::CreateScheme::Legacy { caller: source })
 					.unwrap_or_default(); // transact_create will check the address
-				(
-					executor.transact_create(source, value, init, gas_limit, access_list),
-					address,
-				)
+				(executor.transact_create(source, value, init, gas_limit, access_list), address)
 			},
 		)
 	}
@@ -307,11 +300,7 @@ impl<T: Config> RunnerT<T> for Runner<T> {
 			&precompiles,
 			|executor| {
 				let address = executor
-					.create_address(evm::CreateScheme::Create2 {
-						caller: source,
-						code_hash,
-						salt,
-					})
+					.create_address(evm::CreateScheme::Create2 { caller: source, code_hash, salt })
 					.unwrap_or_default(); // transact_create2 will check the address
 				(
 					executor.transact_create2(source, value, init, salt, gas_limit, access_list),
@@ -346,7 +335,14 @@ impl<T: Config> RunnerT<T> for Runner<T> {
 			&precompiles,
 			|executor| {
 				(
-					executor.transact_create_at_address(source, address, value, init, gas_limit, access_list),
+					executor.transact_create_at_address(
+						source,
+						address,
+						value,
+						init,
+						gas_limit,
+						access_list,
+					),
 					address,
 				)
 			},
@@ -409,10 +405,7 @@ impl<T: Config> RunnerExtended<T> for Runner<T> {
 				let address = executor
 					.create_address(evm::CreateScheme::Legacy { caller: source })
 					.unwrap_or_default(); // transact_create will check the address
-				(
-					executor.transact_create(source, value, init, gas_limit, access_list),
-					address,
-				)
+				(executor.transact_create(source, value, init, gas_limit, access_list), address)
 			},
 		)
 	}
@@ -499,11 +492,11 @@ impl<'config> SubstrateStackSubstate<'config> {
 
 	pub fn deleted(&self, address: H160) -> bool {
 		if self.deletes.contains(&address) {
-			return true;
+			return true
 		}
 
 		if let Some(parent) = self.parent.as_ref() {
-			return parent.deleted(address);
+			return parent.deleted(address)
 		}
 
 		false
@@ -528,14 +521,14 @@ impl<'config> SubstrateStackSubstate<'config> {
 
 	pub fn known_original_storage(&self, address: H160, index: H256) -> Option<H256> {
 		if let Some(parent) = self.parent.as_ref() {
-			return parent.known_original_storage(address, index);
+			return parent.known_original_storage(address, index)
 		}
 		self.known_original_storage.get(&(address, index)).copied()
 	}
 
 	pub fn set_known_original_storage(&mut self, address: H160, index: H256, value: H256) {
 		if let Some(ref mut parent) = self.parent {
-			return parent.set_known_original_storage(address, index, value);
+			return parent.set_known_original_storage(address, index, value)
 		}
 		self.known_original_storage.insert((address, index), value);
 	}
@@ -548,7 +541,7 @@ impl<'config> SubstrateStackSubstate<'config> {
 		// insert in parent to make sure it doesn't get discarded
 		if address == H160::from_low_u64_be(3) {
 			if let Some(parent) = self.parent.as_ref() {
-				return parent.mark_account_dirty(address);
+				return parent.mark_account_dirty(address)
 			}
 		}
 		self.metadata().dirty_accounts.borrow_mut().insert(address);
@@ -556,10 +549,10 @@ impl<'config> SubstrateStackSubstate<'config> {
 
 	pub fn is_account_dirty(&self, address: H160) -> bool {
 		if self.metadata().dirty_accounts.borrow().contains(&address) {
-			return true;
+			return true
 		}
 		if let Some(parent) = self.parent.as_ref() {
-			return parent.is_account_dirty(address);
+			return parent.is_account_dirty(address)
 		}
 		false
 	}
@@ -663,10 +656,7 @@ impl<'vicinity, 'config, T: Config> BackendT for SubstrateStackState<'vicinity, 
 	fn basic(&self, address: H160) -> evm::backend::Basic {
 		let account = Pallet::<T>::account_basic(&address);
 
-		evm::backend::Basic {
-			balance: account.balance,
-			nonce: account.nonce,
-		}
+		evm::backend::Basic { balance: account.balance, nonce: account.nonce }
 	}
 
 	fn code(&self, address: H160) -> Vec<u8> {
@@ -690,7 +680,9 @@ impl<'vicinity, 'config, T: Config> BackendT for SubstrateStackState<'vicinity, 
 	}
 }
 
-impl<'vicinity, 'config, T: Config> StackStateT<'config> for SubstrateStackState<'vicinity, 'config, T> {
+impl<'vicinity, 'config, T: Config> StackStateT<'config>
+	for SubstrateStackState<'vicinity, 'config, T>
+{
 	fn metadata(&self) -> &StackSubstateMetadata<'config> {
 		self.substate.metadata()
 	}
@@ -805,8 +797,8 @@ impl<'vicinity, 'config, T: Config> StackStateT<'config> for SubstrateStackState
 					address
 				);
 				debug_assert!(false);
-				return;
-			}
+				return
+			},
 		};
 
 		let caller = match parent.metadata().caller() {
@@ -818,12 +810,13 @@ impl<'vicinity, 'config, T: Config> StackStateT<'config> for SubstrateStackState
 					address
 				);
 				debug_assert!(false);
-				return;
-			}
+				return
+			},
 		};
 
 		let is_published = self.substate.metadata.origin_code_address().map_or(false, |addr| {
-			Pallet::<T>::accounts(addr).map_or(false, |account| account.contract_info.map_or(false, |v| v.published))
+			Pallet::<T>::accounts(addr)
+				.map_or(false, |account| account.contract_info.map_or(false, |v| v.published))
 		});
 
 		log::debug!(
@@ -845,7 +838,7 @@ impl<'vicinity, 'config, T: Config> StackStateT<'config> for SubstrateStackState
 	fn transfer(&mut self, transfer: Transfer) -> Result<(), ExitError> {
 		self.touch(transfer.target);
 		if transfer.value.is_zero() {
-			return Ok(());
+			return Ok(())
 		}
 		let source = T::AddressMapping::get_account_id(&transfer.source);
 		let target = T::AddressMapping::get_account_id(&transfer.target);
@@ -863,7 +856,7 @@ impl<'vicinity, 'config, T: Config> StackStateT<'config> for SubstrateStackState
 		);
 
 		if T::Currency::free_balance(&source) < amount {
-			return Err(ExitError::OutOfFund);
+			return Err(ExitError::OutOfFund)
 		}
 
 		T::Currency::transfer(&source, &target, amount, ExistenceRequirement::AllowDeath)
@@ -904,8 +897,7 @@ impl<'vicinity, 'config, T: Config> StackStateT<'config> for SubstrateStackState
 	}
 
 	fn is_cold(&self, address: H160) -> bool {
-		self.substate
-			.recursive_is_cold(&|a| a.accessed_addresses.contains(&address))
+		self.substate.recursive_is_cold(&|a| a.accessed_addresses.contains(&address))
 	}
 
 	fn is_storage_cold(&self, address: H160, key: H256) -> bool {

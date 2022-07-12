@@ -21,7 +21,7 @@
 /// Time and blocks.
 pub mod time {
 	use primitives::{Balance, BlockNumber, Moment};
-	use runtime_common::{dollar, millicent, SEL, prod_or_fast};
+	use runtime_common::{dollar, millicent, prod_or_fast, SEL};
 
 	pub const MILLISECS_PER_BLOCK: Moment = 6000;
 	pub const SLOT_DURATION: Moment = MILLISECS_PER_BLOCK;

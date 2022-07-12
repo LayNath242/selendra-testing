@@ -31,13 +31,7 @@ pub struct StorageMeter {
 impl StorageMeter {
 	/// Create a new storage_meter with given storage limit.
 	pub fn new(limit: u32) -> Self {
-		Self {
-			limit,
-			used: 0,
-			refunded: 0,
-			child_used: 0,
-			child_refunded: 0,
-		}
+		Self { limit, used: 0, refunded: 0, child_used: 0, child_refunded: 0 }
 	}
 
 	pub fn child_meter(&mut self) -> Self {
@@ -91,7 +85,7 @@ impl StorageMeter {
 		);
 		if self.limit < total_used.saturating_sub(total_refunded) {
 			// OutOfStorage
-			return None;
+			return None
 		}
 
 		if total_used > total_refunded {

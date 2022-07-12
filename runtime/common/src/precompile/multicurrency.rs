@@ -63,11 +63,19 @@ pub enum Action {
 
 impl<Runtime> Precompile for MultiCurrencyPrecompile<Runtime>
 where
-	Runtime:
-		module_currencies::Config + module_evm::Config + module_prices::Config + module_transaction_payment::Config,
-	module_currencies::Pallet<Runtime>: MultiCurrencyT<Runtime::AccountId, CurrencyId = CurrencyId, Balance = Balance>,
+	Runtime: module_currencies::Config
+		+ module_evm::Config
+		+ module_prices::Config
+		+ module_transaction_payment::Config,
+	module_currencies::Pallet<Runtime>:
+		MultiCurrencyT<Runtime::AccountId, CurrencyId = CurrencyId, Balance = Balance>,
 {
-	fn execute(input: &[u8], target_gas: Option<u64>, context: &Context, _is_static: bool) -> PrecompileResult {
+	fn execute(
+		input: &[u8],
+		target_gas: Option<u64>,
+		context: &Context,
+		_is_static: bool,
+	) -> PrecompileResult {
 		let input = Input::<
 			Action,
 			Runtime::AccountId,
@@ -75,8 +83,8 @@ where
 			Runtime::Erc20InfoMapping,
 		>::new(input, target_gas_limit(target_gas));
 
-		let currency_id =
-			Runtime::Erc20InfoMapping::decode_evm_address(context.caller).ok_or_else(|| PrecompileFailure::Revert {
+		let currency_id = Runtime::Erc20InfoMapping::decode_evm_address(context.caller)
+			.ok_or_else(|| PrecompileFailure::Revert {
 				exit_status: ExitRevert::Reverted,
 				output: "invalid currency id".into(),
 				cost: target_gas_limit(target_gas).unwrap_or_default(),
@@ -86,9 +94,7 @@ where
 
 		if let Some(gas_limit) = target_gas {
 			if gas_limit < gas_cost {
-				return Err(PrecompileFailure::Error {
-					exit_status: ExitError::OutOfGas,
-				});
+				return Err(PrecompileFailure::Error { exit_status: ExitError::OutOfGas })
 			}
 		}
 
@@ -98,10 +104,12 @@ where
 
 		match action {
 			Action::QueryName => {
-				let name = Runtime::Erc20InfoMapping::name(currency_id).ok_or_else(|| PrecompileFailure::Revert {
-					exit_status: ExitRevert::Reverted,
-					output: "Get name failed".into(),
-					cost: target_gas_limit(target_gas).unwrap_or_default(),
+				let name = Runtime::Erc20InfoMapping::name(currency_id).ok_or_else(|| {
+					PrecompileFailure::Revert {
+						exit_status: ExitRevert::Reverted,
+						output: "Get name failed".into(),
+						cost: target_gas_limit(target_gas).unwrap_or_default(),
+					}
 				})?;
 				log::debug!(target: "evm", "multicurrency: name: {:?}", name);
 
@@ -111,14 +119,15 @@ where
 					output: Output::encode_bytes(&name),
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::QuerySymbol => {
-				let symbol =
-					Runtime::Erc20InfoMapping::symbol(currency_id).ok_or_else(|| PrecompileFailure::Revert {
+				let symbol = Runtime::Erc20InfoMapping::symbol(currency_id).ok_or_else(|| {
+					PrecompileFailure::Revert {
 						exit_status: ExitRevert::Reverted,
 						output: "Get symbol failed".into(),
 						cost: target_gas_limit(target_gas).unwrap_or_default(),
-					})?;
+					}
+				})?;
 				log::debug!(target: "evm", "multicurrency: symbol: {:?}", symbol);
 
 				Ok(PrecompileOutput {
@@ -127,13 +136,15 @@ where
 					output: Output::encode_bytes(&symbol),
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::QueryDecimals => {
 				let decimals =
-					Runtime::Erc20InfoMapping::decimals(currency_id).ok_or_else(|| PrecompileFailure::Revert {
-						exit_status: ExitRevert::Reverted,
-						output: "Get decimals failed".into(),
-						cost: target_gas_limit(target_gas).unwrap_or_default(),
+					Runtime::Erc20InfoMapping::decimals(currency_id).ok_or_else(|| {
+						PrecompileFailure::Revert {
+							exit_status: ExitRevert::Reverted,
+							output: "Get decimals failed".into(),
+							cost: target_gas_limit(target_gas).unwrap_or_default(),
+						}
 					})?;
 				log::debug!(target: "evm", "multicurrency: decimals: {:?}", decimals);
 
@@ -143,10 +154,12 @@ where
 					output: Output::encode_uint(decimals),
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::QueryTotalIssuance => {
 				let total_issuance =
-					<Runtime as module_transaction_payment::Config>::MultiCurrency::total_issuance(currency_id);
+					<Runtime as module_transaction_payment::Config>::MultiCurrency::total_issuance(
+						currency_id,
+					);
 				log::debug!(target: "evm", "multicurrency: total issuance: {:?}", total_issuance);
 
 				Ok(PrecompileOutput {
@@ -155,15 +168,17 @@ where
 					output: Output::encode_uint(total_issuance),
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::QueryBalance => {
 				let who = input.account_id_at(1)?;
-				let balance = if currency_id == <Runtime as module_transaction_payment::Config>::NativeCurrencyId::get()
-				{
-					<Runtime as module_evm::Config>::Currency::free_balance(&who)
-				} else {
-					<Runtime as module_transaction_payment::Config>::MultiCurrency::total_balance(currency_id, &who)
-				};
+				let balance =
+					if currency_id ==
+						<Runtime as module_transaction_payment::Config>::NativeCurrencyId::get()
+					{
+						<Runtime as module_evm::Config>::Currency::free_balance(&who)
+					} else {
+						<Runtime as module_transaction_payment::Config>::MultiCurrency::total_balance(currency_id, &who)
+					};
 				log::debug!(target: "evm", "multicurrency: who: {:?}, balance: {:?}", who, balance);
 
 				Ok(PrecompileOutput {
@@ -172,7 +187,7 @@ where
 					output: Output::encode_uint(balance),
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::Transfer => {
 				let from = input.account_id_at(1)?;
 				let to = input.account_id_at(2)?;
@@ -197,7 +212,7 @@ where
 					output: vec![],
 					logs: Default::default(),
 				})
-			}
+			},
 		}
 	}
 }
@@ -206,8 +221,10 @@ struct Pricer<R>(PhantomData<R>);
 
 impl<Runtime> Pricer<Runtime>
 where
-	Runtime:
-		module_currencies::Config + module_evm::Config + module_prices::Config + module_transaction_payment::Config,
+	Runtime: module_currencies::Config
+		+ module_evm::Config
+		+ module_prices::Config
+		+ module_transaction_payment::Config,
 {
 	const BASE_COST: u64 = 200;
 
@@ -226,31 +243,34 @@ where
 		let read_currency = InputPricer::<Runtime>::read_currency(currency_id);
 
 		let cost = match action {
-			Action::QueryName | Action::QuerySymbol | Action::QueryDecimals => Self::erc20_info(currency_id),
+			Action::QueryName | Action::QuerySymbol | Action::QueryDecimals =>
+				Self::erc20_info(currency_id),
 			Action::QueryTotalIssuance => {
 				// Currencies::TotalIssuance (r: 1)
 				WeightToGas::convert(<Runtime as frame_system::Config>::DbWeight::get().reads(1))
-			}
+			},
 			Action::QueryBalance => {
 				let cost = InputPricer::<Runtime>::read_accounts(1);
 				// Currencies::Balance (r: 1)
 				cost.saturating_add(WeightToGas::convert(
 					<Runtime as frame_system::Config>::DbWeight::get().reads(2),
 				))
-			}
+			},
 			Action::Transfer => {
 				let cost = InputPricer::<Runtime>::read_accounts(2);
 
 				// transfer weight
-				let weight = if currency_id == <Runtime as module_transaction_payment::Config>::NativeCurrencyId::get()
+				let weight = if currency_id ==
+					<Runtime as module_transaction_payment::Config>::NativeCurrencyId::get()
 				{
 					<Runtime as module_currencies::Config>::WeightInfo::transfer_native_currency()
 				} else {
-					<Runtime as module_currencies::Config>::WeightInfo::transfer_non_native_currency()
+					<Runtime as module_currencies::Config>::WeightInfo::transfer_non_native_currency(
+					)
 				};
 
 				cost.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 		};
 
 		Ok(Self::BASE_COST.saturating_add(read_currency).saturating_add(cost))
@@ -258,19 +278,19 @@ where
 
 	fn dex_share_read_cost(share: DexShare) -> u64 {
 		match share {
-			DexShare::Erc20(_) | DexShare::ForeignAsset(_) => WeightToGas::convert(Runtime::DbWeight::get().reads(1)),
+			DexShare::Erc20(_) | DexShare::ForeignAsset(_) =>
+				WeightToGas::convert(Runtime::DbWeight::get().reads(1)),
 			_ => Self::BASE_COST,
 		}
 	}
 
 	fn erc20_info(currency_id: CurrencyId) -> u64 {
 		match currency_id {
-			CurrencyId::Erc20(_) | CurrencyId::StableAssetPoolToken(_) | CurrencyId::ForeignAsset(_) => {
-				WeightToGas::convert(Runtime::DbWeight::get().reads(1))
-			}
-			CurrencyId::DexShare(symbol_0, symbol_1) => {
-				Self::dex_share_read_cost(symbol_0).saturating_add(Self::dex_share_read_cost(symbol_1))
-			}
+			CurrencyId::Erc20(_) |
+			CurrencyId::StableAssetPoolToken(_) |
+			CurrencyId::ForeignAsset(_) => WeightToGas::convert(Runtime::DbWeight::get().reads(1)),
+			CurrencyId::DexShare(symbol_0, symbol_1) => Self::dex_share_read_cost(symbol_0)
+				.saturating_add(Self::dex_share_read_cost(symbol_1)),
 			_ => Self::BASE_COST,
 		}
 	}
@@ -281,8 +301,8 @@ mod tests {
 	use super::*;
 
 	use crate::precompile::mock::{
-		sel_evm_address, alice, kusd_evm_address, bob, erc20_address_not_exists, lp_sel_kusd_evm_address, new_test_ext,
-		Balances, Test,
+		alice, bob, erc20_address_not_exists, kusd_evm_address, lp_sel_kusd_evm_address,
+		new_test_ext, sel_evm_address, Balances, Test,
 	};
 	use frame_support::assert_noop;
 	use hex_literal::hex;

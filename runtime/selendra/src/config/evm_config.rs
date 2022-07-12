@@ -1,9 +1,8 @@
-
 use crate::{
-	dollar, parameter_types, weights, AllPrecompiles, Babe, Balances, Currencies,
-	EnsureRootOrHalfCouncil, EnsureRootOrTwoThirdsTechnicalCommittee, Event, GasToWeight,
-	IdleScheduler, Runtime, RuntimeDebug, TreasuryAccount, Balance,
-	EVM, H160, SEL, config::utility_config::ScheduledTasks
+	config::utility_config::ScheduledTasks, dollar, parameter_types, weights, AllPrecompiles, Babe,
+	Balance, Balances, Currencies, EnsureRootOrHalfCouncil,
+	EnsureRootOrTwoThirdsTechnicalCommittee, Event, GasToWeight, IdleScheduler, Runtime,
+	RuntimeDebug, TreasuryAccount, EVM, H160, SEL,
 };
 
 use codec::{Decode, Encode};
@@ -20,7 +19,6 @@ impl module_evm_accounts::Config for Runtime {
 	type ChainId = EvmChainId<Runtime>;
 	type WeightInfo = weights::module_evm_accounts::WeightInfo<Runtime>;
 }
-
 
 parameter_types! {
 	pub NetworkContractSource: H160 = H160::from_low_u64_be(0);
@@ -48,9 +46,9 @@ impl<I: From<Balance>> frame_support::traits::Get<I> for StorageDepositPerByte {
 		#[cfg(not(feature = "with-ethereum-compatibility"))]
 		// NOTE: SEL decimals is 12, convert to 18.
 		// 10 * millicent(SEL) * 10^6
-		return I::from(100_000_000_000_000);
+		return I::from(100_000_000_000_000)
 		#[cfg(feature = "with-ethereum-compatibility")]
-		return I::from(0);
+		return I::from(0)
 	}
 }
 

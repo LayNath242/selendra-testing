@@ -76,15 +76,10 @@ construct_runtime!(
 );
 
 pub fn new_test_ext() -> sp_io::TestExternalities {
-	let mut t = frame_system::GenesisConfig::default()
-		.build_storage::<Runtime>()
+	let mut t = frame_system::GenesisConfig::default().build_storage::<Runtime>().unwrap();
+	example::GenesisConfig::<Runtime> { bar: vec![(1, 100), (2, 200)], ..Default::default() }
+		.assimilate_storage(&mut t)
 		.unwrap();
-	example::GenesisConfig::<Runtime> {
-		bar: vec![(1, 100), (2, 200)],
-		..Default::default()
-	}
-	.assimilate_storage(&mut t)
-	.unwrap();
 	let mut ext = sp_io::TestExternalities::new(t);
 	ext.execute_with(|| System::set_block_number(1));
 	ext

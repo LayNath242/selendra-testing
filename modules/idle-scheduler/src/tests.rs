@@ -75,7 +75,10 @@ fn can_process_tasks_up_to_weight_limit() {
 
 		// Given enough weights for only 2 tasks: MinimumWeightRemainInBlock::get() + BASE_WEIGHT*2 +
 		// on_idle_base()
-		IdleScheduler::on_idle(0, 100_002_000_000 + <()>::on_idle_base() + (<()>::clear_tasks() * 2));
+		IdleScheduler::on_idle(
+			0,
+			100_002_000_000 + <()>::on_idle_base() + (<()>::clear_tasks() * 2),
+		);
 
 		// Due to hashing, excution is not guaranteed to be in order.
 		assert_eq!(
@@ -109,4 +112,3 @@ fn can_increment_next_task_id() {
 		assert_eq!(NextTaskId::<Runtime>::get(), 1);
 	});
 }
-

@@ -28,7 +28,9 @@ use frame_support::{
 use frame_system::EnsureSignedBy;
 use module_support::mocks::MockAddressMapping;
 use orml_traits::parameter_type_with_key;
-use primitives::{define_combined_task, Amount, BlockNumber, CurrencyId, ReserveIdentifier, TokenSymbol};
+use primitives::{
+	define_combined_task, Amount, BlockNumber, CurrencyId, ReserveIdentifier, TokenSymbol,
+};
 use sp_core::{H160, H256};
 use sp_runtime::{
 	testing::Header,
@@ -121,7 +123,8 @@ impl orml_currencies::Config for Runtime {
 	type GetNativeCurrencyId = GetNativeCurrencyId;
 	type WeightInfo = ();
 }
-pub type AdaptedBasicCurrency = orml_currencies::BasicCurrencyAdapter<Runtime, Balances, Amount, BlockNumber>;
+pub type AdaptedBasicCurrency =
+	orml_currencies::BasicCurrencyAdapter<Runtime, Balances, Amount, BlockNumber>;
 
 define_combined_task! {
 	#[derive(Clone, Encode, Decode, PartialEq, RuntimeDebug, TypeInfo)]
@@ -251,43 +254,19 @@ pub fn charlie() -> H160 {
 }
 
 pub fn new_test_ext() -> sp_io::TestExternalities {
-	let mut t = frame_system::GenesisConfig::default()
-		.build_storage::<Runtime>()
-		.unwrap();
+	let mut t = frame_system::GenesisConfig::default().build_storage::<Runtime>().unwrap();
 
 	let mut accounts = BTreeMap::new();
 
-	accounts.insert(
-		contract_a(),
-		GenesisAccount {
-			nonce: 1,
-			..Default::default()
-		},
-	);
-	accounts.insert(
-		contract_b(),
-		GenesisAccount {
-			nonce: 1,
-			..Default::default()
-		},
-	);
+	accounts.insert(contract_a(), GenesisAccount { nonce: 1, ..Default::default() });
+	accounts.insert(contract_b(), GenesisAccount { nonce: 1, ..Default::default() });
 
 	accounts.insert(
 		alice(),
-		GenesisAccount {
-			nonce: 1,
-			balance: INITIAL_BALANCE,
-			..Default::default()
-		},
+		GenesisAccount { nonce: 1, balance: INITIAL_BALANCE, ..Default::default() },
 	);
-	accounts.insert(
-		bob(),
-		GenesisAccount {
-			nonce: 1,
-			balance: INITIAL_BALANCE,
-			..Default::default()
-		},
-	);
+	accounts
+		.insert(bob(), GenesisAccount { nonce: 1, balance: INITIAL_BALANCE, ..Default::default() });
 
 	pallet_balances::GenesisConfig::<Runtime> {
 		balances: vec![(TreasuryAccount::get(), INITIAL_BALANCE)],

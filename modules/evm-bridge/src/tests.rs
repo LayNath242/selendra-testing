@@ -23,7 +23,8 @@
 use super::*;
 use frame_support::{assert_err, assert_ok};
 use mock::{
-	alice, alice_evm_addr, bob, bob_evm_addr, deploy_contracts, erc20_address, ExtBuilder, Runtime, ALICE_BALANCE,
+	alice, alice_evm_addr, bob, bob_evm_addr, deploy_contracts, erc20_address, ExtBuilder, Runtime,
+	ALICE_BALANCE,
 };
 
 #[test]

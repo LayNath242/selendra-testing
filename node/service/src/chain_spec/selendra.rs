@@ -21,7 +21,7 @@
 use super::{
 	authority_keys_from_seed, get_account_id_from_seed, testnet_accounts, AccountId,
 	AuthorityDiscoveryId, BabeId, Balance, ChainSpecExtension, GrandpaId, ImOnlineId, TokenInfo,
-	DEFAULT_PROTOCOL_ID, TELEMETRY_URL
+	DEFAULT_PROTOCOL_ID, TELEMETRY_URL,
 };
 
 use hex_literal::hex;
@@ -34,11 +34,12 @@ use sp_core::{crypto::UncheckedInto, sr25519};
 use sp_runtime::Perbill;
 
 use selendra_runtime::{
-	dollar, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, Block, CouncilConfig, CdpEngineConfig,
-	DexConfig, EVMConfig, GenesisConfig, GrandpaConfig, ImOnlineConfig,
-	OperatorMembershipSelendraConfig, OrmlNFTConfig, SS58Prefix, SessionConfig, SessionKeys, IndicesConfig,
+	dollar, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, Block, CdpEngineConfig,
+	CdpTreasuryConfig, CouncilConfig, CouncilMembershipConfig, DexConfig, EVMConfig,
+	FinancialCouncilMembershipConfig, GenesisConfig, GrandpaConfig, ImOnlineConfig, IndicesConfig,
+	OperatorMembershipSelendraConfig, OrmlNFTConfig, SS58Prefix, SessionConfig, SessionKeys,
 	StakerStatus, StakingConfig, SudoConfig, SystemConfig, TechnicalMembershipConfig, TokensConfig,
-	SEL, KUSD, CouncilMembershipConfig, FinancialCouncilMembershipConfig, CdpTreasuryConfig
+	KUSD, SEL,
 };
 
 /// Node `ChainSpec` extensions.
@@ -346,17 +347,10 @@ pub fn selendra_development_genesis(
 		democracy: Default::default(),
 		treasury: Default::default(),
 		tokens: TokensConfig { balances: vec![] },
-		cdp_treasury: CdpTreasuryConfig {
-			expected_collateral_auction_size: vec![],
-		},
-		cdp_engine: CdpEngineConfig {
-			collaterals_params: vec![],
-		},
+		cdp_treasury: CdpTreasuryConfig { expected_collateral_auction_size: vec![] },
+		cdp_engine: CdpEngineConfig { collaterals_params: vec![] },
 		asset_registry: Default::default(),
-		evm: EVMConfig {
-			chain_id: 597u64,
-			accounts: Default::default()
-		},
+		evm: EVMConfig { chain_id: 597u64, accounts: Default::default() },
 		dex: DexConfig {
 			initial_listing_trading_pairs: vec![],
 			initial_enabled_trading_pairs: vec![],
@@ -388,11 +382,11 @@ pub fn selendra_genesis(
 	GenesisConfig {
 		system: SystemConfig { code: wasm_binary.to_vec() },
 		balances: BalancesConfig {
-				balances: endowed_accounts
-					.iter()
-					.map(|k: &AccountId| (k.clone(), endowment))
-					.chain(initial_authorities.iter().map(|x| (x.0.clone(), stash)))
-					.collect(),
+			balances: endowed_accounts
+				.iter()
+				.map(|k: &AccountId| (k.clone(), endowment))
+				.chain(initial_authorities.iter().map(|x| (x.0.clone(), stash)))
+				.collect(),
 		},
 		council: CouncilConfig::default(),
 		council_membership: CouncilMembershipConfig {
@@ -449,17 +443,10 @@ pub fn selendra_genesis(
 		democracy: Default::default(),
 		treasury: Default::default(),
 		tokens: TokensConfig { balances: vec![] },
-		cdp_treasury: CdpTreasuryConfig {
-			expected_collateral_auction_size: vec![],
-		},
-		cdp_engine: CdpEngineConfig {
-			collaterals_params: vec![],
-		},
+		cdp_treasury: CdpTreasuryConfig { expected_collateral_auction_size: vec![] },
+		cdp_engine: CdpEngineConfig { collaterals_params: vec![] },
 		asset_registry: Default::default(),
-		evm: EVMConfig {
-			chain_id: 597u64,
-			accounts: Default::default(),
-		},
+		evm: EVMConfig { chain_id: 597u64, accounts: Default::default() },
 		dex: DexConfig {
 			initial_listing_trading_pairs: vec![],
 			initial_enabled_trading_pairs: vec![],

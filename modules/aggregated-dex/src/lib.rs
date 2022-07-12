@@ -96,8 +96,13 @@ pub mod module {
 
 	#[pallet::storage]
 	#[pallet::getter(fn aggregated_swap_paths)]
-	pub type AggregatedSwapPaths<T: Config> =
-		StorageMap<_, Twox64Concat, (CurrencyId, CurrencyId), BoundedVec<SwapPath, T::SwapPathLimit>, OptionQuery>;
+	pub type AggregatedSwapPaths<T: Config> = StorageMap<
+		_,
+		Twox64Concat,
+		(CurrencyId, CurrencyId),
+		BoundedVec<SwapPath, T::SwapPathLimit>,
+		OptionQuery,
+	>;
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
@@ -130,7 +135,11 @@ pub mod module {
 			let who = ensure_signed(origin)?;
 			let paths: BoundedVec<SwapPath, T::SwapPathLimit> =
 				paths.try_into().map_err(|_| Error::<T>::InvalidSwapPath)?;
-			let _ = Self::do_aggregated_swap(&who, &paths, SwapLimit::ExactSupply(supply_amount, min_target_amount))?;
+			let _ = Self::do_aggregated_swap(
+				&who,
+				&paths,
+				SwapLimit::ExactSupply(supply_amount, min_target_amount),
+			)?;
 			Ok(())
 		}
 
@@ -150,7 +159,11 @@ pub mod module {
 			let who = ensure_signed(origin)?;
 			let paths: BoundedVec<SwapPath, T::SwapPathLimit> =
 				paths.try_into().map_err(|_| Error::<T>::InvalidSwapPath)?;
-			let _ = Self::do_aggregated_swap(&who, &paths, SwapLimit::ExactTarget(max_supply_amount, target_amount))?;
+			let _ = Self::do_aggregated_swap(
+				&who,
+				&paths,
+				SwapLimit::ExactTarget(max_supply_amount, target_amount),
+			)?;
 			Ok(())
 		}
 
@@ -189,7 +202,9 @@ pub mod module {
 }
 
 impl<T: Config> Pallet<T> {
-	fn check_swap_paths(paths: &[SwapPath]) -> sp_std::result::Result<(CurrencyId, CurrencyId), DispatchError> {
+	fn check_swap_paths(
+		paths: &[SwapPath],
+	) -> sp_std::result::Result<(CurrencyId, CurrencyId), DispatchError> {
 		ensure!(!paths.is_empty(), Error::<T>::InvalidSwapPath);
 		let mut supply_currency_id: Option<CurrencyId> = None;
 		let mut previous_output_currency_id: Option<CurrencyId> = None;
@@ -211,10 +226,11 @@ impl<T: Config> Pallet<T> {
 						supply_currency_id = Some(*input_currency_id);
 					}
 					previous_output_currency_id = Some(*output_currency_id);
-				}
+				},
 				SwapPath::Taiga(pool_id, supply_asset_index, target_asset_index) => {
 					ensure!(supply_asset_index != target_asset_index, Error::<T>::InvalidSwapPath);
-					let pool_info = T::StableAsset::pool(*pool_id).ok_or(Error::<T>::InvalidPoolId)?;
+					let pool_info =
+						T::StableAsset::pool(*pool_id).ok_or(Error::<T>::InvalidPoolId)?;
 					let input_currency_id = pool_info
 						.assets
 						.get(*supply_asset_index as usize)
@@ -234,7 +250,7 @@ impl<T: Config> Pallet<T> {
 						supply_currency_id = Some(*input_currency_id);
 					}
 					previous_output_currency_id = Some(*output_currency_id);
-				}
+				},
 			}
 		}
 
@@ -249,7 +265,10 @@ impl<T: Config> Pallet<T> {
 		))
 	}
 
-	fn get_aggregated_swap_amount(paths: &[SwapPath], swap_limit: SwapLimit<Balance>) -> Option<(Balance, Balance)> {
+	fn get_aggregated_swap_amount(
+		paths: &[SwapPath],
+		swap_limit: SwapLimit<Balance>,
+	) -> Option<(Balance, Balance)> {
 		Self::check_swap_paths(paths).ok()?;
 
 		match swap_limit {
@@ -260,11 +279,13 @@ impl<T: Config> Pallet<T> {
 					match path {
 						SwapPath::Dex(dex_path) => {
 							// use the output of the previous swap as input.
-							let (_, actual_target) =
-								T::DEX::get_swap_amount(dex_path, SwapLimit::ExactSupply(output_amount, Zero::zero()))?;
+							let (_, actual_target) = T::DEX::get_swap_amount(
+								dex_path,
+								SwapLimit::ExactSupply(output_amount, Zero::zero()),
+							)?;
 
 							output_amount = actual_target;
-						}
+						},
 						SwapPath::Taiga(pool_id, supply_asset_index, target_asset_index) => {
 							// use the output of the previous swap as input.
 							let (_, actual_output_amount) = T::StableAsset::get_swap_output_amount(
@@ -276,14 +297,14 @@ impl<T: Config> Pallet<T> {
 							.map(|result| (result.dx, result.dy))?;
 
 							output_amount = actual_output_amount;
-						}
+						},
 					}
 				}
 
 				if output_amount >= min_target_amount {
-					return Some((exact_supply_amount, output_amount));
+					return Some((exact_supply_amount, output_amount))
 				}
-			}
+			},
 			SwapLimit::ExactTarget(max_supply_amount, exact_target_amount) => {
 				let mut input_amount: Balance = exact_target_amount;
 
@@ -297,7 +318,7 @@ impl<T: Config> Pallet<T> {
 							)?;
 
 							input_amount = supply_amount;
-						}
+						},
 						SwapPath::Taiga(pool_id, supply_asset_index, target_asset_index) => {
 							// calculate the input amount
 							let (actual_input_amount, _) = T::StableAsset::get_swap_input_amount(
@@ -309,7 +330,7 @@ impl<T: Config> Pallet<T> {
 							.map(|result| (result.dx, result.dy))?;
 
 							input_amount = actual_input_amount;
-						}
+						},
 					}
 				}
 
@@ -318,9 +339,9 @@ impl<T: Config> Pallet<T> {
 					return Self::get_aggregated_swap_amount(
 						paths,
 						SwapLimit::ExactSupply(input_amount, exact_target_amount),
-					);
+					)
 				}
-			}
+			},
 		}
 
 		None
@@ -351,9 +372,10 @@ impl<T: Config> Pallet<T> {
 							)?;
 
 							output_amount = actual_target;
-						}
+						},
 						SwapPath::Taiga(pool_id, supply_asset_index, target_asset_index) => {
-							let pool_info = T::StableAsset::pool(*pool_id).ok_or(Error::<T>::InvalidPoolId)?;
+							let pool_info =
+								T::StableAsset::pool(*pool_id).ok_or(Error::<T>::InvalidPoolId)?;
 							let asset_length = pool_info.assets.len() as u32;
 
 							// use the output of the previous swap as input.
@@ -368,7 +390,7 @@ impl<T: Config> Pallet<T> {
 							)?;
 
 							output_amount = actual_target;
-						}
+						},
 					}
 				}
 
@@ -376,15 +398,19 @@ impl<T: Config> Pallet<T> {
 				ensure!(output_amount >= min_target_amount, Error::<T>::CannotSwap);
 
 				Ok((exact_supply_amount, output_amount))
-			}
+			},
 			// Calculate the supply amount first, then execute swap with ExactSupply
 			SwapLimit::ExactTarget(_max_supply_amount, exact_target_amount) => {
-				let (supply_amount, _) =
-					Self::get_aggregated_swap_amount(paths, swap_limit).ok_or(Error::<T>::CannotSwap)?;
+				let (supply_amount, _) = Self::get_aggregated_swap_amount(paths, swap_limit)
+					.ok_or(Error::<T>::CannotSwap)?;
 
 				// actually swap by `ExactSupply` limit
-				Self::do_aggregated_swap(who, paths, SwapLimit::ExactSupply(supply_amount, exact_target_amount))
-			}
+				Self::do_aggregated_swap(
+					who,
+					paths,
+					SwapLimit::ExactSupply(supply_amount, exact_target_amount),
+				)
+			},
 		}
 	}
 }
@@ -439,25 +465,39 @@ impl<T: Config> Swap<T::AccountId, Balance, CurrencyId> for TaigaSwap<T> {
 	) -> Option<(Balance, Balance)> {
 		match limit {
 			SwapLimit::ExactSupply(supply_amount, min_target_amount) => {
-				let (pool_id, input_index, output_index, _) =
-					T::StableAsset::get_best_route(supply_currency_id, target_currency_id, supply_amount)?;
+				let (pool_id, input_index, output_index, _) = T::StableAsset::get_best_route(
+					supply_currency_id,
+					target_currency_id,
+					supply_amount,
+				)?;
 
-				if let Some((input_amount, output_amount)) =
-					T::StableAsset::get_swap_output_amount(pool_id, input_index, output_index, supply_amount)
-						.map(|result| (result.dx, result.dy))
+				if let Some((input_amount, output_amount)) = T::StableAsset::get_swap_output_amount(
+					pool_id,
+					input_index,
+					output_index,
+					supply_amount,
+				)
+				.map(|result| (result.dx, result.dy))
 				{
 					if output_amount >= min_target_amount {
-						return Some((input_amount, output_amount));
+						return Some((input_amount, output_amount))
 					}
 				}
-			}
+			},
 			SwapLimit::ExactTarget(max_supply_amount, target_amount) => {
-				let (pool_id, input_index, output_index, _) =
-					T::StableAsset::get_best_route(supply_currency_id, target_currency_id, max_supply_amount)?;
+				let (pool_id, input_index, output_index, _) = T::StableAsset::get_best_route(
+					supply_currency_id,
+					target_currency_id,
+					max_supply_amount,
+				)?;
 
-				if let Some((input_amount, _)) =
-					T::StableAsset::get_swap_input_amount(pool_id, input_index, output_index, target_amount)
-						.map(|result| (result.dx, result.dy))
+				if let Some((input_amount, _)) = T::StableAsset::get_swap_input_amount(
+					pool_id,
+					input_index,
+					output_index,
+					target_amount,
+				)
+				.map(|result| (result.dx, result.dy))
 				{
 					if !input_amount.is_zero() && input_amount <= max_supply_amount {
 						// actually swap by `ExactSupply` limit
@@ -465,10 +505,10 @@ impl<T: Config> Swap<T::AccountId, Balance, CurrencyId> for TaigaSwap<T> {
 							supply_currency_id,
 							target_currency_id,
 							SwapLimit::ExactSupply(input_amount, target_amount),
-						);
+						)
 					}
 				}
-			}
+			},
 		};
 
 		None
@@ -482,12 +522,14 @@ impl<T: Config> Swap<T::AccountId, Balance, CurrencyId> for TaigaSwap<T> {
 		limit: SwapLimit<Balance>,
 	) -> sp_std::result::Result<(Balance, Balance), DispatchError> {
 		let (supply_amount, min_target_amount) = match limit {
-			SwapLimit::ExactSupply(supply_amount, min_target_amount) => (supply_amount, min_target_amount),
+			SwapLimit::ExactSupply(supply_amount, min_target_amount) =>
+				(supply_amount, min_target_amount),
 			SwapLimit::ExactTarget(_, target_amount) => {
-				let (supply_amount, _) = Self::get_swap_amount(supply_currency_id, target_currency_id, limit)
-					.ok_or(Error::<T>::CannotSwap)?;
+				let (supply_amount, _) =
+					Self::get_swap_amount(supply_currency_id, target_currency_id, limit)
+						.ok_or(Error::<T>::CannotSwap)?;
 				(supply_amount, target_amount)
-			}
+			},
 		};
 
 		let (pool_id, input_index, output_index, _) =
@@ -526,35 +568,33 @@ impl<T: Config> EitherDexOrTaigaSwap<T> {
 		target_currency_id: CurrencyId,
 		limit: SwapLimit<Balance>,
 	) -> DexOrTaigaSwapParams {
-		let dex_result = DexSwap::<T>::get_swap_amount(supply_currency_id, target_currency_id, limit);
-		let taiga_result = TaigaSwap::<T>::get_swap_amount(supply_currency_id, target_currency_id, limit);
+		let dex_result =
+			DexSwap::<T>::get_swap_amount(supply_currency_id, target_currency_id, limit);
+		let taiga_result =
+			TaigaSwap::<T>::get_swap_amount(supply_currency_id, target_currency_id, limit);
 		let swap_amount =
-			if let (Some((dex_supply, dex_target)), Some((taiga_supply, taiga_target))) = (dex_result, taiga_result) {
+			if let (Some((dex_supply, dex_target)), Some((taiga_supply, taiga_target))) =
+				(dex_result, taiga_result)
+			{
 				match limit {
-					SwapLimit::ExactSupply(_, _) => {
+					SwapLimit::ExactSupply(_, _) =>
 						if taiga_target > dex_target {
 							taiga_result
 						} else {
 							dex_result
-						}
-					}
-					SwapLimit::ExactTarget(_, _) => {
+						},
+					SwapLimit::ExactTarget(_, _) =>
 						if taiga_supply < dex_supply {
 							taiga_result
 						} else {
 							dex_result
-						}
-					}
+						},
 				}
 			} else {
 				dex_result.or(taiga_result)
 			};
 
-		DexOrTaigaSwapParams {
-			dex_result,
-			taiga_result,
-			swap_amount,
-		}
+		DexOrTaigaSwapParams { dex_result, taiga_result, swap_amount }
 	}
 }
 
@@ -573,17 +613,14 @@ impl<T: Config> Swap<T::AccountId, Balance, CurrencyId> for EitherDexOrTaigaSwap
 		target_currency_id: CurrencyId,
 		limit: SwapLimit<Balance>,
 	) -> sp_std::result::Result<(Balance, Balance), DispatchError> {
-		let DexOrTaigaSwapParams {
-			dex_result,
-			taiga_result,
-			swap_amount,
-		} = Self::get_swap_params(supply_currency_id, target_currency_id, limit);
+		let DexOrTaigaSwapParams { dex_result, taiga_result, swap_amount } =
+			Self::get_swap_params(supply_currency_id, target_currency_id, limit);
 
 		if swap_amount.is_some() {
 			if dex_result == swap_amount {
-				return DexSwap::<T>::swap(who, supply_currency_id, target_currency_id, limit);
+				return DexSwap::<T>::swap(who, supply_currency_id, target_currency_id, limit)
 			} else if taiga_result == swap_amount {
-				return TaigaSwap::<T>::swap(who, supply_currency_id, target_currency_id, limit);
+				return TaigaSwap::<T>::swap(who, supply_currency_id, target_currency_id, limit)
 			}
 		}
 
@@ -612,25 +649,26 @@ impl<T: Config> AggregatedSwap<T> {
 	) -> AggregatedSwapParams {
 		let mut swap_amount: Option<(Balance, Balance)> = None;
 
-		let dex_result = DexSwap::<T>::get_swap_amount(supply_currency_id, target_currency_id, limit);
-		let taiga_result = TaigaSwap::<T>::get_swap_amount(supply_currency_id, target_currency_id, limit);
-		let aggregated_result = Pallet::<T>::aggregated_swap_paths((supply_currency_id, target_currency_id))
-			.and_then(|paths| Pallet::<T>::get_aggregated_swap_amount(&paths, limit));
+		let dex_result =
+			DexSwap::<T>::get_swap_amount(supply_currency_id, target_currency_id, limit);
+		let taiga_result =
+			TaigaSwap::<T>::get_swap_amount(supply_currency_id, target_currency_id, limit);
+		let aggregated_result =
+			Pallet::<T>::aggregated_swap_paths((supply_currency_id, target_currency_id))
+				.and_then(|paths| Pallet::<T>::get_aggregated_swap_amount(&paths, limit));
 
 		for result in sp_std::vec![dex_result, taiga_result, aggregated_result].iter() {
 			if let Some((supply_amount, target_amount)) = *result {
 				if let Some((candidate_supply_amount, candidate_target_amount)) = swap_amount {
 					match limit {
-						SwapLimit::ExactSupply(_, _) => {
+						SwapLimit::ExactSupply(_, _) =>
 							if target_amount > candidate_target_amount {
 								swap_amount = *result;
-							}
-						}
-						SwapLimit::ExactTarget(_, _) => {
+							},
+						SwapLimit::ExactTarget(_, _) =>
 							if supply_amount < candidate_supply_amount {
 								swap_amount = *result;
-							}
-						}
+							},
 					}
 				} else {
 					swap_amount = *result;
@@ -638,12 +676,7 @@ impl<T: Config> AggregatedSwap<T> {
 			}
 		}
 
-		AggregatedSwapParams {
-			dex_result,
-			taiga_result,
-			aggregated_result,
-			swap_amount,
-		}
+		AggregatedSwapParams { dex_result, taiga_result, aggregated_result, swap_amount }
 	}
 }
 
@@ -662,23 +695,19 @@ impl<T: Config> Swap<T::AccountId, Balance, CurrencyId> for AggregatedSwap<T> {
 		target_currency_id: CurrencyId,
 		limit: SwapLimit<Balance>,
 	) -> sp_std::result::Result<(Balance, Balance), DispatchError> {
-		let AggregatedSwapParams {
-			dex_result,
-			taiga_result,
-			aggregated_result,
-			swap_amount,
-		} = Self::get_swap_params(supply_currency_id, target_currency_id, limit);
+		let AggregatedSwapParams { dex_result, taiga_result, aggregated_result, swap_amount } =
+			Self::get_swap_params(supply_currency_id, target_currency_id, limit);
 
 		if swap_amount.is_some() {
 			if dex_result == swap_amount {
-				return DexSwap::<T>::swap(who, supply_currency_id, target_currency_id, limit);
+				return DexSwap::<T>::swap(who, supply_currency_id, target_currency_id, limit)
 			} else if taiga_result == swap_amount {
-				return TaigaSwap::<T>::swap(who, supply_currency_id, target_currency_id, limit);
+				return TaigaSwap::<T>::swap(who, supply_currency_id, target_currency_id, limit)
 			} else if aggregated_result == swap_amount {
 				let aggregated_swap_paths =
 					Pallet::<T>::aggregated_swap_paths((supply_currency_id, target_currency_id))
 						.ok_or(Error::<T>::CannotSwap)?;
-				return Pallet::<T>::do_aggregated_swap(who, &aggregated_swap_paths, limit);
+				return Pallet::<T>::do_aggregated_swap(who, &aggregated_swap_paths, limit)
 			}
 		}
 
@@ -687,7 +716,9 @@ impl<T: Config> Swap<T::AccountId, Balance, CurrencyId> for AggregatedSwap<T> {
 }
 
 pub struct RebasedStableAssetErrorConvertor<T>(PhantomData<T>);
-impl<T: Config> Convert<RebasedStableAssetError, DispatchError> for RebasedStableAssetErrorConvertor<T> {
+impl<T: Config> Convert<RebasedStableAssetError, DispatchError>
+	for RebasedStableAssetErrorConvertor<T>
+{
 	fn convert(e: RebasedStableAssetError) -> DispatchError {
 		match e {
 			RebasedStableAssetError::InvalidPoolId => Error::<T>::InvalidPoolId.into(),

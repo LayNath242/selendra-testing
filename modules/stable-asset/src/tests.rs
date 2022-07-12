@@ -16,10 +16,11 @@
 // limitations under the License.
 
 use crate::{mock::*, Error, StableAssetPoolInfo};
-use frame_support::assert_noop;
-use frame_support::assert_ok;
-use frame_support::dispatch::DispatchError;
-use frame_support::traits::fungibles::{Inspect, Mutate};
+use frame_support::{
+	assert_noop, assert_ok,
+	dispatch::DispatchError,
+	traits::fungibles::{Inspect, Mutate},
+};
 
 pub const BALANCE_OFF: u128 = 1;
 
@@ -166,7 +167,7 @@ fn modify_a_successful() {
 						precision: 1000000000000000000u128,
 					})
 				);
-			}
+			},
 		}
 	});
 }
@@ -181,7 +182,7 @@ fn modify_a_argument_error_failed() {
 					StableAsset::modify_a(Origin::signed(1), 0, 100, 0),
 					Error::<Test>::ArgumentsError
 				);
-			}
+			},
 		}
 	});
 }
@@ -196,7 +197,7 @@ fn modify_a_pool_not_found() {
 					StableAsset::modify_a(Origin::signed(1), 1, 100, 1000),
 					Error::<Test>::PoolNotFound
 				);
-			}
+			},
 		}
 	});
 }
@@ -240,7 +241,7 @@ fn mint_successful_equal_amounts() {
 					199800000000000000u128 - BALANCE_OFF
 				);
 				assert_eq!(TestAssets::balance(pool_asset, &2), 200000000000000u128 - BALANCE_OFF);
-			}
+			},
 		}
 	});
 }
@@ -302,7 +303,7 @@ fn mint_successful_different_amounts() {
 				} else {
 					panic!("Unexpected event");
 				}
-			}
+			},
 		}
 	});
 }
@@ -319,7 +320,7 @@ fn mint_failed_no_pool() {
 					StableAsset::mint(Origin::signed(1), 3, amounts, 0),
 					Error::<Test>::PoolNotFound
 				);
-			}
+			},
 		}
 	});
 }
@@ -336,7 +337,7 @@ fn mint_failed_too_many_amounts() {
 					StableAsset::mint(Origin::signed(1), 0, amounts, 0),
 					Error::<Test>::ArgumentsMismatch
 				);
-			}
+			},
 		}
 	});
 }
@@ -353,7 +354,7 @@ fn mint_failed_zero_amount() {
 					StableAsset::mint(Origin::signed(1), 0, amounts, 0),
 					Error::<Test>::ArgumentsError
 				);
-			}
+			},
 		}
 	});
 }
@@ -370,7 +371,7 @@ fn mint_failed_under_min() {
 					StableAsset::mint(Origin::signed(1), 0, amounts, 2000000000000000000000000u128),
 					Error::<Test>::MintUnderMin
 				);
-			}
+			},
 		}
 	});
 }
@@ -386,7 +387,7 @@ fn mint_failed_overflow() {
 				assert_ok!(TestAssets::mint_into(coin1, &1, 20000000000u128));
 				let amounts = vec![10000000000u128, 20000000000u128];
 				assert_ok!(StableAsset::mint(Origin::signed(1), 0, amounts, 0u128),);
-			}
+			},
 		}
 	});
 }
@@ -444,7 +445,7 @@ fn swap_successful() {
 				} else {
 					panic!("Unexpected event");
 				}
-			}
+			},
 		}
 	});
 }
@@ -462,7 +463,7 @@ fn swap_failed_same_token() {
 					StableAsset::swap(Origin::signed(1), 0, 1, 1, 5000000u128, 0, 2),
 					Error::<Test>::ArgumentsError
 				);
-			}
+			},
 		}
 	});
 }
@@ -480,7 +481,7 @@ fn swap_failed_no_pool() {
 					StableAsset::swap(Origin::signed(1), 3, 0, 1, 5000000u128, 0, 2),
 					Error::<Test>::PoolNotFound
 				);
-			}
+			},
 		}
 	});
 }
@@ -498,7 +499,7 @@ fn swap_failed_invalid_first_token() {
 					StableAsset::swap(Origin::signed(1), 0, 2, 1, 5000000u128, 0, 2),
 					Error::<Test>::ArgumentsError
 				);
-			}
+			},
 		}
 	});
 }
@@ -516,7 +517,7 @@ fn swap_failed_invalid_second_token() {
 					StableAsset::swap(Origin::signed(1), 0, 0, 2, 5000000u128, 0, 2),
 					Error::<Test>::ArgumentsError
 				);
-			}
+			},
 		}
 	});
 }
@@ -534,7 +535,7 @@ fn swap_failed_invalid_amount() {
 					StableAsset::swap(Origin::signed(1), 0, 0, 1, 0u128, 0, 2),
 					Error::<Test>::ArgumentsError
 				);
-			}
+			},
 		}
 	});
 }
@@ -549,10 +550,18 @@ fn swap_failed_under_min() {
 				let amounts = vec![10000000u128, 20000000u128];
 				assert_ok!(StableAsset::mint(Origin::signed(1), 0, amounts, 0));
 				assert_noop!(
-					StableAsset::swap(Origin::signed(1), 0, 0, 1, 5000000u128, 50000000000000000u128, 2),
+					StableAsset::swap(
+						Origin::signed(1),
+						0,
+						0,
+						1,
+						5000000u128,
+						50000000000000000u128,
+						2
+					),
 					Error::<Test>::SwapUnderMin
 				);
-			}
+			},
 		}
 	});
 }
@@ -570,7 +579,7 @@ fn swap_failed_under_overflow() {
 					StableAsset::swap(Origin::signed(1), 0, 0, 1, 500000000u128, 0u128, 2),
 					DispatchError::Other("Overflow")
 				);
-			}
+			},
 		}
 	});
 }
@@ -638,7 +647,7 @@ fn redeem_proportion_successful() {
 				} else {
 					panic!("Unexpected event");
 				}
-			}
+			},
 		}
 	});
 }
@@ -656,7 +665,7 @@ fn redeem_proportion_failed_zero_amount() {
 					StableAsset::redeem_proportion(Origin::signed(1), 0, 0u128, vec![0u128, 0u128]),
 					Error::<Test>::ArgumentsError
 				);
-			}
+			},
 		}
 	});
 }
@@ -679,7 +688,7 @@ fn redeem_proportion_failed_limits_mismatch() {
 					),
 					Error::<Test>::ArgumentsMismatch
 				);
-			}
+			},
 		}
 	});
 }
@@ -694,10 +703,15 @@ fn redeem_proportion_failed_overflow() {
 				let amounts = vec![10000000u128, 20000000u128];
 				assert_ok!(StableAsset::mint(Origin::signed(1), 0, amounts, 0));
 				assert_noop!(
-					StableAsset::redeem_proportion(Origin::signed(1), 0, 10000000000000000000u128, vec![0u128, 0u128]),
+					StableAsset::redeem_proportion(
+						Origin::signed(1),
+						0,
+						10000000000000000000u128,
+						vec![0u128, 0u128]
+					),
 					Error::<Test>::Math
 				);
-			}
+			},
 		}
 	});
 }
@@ -720,7 +734,7 @@ fn redeem_proportion_failed_limits_breached() {
 					),
 					Error::<Test>::RedeemUnderMin
 				);
-			}
+			},
 		}
 	});
 }
@@ -735,10 +749,15 @@ fn redeem_proportion_failed_no_pool() {
 				let amounts = vec![10000000u128, 20000000u128];
 				assert_ok!(StableAsset::mint(Origin::signed(1), 0, amounts, 0));
 				assert_noop!(
-					StableAsset::redeem_proportion(Origin::signed(1), 3, 100000000000000000u128, vec![0u128, 0u128]),
+					StableAsset::redeem_proportion(
+						Origin::signed(1),
+						3,
+						100000000000000000u128,
+						vec![0u128, 0u128]
+					),
 					Error::<Test>::PoolNotFound
 				);
-			}
+			},
 		}
 	});
 }
@@ -809,7 +828,7 @@ fn redeem_single_successful() {
 				} else {
 					panic!("Unexpected event");
 				}
-			}
+			},
 		}
 	});
 }
@@ -827,7 +846,7 @@ fn redeem_single_failed_zero_amount() {
 					StableAsset::redeem_single(Origin::signed(1), 0, 0u128, 0, 0u128, 2),
 					Error::<Test>::ArgumentsError
 				);
-			}
+			},
 		}
 	});
 }
@@ -842,10 +861,17 @@ fn redeem_single_failed_overflow() {
 				let amounts = vec![10000000u128, 20000000u128];
 				assert_ok!(StableAsset::mint(Origin::signed(1), 0, amounts, 0));
 				assert_noop!(
-					StableAsset::redeem_single(Origin::signed(1), 0, 1000000000000000000u128, 0, 0u128, 2),
+					StableAsset::redeem_single(
+						Origin::signed(1),
+						0,
+						1000000000000000000u128,
+						0,
+						0u128,
+						2
+					),
 					Error::<Test>::Math
 				);
-			}
+			},
 		}
 	});
 }
@@ -870,7 +896,7 @@ fn redeem_single_failed_under_min() {
 					),
 					Error::<Test>::RedeemUnderMin
 				);
-			}
+			},
 		}
 	});
 }
@@ -885,10 +911,17 @@ fn redeem_single_failed_invalid_token() {
 				let amounts = vec![10000000u128, 20000000u128];
 				assert_ok!(StableAsset::mint(Origin::signed(1), 0, amounts, 0));
 				assert_noop!(
-					StableAsset::redeem_single(Origin::signed(1), 0, 100000000000000000u128, 3, 0u128, 2),
+					StableAsset::redeem_single(
+						Origin::signed(1),
+						0,
+						100000000000000000u128,
+						3,
+						0u128,
+						2
+					),
 					Error::<Test>::ArgumentsError
 				);
-			}
+			},
 		}
 	});
 }
@@ -903,10 +936,17 @@ fn redeem_single_failed_no_pool() {
 				let amounts = vec![10000000u128, 20000000u128];
 				assert_ok!(StableAsset::mint(Origin::signed(1), 0, amounts, 0));
 				assert_noop!(
-					StableAsset::redeem_single(Origin::signed(1), 3, 100000000000000000u128, 3, 0u128, 2),
+					StableAsset::redeem_single(
+						Origin::signed(1),
+						3,
+						100000000000000000u128,
+						3,
+						0u128,
+						2
+					),
 					Error::<Test>::PoolNotFound
 				);
-			}
+			},
 		}
 	});
 }
@@ -971,7 +1011,7 @@ fn redeem_multi_successful() {
 				} else {
 					panic!("Unexpected event");
 				}
-			}
+			},
 		}
 	});
 }
@@ -994,7 +1034,7 @@ fn redeem_multi_failed_not_enough_assets() {
 					),
 					Error::<Test>::Math
 				);
-			}
+			},
 		}
 	});
 }
@@ -1009,10 +1049,15 @@ fn redeem_multi_failed_over_max() {
 				let amounts = vec![10000000u128, 20000000u128];
 				assert_ok!(StableAsset::mint(Origin::signed(1), 0, amounts, 0));
 				assert_noop!(
-					StableAsset::redeem_multi(Origin::signed(1), 0, vec![5000000u128, 5000000u128], 110000u128,),
+					StableAsset::redeem_multi(
+						Origin::signed(1),
+						0,
+						vec![5000000u128, 5000000u128],
+						110000u128,
+					),
 					Error::<Test>::RedeemOverMax
 				);
-			}
+			},
 		}
 	});
 }
@@ -1027,10 +1072,15 @@ fn redeem_multi_failed_no_pool() {
 				let amounts = vec![10000000u128, 20000000u128];
 				assert_ok!(StableAsset::mint(Origin::signed(1), 0, amounts, 0));
 				assert_noop!(
-					StableAsset::redeem_multi(Origin::signed(1), 1, vec![5000000u128, 5000000u128], 110000u128,),
+					StableAsset::redeem_multi(
+						Origin::signed(1),
+						1,
+						vec![5000000u128, 5000000u128],
+						110000u128,
+					),
 					Error::<Test>::PoolNotFound
 				);
-			}
+			},
 		}
 	});
 }
@@ -1053,7 +1103,7 @@ fn swap_exact_success() {
 			a_block: 0,
 			future_a: a,
 			future_a_block: 100,
-			balances: balances,
+			balances,
 			fee_recipient: 2,
 			account_id: 3,
 			yield_recipient: 1,

@@ -19,11 +19,11 @@
 //! An orml_authority trait implementation.
 
 use crate::{
-	AccountId, AccountIdConversion, AuthoritysOriginId, BadOrigin, BlockNumber, DispatchResult, EnsureRoot,
-	EnsureRootOrHalfFinancialCouncil, EnsureRootOrHalfCouncil,
+	AccountId, AccountIdConversion, AuthoritysOriginId, BadOrigin, BlockNumber, DispatchResult,
+	EnsureRoot, EnsureRootOrHalfCouncil, EnsureRootOrHalfFinancialCouncil,
 	EnsureRootOrOneThirdsTechnicalCommittee, EnsureRootOrThreeFourthsCouncil,
-	EnsureRootOrTwoThirdsTechnicalCommittee, FunanTreasuryPalletId, OneDay, Origin,
-	OriginCaller, SevenDays, TreasuryPalletId, TreasuryReservePalletId, ZeroDay, HOURS,
+	EnsureRootOrTwoThirdsTechnicalCommittee, FunanTreasuryPalletId, OneDay, Origin, OriginCaller,
+	SevenDays, TreasuryPalletId, TreasuryReservePalletId, ZeroDay, HOURS,
 };
 pub use frame_support::traits::{schedule::Priority, EnsureOrigin, OriginTrait};
 use frame_system::ensure_root;
@@ -57,7 +57,8 @@ impl orml_authority::AuthorityConfig<Origin, OriginCaller, BlockNumber> for Auth
 
 	fn check_delay_schedule(origin: Origin, _initial_origin: &OriginCaller) -> DispatchResult {
 		ensure_root(origin.clone()).or_else(|_| {
-			EnsureRootOrOneThirdsTechnicalCommittee::ensure_origin(origin).map_or_else(|e| Err(e.into()), |_| Ok(()))
+			EnsureRootOrOneThirdsTechnicalCommittee::ensure_origin(origin)
+				.map_or_else(|e| Err(e.into()), |_| Ok(()))
 		})
 	}
 
@@ -78,19 +79,18 @@ impl orml_authority::AsOriginId<Origin, OriginCaller> for AuthoritysOriginId {
 	fn into_origin(self) -> OriginCaller {
 		match self {
 			AuthoritysOriginId::Root => Origin::root().caller().clone(),
-			AuthoritysOriginId::Treasury => Origin::signed(TreasuryPalletId::get().into_account_truncating())
-				.caller()
-				.clone(),
-			AuthoritysOriginId::FunanTreasury => {
+			AuthoritysOriginId::Treasury =>
+				Origin::signed(TreasuryPalletId::get().into_account_truncating())
+					.caller()
+					.clone(),
+			AuthoritysOriginId::FunanTreasury =>
 				Origin::signed(FunanTreasuryPalletId::get().into_account_truncating())
 					.caller()
-					.clone()
-			}
-			AuthoritysOriginId::TreasuryReserve => {
+					.clone(),
+			AuthoritysOriginId::TreasuryReserve =>
 				Origin::signed(TreasuryReservePalletId::get().into_account_truncating())
 					.caller()
-					.clone()
-			}
+					.clone(),
 		}
 	}
 
@@ -103,18 +103,20 @@ impl orml_authority::AsOriginId<Origin, OriginCaller> for AuthoritysOriginId {
 				OriginCaller,
 			> as EnsureOrigin<Origin>>::ensure_origin(origin)
 			.map_or_else(|_| Err(BadOrigin.into()), |_| Ok(())),
-			AuthoritysOriginId::Treasury => {
-				<EnsureDelayed<OneDay, EnsureRootOrHalfCouncil, BlockNumber, OriginCaller> as EnsureOrigin<
-					Origin,
-				>>::ensure_origin(origin)
-				.map_or_else(|_| Err(BadOrigin.into()), |_| Ok(()))
-			}
-			AuthoritysOriginId::FunanTreasury => {
-				<EnsureDelayed<OneDay, EnsureRootOrHalfFinancialCouncil, BlockNumber, OriginCaller> as EnsureOrigin<
-					Origin,
-				>>::ensure_origin(origin)
-				.map_or_else(|_| Err(BadOrigin.into()), |_| Ok(()))
-			}
+			AuthoritysOriginId::Treasury => <EnsureDelayed<
+				OneDay,
+				EnsureRootOrHalfCouncil,
+				BlockNumber,
+				OriginCaller,
+			> as EnsureOrigin<Origin>>::ensure_origin(origin)
+			.map_or_else(|_| Err(BadOrigin.into()), |_| Ok(())),
+			AuthoritysOriginId::FunanTreasury => <EnsureDelayed<
+				OneDay,
+				EnsureRootOrHalfFinancialCouncil,
+				BlockNumber,
+				OriginCaller,
+			> as EnsureOrigin<Origin>>::ensure_origin(origin)
+			.map_or_else(|_| Err(BadOrigin.into()), |_| Ok(())),
 			AuthoritysOriginId::TreasuryReserve => <EnsureDelayed<
 				ZeroDay,
 				EnsureRoot<AccountId>,
@@ -129,7 +131,7 @@ impl orml_authority::AsOriginId<Origin, OriginCaller> for AuthoritysOriginId {
 /// Compares privilages
 fn cmp_privilege(left: &OriginCaller, right: &OriginCaller) -> Option<Ordering> {
 	if left == right {
-		return Some(Ordering::Equal);
+		return Some(Ordering::Equal)
 	}
 
 	match (left, right) {
@@ -142,8 +144,14 @@ fn cmp_privilege(left: &OriginCaller, right: &OriginCaller) -> Option<Ordering> 
 			OriginCaller::Council(pallet_collective::RawOrigin::Members(r_yes_votes, r_count)),
 		) => Some((l_yes_votes * r_count).cmp(&(r_yes_votes * l_count))),
 		(
-			OriginCaller::FinancialCouncil(pallet_collective::RawOrigin::Members(l_yes_votes, l_count)),
-			OriginCaller::FinancialCouncil(pallet_collective::RawOrigin::Members(r_yes_votes, r_count)),
+			OriginCaller::FinancialCouncil(pallet_collective::RawOrigin::Members(
+				l_yes_votes,
+				l_count,
+			)),
+			OriginCaller::FinancialCouncil(pallet_collective::RawOrigin::Members(
+				r_yes_votes,
+				r_count,
+			)),
 		) => Some((l_yes_votes * r_count).cmp(&(r_yes_votes * l_count))),
 
 		// For every other origin we don't care, as they are not used in schedule_dispatch

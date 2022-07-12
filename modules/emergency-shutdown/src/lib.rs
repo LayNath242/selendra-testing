@@ -65,7 +65,11 @@ pub mod module {
 
 		/// Check the auction cancellation to decide whether to open the final
 		/// redemption
-		type AuctionManagerHandler: AuctionManager<Self::AccountId, Balance = Balance, CurrencyId = CurrencyId>;
+		type AuctionManagerHandler: AuctionManager<
+			Self::AccountId,
+			Balance = Balance,
+			CurrencyId = CurrencyId,
+		>;
 
 		/// The origin which may trigger emergency shutdown. Root can always do
 		/// this.
@@ -168,7 +172,10 @@ pub mod module {
 			for currency_id in collateral_currency_ids {
 				// there's no collateral auction
 				ensure!(
-					<T as Config>::AuctionManagerHandler::get_total_collateral_in_auction(currency_id).is_zero(),
+					<T as Config>::AuctionManagerHandler::get_total_collateral_in_auction(
+						currency_id
+					)
+					.is_zero(),
 					Error::<T>::ExistPotentialSurplus,
 				);
 				// there's on debit in CDP
@@ -191,7 +198,10 @@ pub mod module {
 		/// - `amount`: stable currency amount used to refund.
 		#[pallet::weight(T::WeightInfo::refund_collaterals(T::CollateralCurrencyIds::get().len() as u32))]
 		#[transactional]
-		pub fn refund_collaterals(origin: OriginFor<T>, #[pallet::compact] amount: Balance) -> DispatchResult {
+		pub fn refund_collaterals(
+			origin: OriginFor<T>,
+			#[pallet::compact] amount: Balance,
+		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			ensure!(Self::can_refund(), Error::<T>::CanNotRefund);
 
@@ -204,11 +214,16 @@ pub mod module {
 			let mut refund_assets: Vec<(CurrencyId, Balance)> = vec![];
 			// refund collaterals to caller by CDP treasury
 			for currency_id in collateral_currency_ids {
-				let refund_amount =
-					refund_ratio.saturating_mul_int(<T as Config>::CDPTreasury::get_total_collaterals(currency_id));
+				let refund_amount = refund_ratio.saturating_mul_int(
+					<T as Config>::CDPTreasury::get_total_collaterals(currency_id),
+				);
 
 				if !refund_amount.is_zero() {
-					let res = <T as Config>::CDPTreasury::withdraw_collateral(&who, currency_id, refund_amount);
+					let res = <T as Config>::CDPTreasury::withdraw_collateral(
+						&who,
+						currency_id,
+						refund_amount,
+					);
 					if res.is_ok() {
 						refund_assets.push((currency_id, refund_amount));
 					}

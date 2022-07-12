@@ -1,4 +1,4 @@
-use super::{EnsureRoot, AccountId, EnsureOneOf};
+use super::{AccountId, EnsureOneOf, EnsureRoot};
 
 pub type CouncilInstance = pallet_collective::Instance1;
 pub type FinancialCouncilInstance = pallet_collective::Instance2;

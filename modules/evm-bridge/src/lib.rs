@@ -210,13 +210,12 @@ impl<T: Config> EVMBridgeTrait<AccountIdOf<T>, BalanceOf<T>> for EVMBridge<T> {
 		// append receiver address
 		input.extend_from_slice(H256::from(to).as_bytes());
 		// append amount to be transferred
-		input.extend_from_slice(H256::from_uint(&U256::from(value.saturated_into::<u128>())).as_bytes());
+		input.extend_from_slice(
+			H256::from_uint(&U256::from(value.saturated_into::<u128>())).as_bytes(),
+		);
 
-		let storage_limit = if context.origin == Default::default() {
-			0
-		} else {
-			erc20::TRANSFER.storage
-		};
+		let storage_limit =
+			if context.origin == Default::default() { 0 } else { erc20::TRANSFER.storage };
 
 		let info = T::EVM::execute(
 			context,
@@ -234,10 +233,7 @@ impl<T: Config> EVMBridgeTrait<AccountIdOf<T>, BalanceOf<T>> for EVMBridge<T> {
 		U256::from(1).to_big_endian(&mut bytes);
 
 		// Check return value to make sure not calling on empty contracts.
-		ensure!(
-			!info.value.is_empty() && info.value == bytes,
-			Error::<T>::InvalidReturnValue
-		);
+		ensure!(!info.value.is_empty() && info.value == bytes, Error::<T>::InvalidReturnValue);
 		Ok(())
 	}
 
@@ -268,10 +264,7 @@ impl<T: Config> Pallet<T> {
 		// the corresponding parameter or return value.
 		// - part 2: 32 byte, string length
 		// - part 3: string data
-		ensure!(
-			output.len() >= 64 && output.len() % 32 == 0,
-			Error::<T>::InvalidReturnValue
-		);
+		ensure!(output.len() >= 64 && output.len() % 32 == 0, Error::<T>::InvalidReturnValue);
 
 		let offset = U256::from_big_endian(&output[0..32]);
 		let length = U256::from_big_endian(&output[offset.as_usize()..offset.as_usize() + 32]);
@@ -282,7 +275,9 @@ impl<T: Config> Pallet<T> {
 		);
 
 		let mut data = Vec::new();
-		data.extend_from_slice(&output[offset.as_usize() + 32..offset.as_usize() + 32 + length.as_usize()]);
+		data.extend_from_slice(
+			&output[offset.as_usize() + 32..offset.as_usize() + 32 + length.as_usize()],
+		);
 
 		Ok(data.to_vec())
 	}

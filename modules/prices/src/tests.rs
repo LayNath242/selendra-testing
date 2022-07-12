@@ -39,8 +39,8 @@ fn lp_token_fair_price_works() {
 	)
 	.unwrap();
 	assert!(
-		lp_token_fair_price_0 <= Price::saturating_from_integer(400)
-			&& lp_token_fair_price_0 >= Price::saturating_from_integer(399)
+		lp_token_fair_price_0 <= Price::saturating_from_integer(400) &&
+			lp_token_fair_price_0 >= Price::saturating_from_integer(399)
 	);
 
 	assert_eq!(
@@ -320,7 +320,9 @@ fn unlock_price_work() {
 			Some(Price::saturating_from_integer(500000000000000u128))
 		);
 		assert_ok!(PricesModule::unlock_price(Origin::signed(1), BTC));
-		System::assert_last_event(Event::PricesModule(crate::Event::UnlockPrice { currency_id: BTC }));
+		System::assert_last_event(Event::PricesModule(crate::Event::UnlockPrice {
+			currency_id: BTC,
+		}));
 		assert_eq!(PricesModule::locked_price(BTC), None);
 	});
 }
@@ -368,14 +370,8 @@ fn price_providers_work() {
 			Some(Price::saturating_from_integer(50000000u128))
 		);
 		assert_eq!(PriorityLockedPriceProvider::<Runtime>::get_price(KSM), None);
-		assert_eq!(
-			PriorityLockedPriceProvider::<Runtime>::get_price(LP_KUSD_DOT),
-			lp_price_1
-		);
-		assert_eq!(
-			PriorityLockedPriceProvider::<Runtime>::get_relative_price(BTC, KSM),
-			None
-		);
+		assert_eq!(PriorityLockedPriceProvider::<Runtime>::get_price(LP_KUSD_DOT), lp_price_1);
+		assert_eq!(PriorityLockedPriceProvider::<Runtime>::get_relative_price(BTC, KSM), None);
 
 		assert_eq!(LockedPriceProvider::<Runtime>::get_price(KUSD), None);
 		assert_eq!(LockedPriceProvider::<Runtime>::get_price(BTC), None);
@@ -458,10 +454,7 @@ fn price_providers_work() {
 			PriorityLockedPriceProvider::<Runtime>::get_price(KSM),
 			Some(Price::saturating_from_integer(200000000u128))
 		);
-		assert_eq!(
-			PriorityLockedPriceProvider::<Runtime>::get_price(LP_KUSD_DOT),
-			lp_price_1
-		);
+		assert_eq!(PriorityLockedPriceProvider::<Runtime>::get_price(LP_KUSD_DOT), lp_price_1);
 		assert_eq!(
 			PriorityLockedPriceProvider::<Runtime>::get_relative_price(BTC, KSM),
 			Some(Price::saturating_from_integer(2500000u128))
@@ -509,10 +502,7 @@ fn price_providers_work() {
 			PriorityLockedPriceProvider::<Runtime>::get_price(KSM),
 			Some(Price::saturating_from_integer(200000000u128))
 		);
-		assert_eq!(
-			PriorityLockedPriceProvider::<Runtime>::get_price(LP_KUSD_DOT),
-			lp_price_2
-		);
+		assert_eq!(PriorityLockedPriceProvider::<Runtime>::get_price(LP_KUSD_DOT), lp_price_2);
 		assert_eq!(
 			PriorityLockedPriceProvider::<Runtime>::get_relative_price(BTC, KSM),
 			Some(Price::saturating_from_integer(2000000u128))

@@ -37,8 +37,10 @@ use sp_runtime::{
 	FixedPointNumber,
 };
 use sp_std::cell::RefCell;
-use support::mocks::MockStableAsset;
-use support::{AuctionManager, ExchangeRate, Price, PriceProvider, Rate, Ratio, SpecificJointsSwap};
+use support::{
+	mocks::MockStableAsset, AuctionManager, ExchangeRate, Price, PriceProvider, Rate, Ratio,
+	SpecificJointsSwap,
+};
 
 mod funan {
 	pub use super::super::*;
@@ -116,7 +118,8 @@ impl pallet_balances::Config for Runtime {
 	type ReserveIdentifier = ReserveIdentifier;
 	type WeightInfo = ();
 }
-pub type AdaptedBasicCurrency = orml_currencies::BasicCurrencyAdapter<Runtime, PalletBalances, Amount, BlockNumber>;
+pub type AdaptedBasicCurrency =
+	orml_currencies::BasicCurrencyAdapter<Runtime, PalletBalances, Amount, BlockNumber>;
 
 parameter_types! {
 	pub const GetNativeCurrencyId: CurrencyId = SEL;
@@ -326,21 +329,15 @@ impl Default for ExtBuilder {
 
 impl ExtBuilder {
 	pub fn build(self) -> sp_io::TestExternalities {
-		let mut t = frame_system::GenesisConfig::default()
-			.build_storage::<Runtime>()
+		let mut t = frame_system::GenesisConfig::default().build_storage::<Runtime>().unwrap();
+
+		pallet_balances::GenesisConfig::<Runtime> { balances: self.endowed_native }
+			.assimilate_storage(&mut t)
 			.unwrap();
 
-		pallet_balances::GenesisConfig::<Runtime> {
-			balances: self.endowed_native,
-		}
-		.assimilate_storage(&mut t)
-		.unwrap();
-
-		orml_tokens::GenesisConfig::<Runtime> {
-			balances: self.balances,
-		}
-		.assimilate_storage(&mut t)
-		.unwrap();
+		orml_tokens::GenesisConfig::<Runtime> { balances: self.balances }
+			.assimilate_storage(&mut t)
+			.unwrap();
 
 		t.into()
 	}

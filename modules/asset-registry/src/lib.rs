@@ -39,8 +39,9 @@ use primitives::{
 		StableAssetPoolId, TokenInfo,
 	},
 	evm::{
-		is_system_contract, EvmAddress, H160_POSITION_CURRENCY_ID_TYPE, H160_POSITION_DEXSHARE_LEFT_FIELD,
-		H160_POSITION_DEXSHARE_LEFT_TYPE, H160_POSITION_DEXSHARE_RIGHT_FIELD, H160_POSITION_DEXSHARE_RIGHT_TYPE,
+		is_system_contract, EvmAddress, H160_POSITION_CURRENCY_ID_TYPE,
+		H160_POSITION_DEXSHARE_LEFT_FIELD, H160_POSITION_DEXSHARE_LEFT_TYPE,
+		H160_POSITION_DEXSHARE_RIGHT_FIELD, H160_POSITION_DEXSHARE_RIGHT_TYPE,
 		H160_POSITION_FOREIGN_ASSET, H160_POSITION_STABLE_ASSET, H160_POSITION_TOKEN,
 	},
 	CurrencyId,
@@ -56,7 +57,8 @@ pub use module::*;
 pub use weights::WeightInfo;
 
 /// Type alias for currency balance.
-pub type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+pub type BalanceOf<T> =
+	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
 #[frame_support::pallet]
 pub mod module {
@@ -94,15 +96,9 @@ pub mod module {
 	#[pallet::generate_deposit(fn deposit_event)]
 	pub enum Event<T: Config> {
 		/// The asset registered.
-		AssetRegistered {
-			asset_id: AssetIds,
-			metadata: AssetMetadata<BalanceOf<T>>,
-		},
+		AssetRegistered { asset_id: AssetIds, metadata: AssetMetadata<BalanceOf<T>> },
 		/// The asset updated.
-		AssetUpdated {
-			asset_id: AssetIds,
-			metadata: AssetMetadata<BalanceOf<T>>,
-		},
+		AssetUpdated { asset_id: AssetIds, metadata: AssetMetadata<BalanceOf<T>> },
 	}
 
 	/// Next available Stable AssetId ID.
@@ -117,7 +113,8 @@ pub mod module {
 	/// Erc20IdToAddress: map Erc20Id => Option<EvmAddress>
 	#[pallet::storage]
 	#[pallet::getter(fn erc20_id_to_address)]
-	pub type Erc20IdToAddress<T: Config> = StorageMap<_, Twox64Concat, Erc20Id, EvmAddress, OptionQuery>;
+	pub type Erc20IdToAddress<T: Config> =
+		StorageMap<_, Twox64Concat, Erc20Id, EvmAddress, OptionQuery>;
 
 	/// The storages for AssetMetadatas.
 	///
@@ -139,9 +136,7 @@ pub mod module {
 	#[cfg(feature = "std")]
 	impl<T: Config> Default for GenesisConfig<T> {
 		fn default() -> Self {
-			GenesisConfig {
-				assets: Default::default(),
-			}
+			GenesisConfig { assets: Default::default() }
 		}
 	}
 
@@ -282,7 +277,9 @@ impl<T: Config> Pallet<T> {
 		})
 	}
 
-	fn do_register_stable_asset(metadata: &AssetMetadata<BalanceOf<T>>) -> Result<StableAssetPoolId, DispatchError> {
+	fn do_register_stable_asset(
+		metadata: &AssetMetadata<BalanceOf<T>>,
+	) -> Result<StableAssetPoolId, DispatchError> {
 		let stable_asset_id = Self::get_next_stable_asset_id()?;
 		AssetMetadatas::<T>::try_mutate(
 			AssetIds::StableAssetId(stable_asset_id),
@@ -316,11 +313,8 @@ impl<T: Config> Pallet<T> {
 		contract: EvmAddress,
 		minimal_balance: BalanceOf<T>,
 	) -> Result<AssetMetadata<BalanceOf<T>>, DispatchError> {
-		let invoke_context = InvokeContext {
-			contract,
-			sender: Default::default(),
-			origin: Default::default(),
-		};
+		let invoke_context =
+			InvokeContext { contract, sender: Default::default(), origin: Default::default() };
 
 		let metadata = AssetMetadata {
 			name: T::EVMBridge::name(invoke_context)?,
@@ -331,33 +325,45 @@ impl<T: Config> Pallet<T> {
 
 		let erc20_id = Into::<Erc20Id>::into(DexShare::Erc20(contract));
 
-		AssetMetadatas::<T>::try_mutate(AssetIds::Erc20(contract), |maybe_asset_metadatas| -> DispatchResult {
-			ensure!(maybe_asset_metadatas.is_none(), Error::<T>::AssetIdExisted);
+		AssetMetadatas::<T>::try_mutate(
+			AssetIds::Erc20(contract),
+			|maybe_asset_metadatas| -> DispatchResult {
+				ensure!(maybe_asset_metadatas.is_none(), Error::<T>::AssetIdExisted);
 
-			Erc20IdToAddress::<T>::try_mutate(erc20_id, |maybe_address| -> DispatchResult {
-				ensure!(maybe_address.is_none(), Error::<T>::AssetIdExisted);
-				*maybe_address = Some(contract);
+				Erc20IdToAddress::<T>::try_mutate(erc20_id, |maybe_address| -> DispatchResult {
+					ensure!(maybe_address.is_none(), Error::<T>::AssetIdExisted);
+					*maybe_address = Some(contract);
 
+					Ok(())
+				})?;
+
+				*maybe_asset_metadatas = Some(metadata.clone());
 				Ok(())
-			})?;
-
-			*maybe_asset_metadatas = Some(metadata.clone());
-			Ok(())
-		})?;
+			},
+		)?;
 
 		Ok(metadata)
 	}
 
-	fn do_update_erc20_asset(contract: EvmAddress, metadata: &AssetMetadata<BalanceOf<T>>) -> DispatchResult {
-		AssetMetadatas::<T>::try_mutate(AssetIds::Erc20(contract), |maybe_asset_metadatas| -> DispatchResult {
-			ensure!(maybe_asset_metadatas.is_some(), Error::<T>::AssetIdNotExists);
+	fn do_update_erc20_asset(
+		contract: EvmAddress,
+		metadata: &AssetMetadata<BalanceOf<T>>,
+	) -> DispatchResult {
+		AssetMetadatas::<T>::try_mutate(
+			AssetIds::Erc20(contract),
+			|maybe_asset_metadatas| -> DispatchResult {
+				ensure!(maybe_asset_metadatas.is_some(), Error::<T>::AssetIdNotExists);
 
-			*maybe_asset_metadatas = Some(metadata.clone());
-			Ok(())
-		})
+				*maybe_asset_metadatas = Some(metadata.clone());
+				Ok(())
+			},
+		)
 	}
 
-	fn do_register_native_asset(asset: CurrencyId, metadata: &AssetMetadata<BalanceOf<T>>) -> DispatchResult {
+	fn do_register_native_asset(
+		asset: CurrencyId,
+		metadata: &AssetMetadata<BalanceOf<T>>,
+	) -> DispatchResult {
 		AssetMetadatas::<T>::try_mutate(
 			AssetIds::NativeAssetId(asset),
 			|maybe_asset_metadatas| -> DispatchResult {
@@ -371,7 +377,10 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
-	fn do_update_native_asset(currency_id: CurrencyId, metadata: &AssetMetadata<BalanceOf<T>>) -> DispatchResult {
+	fn do_update_native_asset(
+		currency_id: CurrencyId,
+		metadata: &AssetMetadata<BalanceOf<T>>,
+	) -> DispatchResult {
 		AssetMetadatas::<T>::try_mutate(
 			AssetIds::NativeAssetId(currency_id),
 			|maybe_asset_metadatas| -> DispatchResult {
@@ -397,40 +406,44 @@ pub struct EvmErc20InfoMapping<T>(sp_std::marker::PhantomData<T>);
 impl<T: Config> EvmErc20InfoMapping<T> {
 	fn name_for_dex_share(symbol: DexShare) -> Option<Vec<u8>> {
 		match symbol {
-			DexShare::Token(symbol) => CurrencyId::Token(symbol).name().map(|v| v.as_bytes().to_vec()),
-			DexShare::Erc20(address) => AssetMetadatas::<T>::get(AssetIds::Erc20(address)).map(|v| v.name),
-			DexShare::ForeignAsset(foreign_asset_id) => {
-				AssetMetadatas::<T>::get(AssetIds::ForeignAssetId(foreign_asset_id)).map(|v| v.name)
-			}
-			DexShare::StableAssetPoolToken(stable_asset_pool_id) => {
-				AssetMetadatas::<T>::get(AssetIds::StableAssetId(stable_asset_pool_id)).map(|v| v.name)
-			}
+			DexShare::Token(symbol) =>
+				CurrencyId::Token(symbol).name().map(|v| v.as_bytes().to_vec()),
+			DexShare::Erc20(address) =>
+				AssetMetadatas::<T>::get(AssetIds::Erc20(address)).map(|v| v.name),
+			DexShare::ForeignAsset(foreign_asset_id) =>
+				AssetMetadatas::<T>::get(AssetIds::ForeignAssetId(foreign_asset_id)).map(|v| v.name),
+			DexShare::StableAssetPoolToken(stable_asset_pool_id) =>
+				AssetMetadatas::<T>::get(AssetIds::StableAssetId(stable_asset_pool_id))
+					.map(|v| v.name),
 		}
 	}
 
 	fn symbol_for_dex_share(symbol: DexShare) -> Option<Vec<u8>> {
 		match symbol {
-			DexShare::Token(symbol) => CurrencyId::Token(symbol).symbol().map(|v| v.as_bytes().to_vec()),
-			DexShare::Erc20(address) => AssetMetadatas::<T>::get(AssetIds::Erc20(address)).map(|v| v.symbol),
-			DexShare::ForeignAsset(foreign_asset_id) => {
-				AssetMetadatas::<T>::get(AssetIds::ForeignAssetId(foreign_asset_id)).map(|v| v.symbol)
-			}
-			DexShare::StableAssetPoolToken(stable_asset_pool_id) => {
-				AssetMetadatas::<T>::get(AssetIds::StableAssetId(stable_asset_pool_id)).map(|v| v.symbol)
-			}
+			DexShare::Token(symbol) =>
+				CurrencyId::Token(symbol).symbol().map(|v| v.as_bytes().to_vec()),
+			DexShare::Erc20(address) =>
+				AssetMetadatas::<T>::get(AssetIds::Erc20(address)).map(|v| v.symbol),
+			DexShare::ForeignAsset(foreign_asset_id) =>
+				AssetMetadatas::<T>::get(AssetIds::ForeignAssetId(foreign_asset_id))
+					.map(|v| v.symbol),
+			DexShare::StableAssetPoolToken(stable_asset_pool_id) =>
+				AssetMetadatas::<T>::get(AssetIds::StableAssetId(stable_asset_pool_id))
+					.map(|v| v.symbol),
 		}
 	}
 
 	fn decimal_for_dex_share(symbol: DexShare) -> Option<u8> {
 		match symbol {
 			DexShare::Token(symbol) => CurrencyId::Token(symbol).decimals(),
-			DexShare::Erc20(address) => AssetMetadatas::<T>::get(AssetIds::Erc20(address)).map(|v| v.decimals),
-			DexShare::ForeignAsset(foreign_asset_id) => {
-				AssetMetadatas::<T>::get(AssetIds::ForeignAssetId(foreign_asset_id)).map(|v| v.decimals)
-			}
-			DexShare::StableAssetPoolToken(stable_asset_pool_id) => {
-				AssetMetadatas::<T>::get(AssetIds::StableAssetId(stable_asset_pool_id)).map(|v| v.decimals)
-			}
+			DexShare::Erc20(address) =>
+				AssetMetadatas::<T>::get(AssetIds::Erc20(address)).map(|v| v.decimals),
+			DexShare::ForeignAsset(foreign_asset_id) =>
+				AssetMetadatas::<T>::get(AssetIds::ForeignAssetId(foreign_asset_id))
+					.map(|v| v.decimals),
+			DexShare::StableAssetPoolToken(stable_asset_pool_id) =>
+				AssetMetadatas::<T>::get(AssetIds::StableAssetId(stable_asset_pool_id))
+					.map(|v| v.decimals),
 		}
 	}
 
@@ -445,15 +458,17 @@ impl<T: Config> EvmErc20InfoMapping<T> {
 			DexShareType::Erc20 => {
 				let id = u32::from_be_bytes(address[dex_share_field].try_into().ok()?);
 				Erc20IdToAddress::<T>::get(id).map(DexShare::Erc20)
-			}
+			},
 			DexShareType::ForeignAsset => {
-				let id = ForeignAssetId::from_be_bytes(address[dex_share_field][2..].try_into().ok()?);
+				let id =
+					ForeignAssetId::from_be_bytes(address[dex_share_field][2..].try_into().ok()?);
 				Some(DexShare::ForeignAsset(id))
-			}
+			},
 			DexShareType::StableAssetPoolToken => {
-				let id = StableAssetPoolId::from_be_bytes(address[dex_share_field][..].try_into().ok()?);
+				let id =
+					StableAssetPoolId::from_be_bytes(address[dex_share_field][..].try_into().ok()?);
 				Some(DexShare::StableAssetPoolToken(id))
-			}
+			},
 		}
 	}
 }
@@ -464,7 +479,8 @@ impl<T: Config> Erc20InfoMapping for EvmErc20InfoMapping<T> {
 	// the EvmAddress must have been mapped.
 	fn name(currency_id: CurrencyId) -> Option<Vec<u8>> {
 		let name = match currency_id {
-			CurrencyId::Token(_) => AssetMetadatas::<T>::get(AssetIds::NativeAssetId(currency_id)).map(|v| v.name),
+			CurrencyId::Token(_) =>
+				AssetMetadatas::<T>::get(AssetIds::NativeAssetId(currency_id)).map(|v| v.name),
 			CurrencyId::DexShare(symbol_0, symbol_1) => {
 				let name_0 = EvmErc20InfoMapping::<T>::name_for_dex_share(symbol_0)?;
 				let name_1 = EvmErc20InfoMapping::<T>::name_for_dex_share(symbol_1)?;
@@ -475,14 +491,13 @@ impl<T: Config> Erc20InfoMapping for EvmErc20InfoMapping<T> {
 				vec.extend_from_slice(&b" - "[..]);
 				vec.extend_from_slice(&name_1);
 				Some(vec)
-			}
-			CurrencyId::Erc20(address) => AssetMetadatas::<T>::get(AssetIds::Erc20(address)).map(|v| v.name),
-			CurrencyId::StableAssetPoolToken(stable_asset_id) => {
-				AssetMetadatas::<T>::get(AssetIds::StableAssetId(stable_asset_id)).map(|v| v.name)
-			}
-			CurrencyId::ForeignAsset(foreign_asset_id) => {
-				AssetMetadatas::<T>::get(AssetIds::ForeignAssetId(foreign_asset_id)).map(|v| v.name)
-			}
+			},
+			CurrencyId::Erc20(address) =>
+				AssetMetadatas::<T>::get(AssetIds::Erc20(address)).map(|v| v.name),
+			CurrencyId::StableAssetPoolToken(stable_asset_id) =>
+				AssetMetadatas::<T>::get(AssetIds::StableAssetId(stable_asset_id)).map(|v| v.name),
+			CurrencyId::ForeignAsset(foreign_asset_id) =>
+				AssetMetadatas::<T>::get(AssetIds::ForeignAssetId(foreign_asset_id)).map(|v| v.name),
 		}?;
 
 		// More than 32 bytes will be truncated.
@@ -498,7 +513,8 @@ impl<T: Config> Erc20InfoMapping for EvmErc20InfoMapping<T> {
 	// the EvmAddress must have been mapped.
 	fn symbol(currency_id: CurrencyId) -> Option<Vec<u8>> {
 		let symbol = match currency_id {
-			CurrencyId::Token(_) => AssetMetadatas::<T>::get(AssetIds::NativeAssetId(currency_id)).map(|v| v.symbol),
+			CurrencyId::Token(_) =>
+				AssetMetadatas::<T>::get(AssetIds::NativeAssetId(currency_id)).map(|v| v.symbol),
 			CurrencyId::DexShare(symbol_0, symbol_1) => {
 				let token_symbol_0 = EvmErc20InfoMapping::<T>::symbol_for_dex_share(symbol_0)?;
 				let token_symbol_1 = EvmErc20InfoMapping::<T>::symbol_for_dex_share(symbol_1)?;
@@ -509,14 +525,14 @@ impl<T: Config> Erc20InfoMapping for EvmErc20InfoMapping<T> {
 				vec.extend_from_slice(&b"_"[..]);
 				vec.extend_from_slice(&token_symbol_1);
 				Some(vec)
-			}
-			CurrencyId::Erc20(address) => AssetMetadatas::<T>::get(AssetIds::Erc20(address)).map(|v| v.symbol),
-			CurrencyId::StableAssetPoolToken(stable_asset_id) => {
-				AssetMetadatas::<T>::get(AssetIds::StableAssetId(stable_asset_id)).map(|v| v.symbol)
-			}
-			CurrencyId::ForeignAsset(foreign_asset_id) => {
-				AssetMetadatas::<T>::get(AssetIds::ForeignAssetId(foreign_asset_id)).map(|v| v.symbol)
-			}
+			},
+			CurrencyId::Erc20(address) =>
+				AssetMetadatas::<T>::get(AssetIds::Erc20(address)).map(|v| v.symbol),
+			CurrencyId::StableAssetPoolToken(stable_asset_id) =>
+				AssetMetadatas::<T>::get(AssetIds::StableAssetId(stable_asset_id)).map(|v| v.symbol),
+			CurrencyId::ForeignAsset(foreign_asset_id) =>
+				AssetMetadatas::<T>::get(AssetIds::ForeignAssetId(foreign_asset_id))
+					.map(|v| v.symbol),
 		}?;
 
 		// More than 32 bytes will be truncated.
@@ -532,19 +548,21 @@ impl<T: Config> Erc20InfoMapping for EvmErc20InfoMapping<T> {
 	// the EvmAddress must have been mapped.
 	fn decimals(currency_id: CurrencyId) -> Option<u8> {
 		match currency_id {
-			CurrencyId::Token(_) => AssetMetadatas::<T>::get(AssetIds::NativeAssetId(currency_id)).map(|v| v.decimals),
+			CurrencyId::Token(_) =>
+				AssetMetadatas::<T>::get(AssetIds::NativeAssetId(currency_id)).map(|v| v.decimals),
 			CurrencyId::DexShare(symbol_0, _) => {
 				// initial dex share amount is calculated based on currency_id_0,
 				// use the decimals of currency_id_0 as the decimals of lp token.
 				EvmErc20InfoMapping::<T>::decimal_for_dex_share(symbol_0)
-			}
-			CurrencyId::Erc20(address) => AssetMetadatas::<T>::get(AssetIds::Erc20(address)).map(|v| v.decimals),
-			CurrencyId::StableAssetPoolToken(stable_asset_id) => {
-				AssetMetadatas::<T>::get(AssetIds::StableAssetId(stable_asset_id)).map(|v| v.decimals)
-			}
-			CurrencyId::ForeignAsset(foreign_asset_id) => {
-				AssetMetadatas::<T>::get(AssetIds::ForeignAssetId(foreign_asset_id)).map(|v| v.decimals)
-			}
+			},
+			CurrencyId::Erc20(address) =>
+				AssetMetadatas::<T>::get(AssetIds::Erc20(address)).map(|v| v.decimals),
+			CurrencyId::StableAssetPoolToken(stable_asset_id) =>
+				AssetMetadatas::<T>::get(AssetIds::StableAssetId(stable_asset_id))
+					.map(|v| v.decimals),
+			CurrencyId::ForeignAsset(foreign_asset_id) =>
+				AssetMetadatas::<T>::get(AssetIds::ForeignAssetId(foreign_asset_id))
+					.map(|v| v.decimals),
 		}
 	}
 
@@ -558,25 +576,25 @@ impl<T: Config> Erc20InfoMapping for EvmErc20InfoMapping<T> {
 					DexShare::Erc20(address) => {
 						// ensure erc20 is mapped
 						AssetMetadatas::<T>::get(AssetIds::Erc20(address)).map(|_| ())?;
-					}
-					DexShare::Token(_)
-					| DexShare::ForeignAsset(_)
-					| DexShare::StableAssetPoolToken(_) => {}
+					},
+					DexShare::Token(_) |
+					DexShare::ForeignAsset(_) |
+					DexShare::StableAssetPoolToken(_) => {},
 				};
 				match right {
 					DexShare::Erc20(address) => {
 						// ensure erc20 is mapped
 						AssetMetadatas::<T>::get(AssetIds::Erc20(address)).map(|_| ())?;
-					}
-					DexShare::Token(_)
-					| DexShare::ForeignAsset(_)
-					| DexShare::StableAssetPoolToken(_) => {}
+					},
+					DexShare::Token(_) |
+					DexShare::ForeignAsset(_) |
+					DexShare::StableAssetPoolToken(_) => {},
 				};
-			}
-			CurrencyId::Token(_)
-			| CurrencyId::Erc20(_)
-			| CurrencyId::StableAssetPoolToken(_)
-			| CurrencyId::ForeignAsset(_) => {}
+			},
+			CurrencyId::Token(_) |
+			CurrencyId::Erc20(_) |
+			CurrencyId::StableAssetPoolToken(_) |
+			CurrencyId::ForeignAsset(_) => {},
 		};
 
 		EvmAddress::try_from(v).ok()
@@ -587,28 +605,42 @@ impl<T: Config> Erc20InfoMapping for EvmErc20InfoMapping<T> {
 	// will use the u32 to get the DexShare::Erc20 from the mapping.
 	fn decode_evm_address(addr: EvmAddress) -> Option<CurrencyId> {
 		if !is_system_contract(addr) {
-			return Some(CurrencyId::Erc20(addr));
+			return Some(CurrencyId::Erc20(addr))
 		}
 
 		let address = addr.as_bytes();
-		let currency_id = match CurrencyIdType::try_from(address[H160_POSITION_CURRENCY_ID_TYPE]).ok()? {
-			CurrencyIdType::Token => address[H160_POSITION_TOKEN].try_into().map(CurrencyId::Token).ok(),
-			CurrencyIdType::DexShare => {
-				let left = EvmErc20InfoMapping::<T>::decode_evm_address_for_dex_share(address, true)?;
-				let right = EvmErc20InfoMapping::<T>::decode_evm_address_for_dex_share(address, false)?;
-				Some(CurrencyId::DexShare(left, right))
-			}
-			CurrencyIdType::StableAsset => {
-				let id = StableAssetPoolId::from_be_bytes(address[H160_POSITION_STABLE_ASSET].try_into().ok()?);
-				Some(CurrencyId::StableAssetPoolToken(id))
-			}
-			CurrencyIdType::ForeignAsset => {
-				let id = ForeignAssetId::from_be_bytes(address[H160_POSITION_FOREIGN_ASSET].try_into().ok()?);
-				Some(CurrencyId::ForeignAsset(id))
-			}
-		};
+		let currency_id =
+			match CurrencyIdType::try_from(address[H160_POSITION_CURRENCY_ID_TYPE]).ok()? {
+				CurrencyIdType::Token =>
+					address[H160_POSITION_TOKEN].try_into().map(CurrencyId::Token).ok(),
+				CurrencyIdType::DexShare => {
+					let left =
+						EvmErc20InfoMapping::<T>::decode_evm_address_for_dex_share(address, true)?;
+					let right =
+						EvmErc20InfoMapping::<T>::decode_evm_address_for_dex_share(address, false)?;
+					Some(CurrencyId::DexShare(left, right))
+				},
+				CurrencyIdType::StableAsset => {
+					let id = StableAssetPoolId::from_be_bytes(
+						address[H160_POSITION_STABLE_ASSET].try_into().ok()?,
+					);
+					Some(CurrencyId::StableAssetPoolToken(id))
+				},
+				CurrencyIdType::ForeignAsset => {
+					let id = ForeignAssetId::from_be_bytes(
+						address[H160_POSITION_FOREIGN_ASSET].try_into().ok()?,
+					);
+					Some(CurrencyId::ForeignAsset(id))
+				},
+			};
 
 		// Make sure that every bit of the address is the same
-		Self::encode_evm_address(currency_id?).and_then(|encoded| if encoded == addr { currency_id } else { None })
+		Self::encode_evm_address(currency_id?).and_then(|encoded| {
+			if encoded == addr {
+				currency_id
+			} else {
+				None
+			}
+		})
 	}
 }

@@ -57,19 +57,24 @@ where
 	Runtime: module_evm_accounts::Config + module_prices::Config,
 	module_evm_accounts::Pallet<Runtime>: EVMAccountsManager<Runtime::AccountId>,
 {
-	fn execute(input: &[u8], target_gas: Option<u64>, _context: &Context, _is_static: bool) -> PrecompileResult {
-		let input = Input::<Action, Runtime::AccountId, Runtime::AddressMapping, Runtime::Erc20InfoMapping>::new(
-			input,
-			target_gas_limit(target_gas),
-		);
+	fn execute(
+		input: &[u8],
+		target_gas: Option<u64>,
+		_context: &Context,
+		_is_static: bool,
+	) -> PrecompileResult {
+		let input = Input::<
+			Action,
+			Runtime::AccountId,
+			Runtime::AddressMapping,
+			Runtime::Erc20InfoMapping,
+		>::new(input, target_gas_limit(target_gas));
 
 		let gas_cost = Pricer::<Runtime>::cost(&input)?;
 
 		if let Some(gas_limit) = target_gas {
 			if gas_limit < gas_cost {
-				return Err(PrecompileFailure::Error {
-					exit_status: ExitError::OutOfGas,
-				});
+				return Err(PrecompileFailure::Error { exit_status: ExitError::OutOfGas })
 			}
 		}
 
@@ -86,7 +91,7 @@ where
 					output: Output::encode_fixed_bytes(output.into().as_ref()),
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::GetEvmAddress => {
 				// bytes32
 				let input_data = input.bytes_at(1, 32)?;
@@ -96,7 +101,8 @@ where
 				let account_id: Runtime::AccountId = AccountId32::from(buf).into();
 
 				// If it does not exist, return address(0x0). Keep the behavior the same as mapping[key]
-				let address = module_evm_accounts::Pallet::<Runtime>::get_evm_address(&account_id).unwrap_or_default();
+				let address = module_evm_accounts::Pallet::<Runtime>::get_evm_address(&account_id)
+					.unwrap_or_default();
 
 				Ok(PrecompileOutput {
 					exit_status: ExitSucceed::Returned,
@@ -104,7 +110,7 @@ where
 					output: Output::encode_address(address),
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::ClaimDefaultEvmAddress => {
 				// bytes32
 				let input_data = input.bytes_at(1, 32)?;
@@ -114,13 +120,12 @@ where
 				let account_id: Runtime::AccountId = AccountId32::from(buf).into();
 
 				let address =
-					module_evm_accounts::Pallet::<Runtime>::claim_default_evm_address(&account_id).map_err(|e| {
-						PrecompileFailure::Revert {
+					module_evm_accounts::Pallet::<Runtime>::claim_default_evm_address(&account_id)
+						.map_err(|e| PrecompileFailure::Revert {
 							exit_status: ExitRevert::Reverted,
 							output: Into::<&str>::into(e).as_bytes().to_vec(),
 							cost: target_gas_limit(target_gas).unwrap_or_default(),
-						}
-					})?;
+						})?;
 
 				Ok(PrecompileOutput {
 					exit_status: ExitSucceed::Returned,
@@ -128,7 +133,7 @@ where
 					output: Output::encode_address(address),
 					logs: Default::default(),
 				})
-			}
+			},
 		}
 	}
 }
@@ -142,24 +147,30 @@ where
 	const BASE_COST: u64 = 200;
 
 	fn cost(
-		input: &Input<Action, Runtime::AccountId, Runtime::AddressMapping, Runtime::Erc20InfoMapping>,
+		input: &Input<
+			Action,
+			Runtime::AccountId,
+			Runtime::AddressMapping,
+			Runtime::Erc20InfoMapping,
+		>,
 	) -> Result<u64, PrecompileFailure> {
 		let action = input.action()?;
 		let cost = match action {
 			Action::GetAccountId => {
 				// EVMAccounts::Accounts (r: 1)
 				WeightToGas::convert(<Runtime as frame_system::Config>::DbWeight::get().reads(1))
-			}
+			},
 			Action::GetEvmAddress => {
 				// EVMAccounts::EvmAddresses (r: 1)
 				WeightToGas::convert(<Runtime as frame_system::Config>::DbWeight::get().reads(1))
-			}
+			},
 			Action::ClaimDefaultEvmAddress => {
 				// claim_default_account weight
-				let weight = <Runtime as module_evm_accounts::Config>::WeightInfo::claim_default_account();
+				let weight =
+					<Runtime as module_evm_accounts::Config>::WeightInfo::claim_default_account();
 
 				WeightToGas::convert(weight)
-			}
+			},
 		};
 		Ok(Self::BASE_COST.saturating_add(cost))
 	}

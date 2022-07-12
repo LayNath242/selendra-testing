@@ -64,21 +64,27 @@ pub enum Action {
 impl<Runtime> Precompile for IncentivesPrecompile<Runtime>
 where
 	Runtime: module_evm::Config + module_incentives::Config + module_prices::Config,
-	module_incentives::Pallet<Runtime>: IncentivesManager<Runtime::AccountId, Balance, CurrencyId, PoolId>,
+	module_incentives::Pallet<Runtime>:
+		IncentivesManager<Runtime::AccountId, Balance, CurrencyId, PoolId>,
 {
-	fn execute(input: &[u8], target_gas: Option<u64>, _context: &Context, _is_static: bool) -> PrecompileResult {
-		let input = Input::<Action, Runtime::AccountId, Runtime::AddressMapping, Runtime::Erc20InfoMapping>::new(
-			input,
-			target_gas_limit(target_gas),
-		);
+	fn execute(
+		input: &[u8],
+		target_gas: Option<u64>,
+		_context: &Context,
+		_is_static: bool,
+	) -> PrecompileResult {
+		let input = Input::<
+			Action,
+			Runtime::AccountId,
+			Runtime::AddressMapping,
+			Runtime::Erc20InfoMapping,
+		>::new(input, target_gas_limit(target_gas));
 
 		let gas_cost = Pricer::<Runtime>::cost(&input)?;
 
 		if let Some(gas_limit) = target_gas {
 			if gas_limit < gas_cost {
-				return Err(PrecompileFailure::Error {
-					exit_status: ExitError::OutOfGas,
-				});
+				return Err(PrecompileFailure::Error { exit_status: ExitError::OutOfGas })
 			}
 		}
 
@@ -104,7 +110,7 @@ where
 					output: Output::encode_uint(value),
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::GetDexRewardRate => {
 				let pool_currency_id = input.currency_id_at(1)?;
 				let pool_id = PoolId::Dex(pool_currency_id);
@@ -122,7 +128,7 @@ where
 					output: Output::encode_uint(value.into_inner()),
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::DepositDexShare => {
 				let who = input.account_id_at(1)?;
 				let lp_currency_id = input.currency_id_at(2)?;
@@ -146,7 +152,7 @@ where
 					output: vec![],
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::WithdrawDexShare => {
 				let who = input.account_id_at(1)?;
 				let lp_currency_id = input.currency_id_at(2)?;
@@ -170,7 +176,7 @@ where
 					output: vec![],
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::ClaimRewards => {
 				let who = input.account_id_at(1)?;
 				let pool = input.u32_at(2)?;
@@ -195,7 +201,7 @@ where
 					output: vec![],
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::GetClaimRewardDeductionRate => {
 				let pool = input.u32_at(1)?;
 				let pool_currency_id = input.currency_id_at(2)?;
@@ -214,7 +220,7 @@ where
 					output: Output::encode_uint(value.into_inner()),
 					logs: Default::default(),
 				})
-			}
+			},
 			Action::GetPendingRewards => {
 				// solidity abi encode array will add an offset at input[1]
 				let pool = input.u32_at(2)?;
@@ -240,7 +246,7 @@ where
 					output: Output::encode_uint_array(value),
 					logs: Default::default(),
 				})
-			}
+			},
 		}
 	}
 }
@@ -254,7 +260,12 @@ where
 	const BASE_COST: u64 = 200;
 
 	fn cost(
-		input: &Input<Action, Runtime::AccountId, Runtime::AddressMapping, Runtime::Erc20InfoMapping>,
+		input: &Input<
+			Action,
+			Runtime::AccountId,
+			Runtime::AddressMapping,
+			Runtime::Erc20InfoMapping,
+		>,
 	) -> Result<u64, PrecompileFailure> {
 		let action = input.action()?;
 
@@ -263,7 +274,8 @@ where
 				let pool_currency_id = input.currency_id_at(2)?;
 				let reward_currency_id = input.currency_id_at(3)?;
 				let read_pool_currency = InputPricer::<Runtime>::read_currency(pool_currency_id);
-				let read_reward_currency = InputPricer::<Runtime>::read_currency(reward_currency_id);
+				let read_reward_currency =
+					InputPricer::<Runtime>::read_currency(reward_currency_id);
 
 				let weight = <Runtime as frame_system::Config>::DbWeight::get().reads(1);
 
@@ -271,7 +283,7 @@ where
 					.saturating_add(read_pool_currency)
 					.saturating_add(read_reward_currency)
 					.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 			Action::GetDexRewardRate => {
 				let pool_currency_id = input.currency_id_at(1)?;
 				let read_pool_currency = InputPricer::<Runtime>::read_currency(pool_currency_id);
@@ -281,31 +293,33 @@ where
 				Self::BASE_COST
 					.saturating_add(read_pool_currency)
 					.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 			Action::DepositDexShare => {
 				let read_account = InputPricer::<Runtime>::read_accounts(1);
 				let lp_currency_id = input.currency_id_at(2)?;
 				let read_lp_currency = InputPricer::<Runtime>::read_currency(lp_currency_id);
 
-				let weight = <Runtime as module_incentives::Config>::WeightInfo::deposit_dex_share();
+				let weight =
+					<Runtime as module_incentives::Config>::WeightInfo::deposit_dex_share();
 
 				Self::BASE_COST
 					.saturating_add(read_lp_currency)
 					.saturating_add(read_account)
 					.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 			Action::WithdrawDexShare => {
 				let read_account = InputPricer::<Runtime>::read_accounts(1);
 				let lp_currency_id = input.currency_id_at(2)?;
 				let read_lp_currency = InputPricer::<Runtime>::read_currency(lp_currency_id);
 
-				let weight = <Runtime as module_incentives::Config>::WeightInfo::withdraw_dex_share();
+				let weight =
+					<Runtime as module_incentives::Config>::WeightInfo::withdraw_dex_share();
 
 				Self::BASE_COST
 					.saturating_add(read_lp_currency)
 					.saturating_add(read_account)
 					.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 			Action::ClaimRewards => {
 				let read_account = InputPricer::<Runtime>::read_accounts(1);
 				let pool_currency_id = input.currency_id_at(3)?;
@@ -317,7 +331,7 @@ where
 					.saturating_add(read_pool_currency)
 					.saturating_add(read_account)
 					.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 			Action::GetClaimRewardDeductionRate => {
 				let pool_currency_id = input.currency_id_at(2)?;
 				let read_pool_currency = InputPricer::<Runtime>::read_currency(pool_currency_id);
@@ -327,7 +341,7 @@ where
 				Self::BASE_COST
 					.saturating_add(read_pool_currency)
 					.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 			Action::GetPendingRewards => {
 				let read_account = InputPricer::<Runtime>::read_accounts(1);
 				let pool_currency_id = input.currency_id_at(3)?;
@@ -336,7 +350,8 @@ where
 
 				for i in 0..reward_currency_ids_len {
 					let currency_id = input.currency_id_at((6 + i) as usize)?;
-					read_currency = read_currency.saturating_add(InputPricer::<Runtime>::read_currency(currency_id));
+					read_currency = read_currency
+						.saturating_add(InputPricer::<Runtime>::read_currency(currency_id));
 				}
 
 				let weight = <Runtime as frame_system::Config>::DbWeight::get().reads(1);
@@ -345,7 +360,7 @@ where
 					.saturating_add(read_account)
 					.saturating_add(read_currency)
 					.saturating_add(WeightToGas::convert(weight))
-			}
+			},
 		};
 		Ok(cost)
 	}
@@ -372,8 +387,8 @@ fn init_pool_id(
 mod tests {
 	use super::*;
 	use crate::precompile::mock::{
-		alice, alice_evm_addr, bob, new_test_ext, Currencies, Incentives, Origin, Rewards, Test, Tokens, SEL, ALICE,
-		KUSD, DOT, LP_SEL_KUSD,
+		alice, alice_evm_addr, bob, new_test_ext, Currencies, Incentives, Origin, Rewards, Test,
+		Tokens, ALICE, DOT, KUSD, LP_SEL_KUSD, SEL,
 	};
 	use frame_support::assert_ok;
 	use hex_literal::hex;
@@ -479,10 +494,7 @@ mod tests {
 
 			assert_eq!(
 				Rewards::pool_infos(PoolId::Dex(LP_SEL_KUSD)),
-				PoolInfo {
-					total_shares: 1048576,
-					..Default::default()
-				}
+				PoolInfo { total_shares: 1048576, ..Default::default() }
 			);
 			assert_eq!(
 				Rewards::shares_and_withdrawn_rewards(PoolId::Dex(LP_SEL_KUSD), alice()),
@@ -523,10 +535,7 @@ mod tests {
 
 			assert_eq!(
 				Rewards::pool_infos(PoolId::Dex(LP_SEL_KUSD)),
-				PoolInfo {
-					total_shares: 99744,
-					..Default::default()
-				}
+				PoolInfo { total_shares: 99744, ..Default::default() }
 			);
 			assert_eq!(
 				Rewards::shares_and_withdrawn_rewards(PoolId::Dex(LP_SEL_KUSD), alice()),

@@ -53,19 +53,24 @@ impl<Runtime> Precompile for OraclePrecompile<Runtime>
 where
 	Runtime: module_evm::Config + module_prices::Config,
 {
-	fn execute(input: &[u8], target_gas: Option<u64>, _context: &Context, _is_static: bool) -> PrecompileResult {
-		let input = Input::<Action, Runtime::AccountId, Runtime::AddressMapping, Runtime::Erc20InfoMapping>::new(
-			input,
-			target_gas_limit(target_gas),
-		);
+	fn execute(
+		input: &[u8],
+		target_gas: Option<u64>,
+		_context: &Context,
+		_is_static: bool,
+	) -> PrecompileResult {
+		let input = Input::<
+			Action,
+			Runtime::AccountId,
+			Runtime::AddressMapping,
+			Runtime::Erc20InfoMapping,
+		>::new(input, target_gas_limit(target_gas));
 
 		let gas_cost = Pricer::<Runtime>::cost(&input)?;
 
 		if let Some(gas_limit) = target_gas {
 			if gas_limit < gas_cost {
-				return Err(PrecompileFailure::Error {
-					exit_status: ExitError::OutOfGas,
-				});
+				return Err(PrecompileFailure::Error { exit_status: ExitError::OutOfGas })
 			}
 		}
 
@@ -75,7 +80,8 @@ where
 			Action::GetPrice => {
 				let currency_id = input.currency_id_at(1)?;
 				let mut price =
-					<module_prices::RealTimePriceProvider<Runtime>>::get_price(currency_id).unwrap_or_default();
+					<module_prices::RealTimePriceProvider<Runtime>>::get_price(currency_id)
+						.unwrap_or_default();
 
 				let maybe_decimals = Runtime::Erc20InfoMapping::decimals(currency_id);
 				let decimals = match maybe_decimals {
@@ -85,7 +91,7 @@ where
 						// Solidity should handle the situation of price 0.
 						price = Default::default();
 						Default::default()
-					}
+					},
 				};
 
 				let maybe_adjustment_multiplier = 10u128.checked_pow((18 - decimals).into());
@@ -96,7 +102,7 @@ where
 						// Solidity should handle the situation of price 0.
 						price = Default::default();
 						Default::default()
-					}
+					},
 				};
 
 				let output = price.into_inner().wrapping_div(adjustment_multiplier);
@@ -108,7 +114,7 @@ where
 					output: Output::encode_uint(output),
 					logs: Default::default(),
 				})
-			}
+			},
 		}
 	}
 }
@@ -122,7 +128,12 @@ where
 	const BASE_COST: u64 = 200;
 
 	fn cost(
-		input: &Input<Action, Runtime::AccountId, Runtime::AddressMapping, Runtime::Erc20InfoMapping>,
+		input: &Input<
+			Action,
+			Runtime::AccountId,
+			Runtime::AddressMapping,
+			Runtime::Erc20InfoMapping,
+		>,
 	) -> Result<u64, PrecompileFailure> {
 		let action = input.action()?;
 
@@ -130,9 +141,10 @@ where
 			Action::GetPrice => {
 				let currency_id = input.currency_id_at(1)?;
 				let read_currency = InputPricer::<Runtime>::read_currency(currency_id);
-				let get_price = WeightToGas::convert(PrecompileWeights::<Runtime>::oracle_get_price());
+				let get_price =
+					WeightToGas::convert(PrecompileWeights::<Runtime>::oracle_get_price());
 				WeightToGas::convert(read_currency).saturating_add(get_price)
-			}
+			},
 		};
 		Ok(Self::BASE_COST.saturating_add(cost))
 	}
@@ -142,7 +154,9 @@ where
 mod tests {
 	use super::*;
 
-	use crate::precompile::mock::{alice_evm_addr, new_test_ext, Oracle, Price, Test, ALICE, RENBTC};
+	use crate::precompile::mock::{
+		alice_evm_addr, new_test_ext, Oracle, Price, Test, ALICE, RENBTC,
+	};
 	use frame_support::{assert_noop, assert_ok};
 	use hex_literal::hex;
 	use module_evm::ExitRevert;
@@ -180,10 +194,7 @@ mod tests {
 			assert_ok!(Oracle::feed_value(ALICE, RENBTC, price));
 			assert_eq!(
 				Oracle::get(&RENBTC),
-				Some(orml_oracle::TimestampedValue {
-					value: price,
-					timestamp: 1
-				})
+				Some(orml_oracle::TimestampedValue { value: price, timestamp: 1 })
 			);
 
 			// returned price

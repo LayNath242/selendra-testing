@@ -22,14 +22,13 @@
 pub mod mock;
 
 use crate::{
-	code_hash, evm::Runtime as EVMRuntime, module::*, runner::Runner, Context, StackExecutor, StackSubstateMetadata,
-	SubstrateStackState,
+	code_hash, evm::Runtime as EVMRuntime, module::*, runner::Runner, Context, StackExecutor,
+	StackSubstateMetadata, SubstrateStackState,
 };
 use frame_support::{assert_ok, BoundedVec};
 use hex::FromHex;
 use mock::*;
-use module_support::mocks::MockAddressMapping;
-use module_support::AddressMapping;
+use module_support::{mocks::MockAddressMapping, AddressMapping};
 use orml_bencher::{benches, Bencher};
 use primitive_types::{H256, U256};
 use primitives::evm::Vicinity;
@@ -58,25 +57,14 @@ fn get_bench_info(name: &str) -> (Vec<u8>, H160, Vec<u8>, u64, Vec<u8>) {
 
 fn faucet(address: &H160) {
 	let account_id = MockAddressMapping::get_account_id(&address);
-	assert_ok!(Balances::set_balance(
-		Origin::root(),
-		account_id,
-		1_000_000_000_000_000,
-		0
-	));
+	assert_ok!(Balances::set_balance(Origin::root(), account_id, 1_000_000_000_000_000, 0));
 }
 
 fn whitelist_keys(b: &mut Bencher, from: H160, code: Vec<u8>) -> H160 {
 	let address = H160::from_str("2000000000000000000000000000000000000001").unwrap();
-	let vicinity = Vicinity {
-		gas_price: U256::one(),
-		..Default::default()
-	};
-	let context = Context {
-		caller: from,
-		address: address.clone(),
-		apparent_value: Default::default(),
-	};
+	let vicinity = Vicinity { gas_price: U256::one(), ..Default::default() };
+	let context =
+		Context { caller: from, address: address.clone(), apparent_value: Default::default() };
 	let config = <Runtime as Config>::config();
 	let metadata = StackSubstateMetadata::new(21_000_000, 1_000_000, config);
 	let state = SubstrateStackState::<Runtime>::new(&vicinity, metadata);
@@ -92,11 +80,7 @@ fn whitelist_keys(b: &mut Bencher, from: H160, code: Vec<u8>) -> H160 {
 	let code_hash = code_hash(bounded_code.as_slice());
 
 	// unknown key
-	b.whitelist(
-		hex_literal::hex!("3a7472616e73616374696f6e5f6c6576656c3a").to_vec(),
-		true,
-		true,
-	);
+	b.whitelist(hex_literal::hex!("3a7472616e73616374696f6e5f6c6576656c3a").to_vec(), true, true);
 
 	// non-existent contract will end up reading this key
 	b.whitelist(
@@ -113,30 +97,15 @@ fn whitelist_keys(b: &mut Bencher, from: H160, code: Vec<u8>) -> H160 {
 	b.whitelist(ContractStorageSizes::<Runtime>::hashed_key_for(&address), true, true);
 	let from_account = <Runtime as Config>::AddressMapping::get_account_id(&from);
 	let address_account = <Runtime as Config>::AddressMapping::get_account_id(&address);
-	b.whitelist(
-		pallet_balances::Reserves::<Runtime>::hashed_key_for(&from_account),
-		true,
-		true,
-	);
-	b.whitelist(
-		pallet_balances::Reserves::<Runtime>::hashed_key_for(&address_account),
-		true,
-		true,
-	);
-	b.whitelist(
-		frame_system::Account::<Runtime>::hashed_key_for(&from_account),
-		true,
-		true,
-	);
-	b.whitelist(
-		frame_system::Account::<Runtime>::hashed_key_for(&address_account),
-		true,
-		true,
-	);
+	b.whitelist(pallet_balances::Reserves::<Runtime>::hashed_key_for(&from_account), true, true);
+	b.whitelist(pallet_balances::Reserves::<Runtime>::hashed_key_for(&address_account), true, true);
+	b.whitelist(frame_system::Account::<Runtime>::hashed_key_for(&from_account), true, true);
+	b.whitelist(frame_system::Account::<Runtime>::hashed_key_for(&address_account), true, true);
 
 	// System::Number
 	b.whitelist(
-		hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef702a5c1b19ab7a04f536c519aca4983ac").to_vec(),
+		hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef702a5c1b19ab7a04f536c519aca4983ac")
+			.to_vec(),
 		true,
 		true,
 	);
@@ -202,10 +171,7 @@ macro_rules! evm_call {
 				result.exit_reason
 			);
 			assert_eq!(contract_address, result.value);
-			assert_ok!(EVM::publish_free(
-				Origin::signed(CouncilAccount::get()),
-				contract_address
-			));
+			assert_ok!(EVM::publish_free(Origin::signed(CouncilAccount::get()), contract_address));
 
 			let result = b
 				.bench(|| {
@@ -223,11 +189,7 @@ macro_rules! evm_call {
 				})
 				.unwrap();
 
-			assert!(
-				result.exit_reason.is_succeed(),
-				"Call failed {:?}",
-				result.exit_reason
-			);
+			assert!(result.exit_reason.is_succeed(), "Call failed {:?}", result.exit_reason);
 			assert_eq!(result.value, output);
 			assert_eq!(result.used_gas, used_gas.into());
 		}
