@@ -112,17 +112,12 @@ pub use runtime_common::{
 	CouncilMembershipInstance, MaxTipsOfPriority, BlockHashCount,
 	OffchainSolutionWeightLimit, OperationalFeeMultiplier, OperatorMembershipInstanceSelendra, Price, ProxyType, Rate,
 	Ratio, RuntimeBlockLength, RuntimeBlockWeights, SystemContractsFilter, TechnicalCommitteeInstance,
-	TechnicalCommitteeMembershipInstance, TimeStampedPrice, TipPerWeightStep, SEL, KUSD, DOT, LSEL, KSM, RENBTC,
+	TechnicalMembershipInstance, TimeStampedPrice, TipPerWeightStep, SEL, KUSD, DOT, LSEL, KSM, RENBTC,
 	DAI,
 };
 
-/// Import the stable_asset pallet.
-pub use module_stable_asset;
-
 mod authority;
-mod benchmarking;
 pub mod constants;
-/// Weights for pallets used in the runtime.
 mod weights;
 mod voter_bags;
 
@@ -132,9 +127,8 @@ mod config;
 pub use config::consensus_config::{EpochDuration, MaxNominations};
 #[cfg(test)]
 use config::evm_config::NewContractExtraBytes;
-#[cfg(feature = "runtime-benchmarks")]
-use config::evm_config::{EvmTask, ScheduledTasks};
 use config::evm_config::{StorageDepositPerByte, TxFeePerGas};
+use crate::config::funan_config::MaxSwapSlippageCompareToOracle;
 
 /// This runtime version.
 #[sp_version::runtime_version]
@@ -251,29 +245,6 @@ impl frame_system::Config for Runtime {
 	type SS58Prefix = SS58Prefix;
 	type OnSetCode = ();
 	type MaxConsumers = ConstU32<16>;
-}
-
-parameter_types! {
-	pub const DisabledValidatorsThreshold: Perbill = Perbill::from_percent(33);
-	pub const SessionDuration: BlockNumber = DAYS; // used in SessionManagerConfig of genesis
-}
-
-parameter_types! {
-	pub const CollatorKickThreshold: Permill = Permill::from_percent(50);
-	// Ensure that can create the author(`ExistentialDeposit`) with dev mode.
-	pub MinRewardDistributeAmount: Balance = NativeTokenExistentialDeposit::get();
-}
-
-parameter_types! {
-	pub IndexDeposit: Balance = dollar(SEL);
-}
-
-impl pallet_indices::Config for Runtime {
-	type AccountIndex = AccountIndex;
-	type Event = Event;
-	type Currency = Balances;
-	type Deposit = IndexDeposit;
-	type WeightInfo = ();
 }
 
 parameter_types! {
@@ -394,7 +365,7 @@ impl pallet_collective::Config<TechnicalCommitteeInstance> for Runtime {
 	type WeightInfo = ();
 }
 
-impl pallet_membership::Config<TechnicalCommitteeMembershipInstance> for Runtime {
+impl pallet_membership::Config<TechnicalMembershipInstance> for Runtime {
 	type Event = Event;
 	type AddOrigin = EnsureRootOrTwoThirdsCouncil;
 	type RemoveOrigin = EnsureRootOrTwoThirdsCouncil;
@@ -417,28 +388,6 @@ impl pallet_membership::Config<OperatorMembershipInstanceSelendra> for Runtime {
 	type MembershipInitialized = ();
 	type MembershipChanged = SelendraOracle;
 	type MaxMembers = ConstU32<50>;
-	type WeightInfo = ();
-}
-
-impl pallet_utility::Config for Runtime {
-	type Event = Event;
-	type Call = Call;
-	type PalletsOrigin = OriginCaller;
-	type WeightInfo = ();
-}
-
-parameter_types! {
-	pub MultisigDepositBase: Balance = 500 * millicent(SEL);
-	pub MultisigDepositFactor: Balance = 100 * millicent(SEL);
-}
-
-impl pallet_multisig::Config for Runtime {
-	type Event = Event;
-	type Call = Call;
-	type Currency = Balances;
-	type DepositBase = MultisigDepositBase;
-	type DepositFactor = MultisigDepositFactor;
-	type MaxSignatories = ConstU16<100>;
 	type WeightInfo = ();
 }
 
@@ -528,23 +477,6 @@ impl pallet_tips::Config for Runtime {
 	type TipCountdown = TipCountdown;
 	type TipFindersFee = TipFindersFee;
 	type TipReportDepositBase = TipReportDepositBase;
-	type WeightInfo = ();
-}
-
-parameter_types! {
-	pub ConfigDepositBase: Balance = 10 * cent(SEL);
-	pub FriendDepositFactor: Balance = cent(SEL);
-	pub RecoveryDeposit: Balance = 10 * cent(SEL);
-}
-
-impl pallet_recovery::Config for Runtime {
-	type Event = Event;
-	type Call = Call;
-	type Currency = Balances;
-	type ConfigDepositBase = ConfigDepositBase;
-	type FriendDepositFactor = FriendDepositFactor;
-	type MaxFriends = ConstU32<9>;
-	type RecoveryDeposit = RecoveryDeposit;
 	type WeightInfo = ();
 }
 
@@ -861,35 +793,7 @@ impl pallet_preimage::Config for Runtime {
 	type ByteDeposit = PreimageByteDeposit;
 }
 
-parameter_types! {
-	pub MinimumIncrementSize: Rate = Rate::saturating_from_rational(2, 100);
-	pub const AuctionTimeToClose: BlockNumber = 15 * MINUTES;
-	pub const AuctionDurationSoftCap: BlockNumber = 2 * HOURS;
-}
 
-impl module_auction_manager::Config for Runtime {
-	type Event = Event;
-	type Currency = Currencies;
-	type Auction = Auction;
-	type MinimumIncrementSize = MinimumIncrementSize;
-	type AuctionTimeToClose = AuctionTimeToClose;
-	type AuctionDurationSoftCap = AuctionDurationSoftCap;
-	type GetStableCurrencyId = GetStableCurrencyId;
-	type CDPTreasury = CdpTreasury;
-	type PriceSource = module_prices::PriorityLockedPriceProvider<Runtime>;
-	type UnsignedPriority = runtime_common::AuctionManagerUnsignedPriority;
-	type EmergencyShutdown = EmergencyShutdown;
-	type WeightInfo = weights::module_auction_manager::WeightInfo<Runtime>;
-}
-
-impl module_loans::Config for Runtime {
-	type Event = Event;
-	type Currency = Currencies;
-	type RiskManager = CdpEngine;
-	type CDPTreasury = CdpTreasury;
-	type PalletId = LoansPalletId;
-	type OnUpdateLoan = module_incentives::OnUpdateLoan<Runtime>;
-}
 
 impl<LocalCall> frame_system::offchain::CreateSignedTransaction<LocalCall> for Runtime
 where
@@ -955,58 +859,6 @@ where
 }
 
 parameter_types! {
-	pub DefaultLiquidationRatio: Ratio = Ratio::saturating_from_rational(110, 100);
-	pub DefaultDebitExchangeRate: ExchangeRate = ExchangeRate::saturating_from_rational(1, 10);
-	pub DefaultLiquidationPenalty: Rate = Rate::saturating_from_rational(5, 100);
-	pub MinimumDebitValue: Balance = dollar(KUSD);
-	pub MaxSwapSlippageCompareToOracle: Ratio = Ratio::saturating_from_rational(15, 100);
-}
-
-impl module_cdp_engine::Config for Runtime {
-	type Event = Event;
-	type PriceSource = module_prices::PriorityLockedPriceProvider<Runtime>;
-	type DefaultLiquidationRatio = DefaultLiquidationRatio;
-	type DefaultDebitExchangeRate = DefaultDebitExchangeRate;
-	type DefaultLiquidationPenalty = DefaultLiquidationPenalty;
-	type MinimumDebitValue = MinimumDebitValue;
-	type MinimumCollateralAmount =
-		ExistentialDepositsTimesOneHundred<GetNativeCurrencyId, NativeTokenExistentialDeposit, ExistentialDeposits>;
-	type GetStableCurrencyId = GetStableCurrencyId;
-	type CDPTreasury = CdpTreasury;
-	type UpdateOrigin = EnsureRootOrHalfFinancialCouncil;
-	type MaxSwapSlippageCompareToOracle = MaxSwapSlippageCompareToOracle;
-	type UnsignedPriority = runtime_common::CdpEngineUnsignedPriority;
-	type EmergencyShutdown = EmergencyShutdown;
-	type UnixTime = Timestamp;
-	type Currency = Currencies;
-	type DEX = Dex;
-	type Swap = SelendraSwap;
-	type WeightInfo = weights::module_cdp_engine::WeightInfo<Runtime>;
-}
-
-parameter_types! {
-	pub DepositPerAuthorization: Balance = dollar(SEL);
-}
-
-impl module_funan::Config for Runtime {
-	type Event = Event;
-	type Currency = Balances;
-	type DepositPerAuthorization = DepositPerAuthorization;
-	type CollateralCurrencyIds = CollateralCurrencyIds<Runtime>;
-	type WeightInfo = weights::module_funan::WeightInfo<Runtime>;
-}
-
-impl module_emergency_shutdown::Config for Runtime {
-	type Event = Event;
-	type CollateralCurrencyIds = CollateralCurrencyIds<Runtime>;
-	type PriceSource = Prices;
-	type CDPTreasury = CdpTreasury;
-	type AuctionManagerHandler = AuctionManager;
-	type ShutdownOrigin = EnsureRootOrHalfCouncil;
-	type WeightInfo = weights::module_emergency_shutdown::WeightInfo<Runtime>;
-}
-
-parameter_types! {
 	pub const GetExchangeFee: (u32, u32) = (1, 1000);	// 0.1%
 	pub const ExtendedProvisioningBlocks: BlockNumber = 2 * DAYS;
 	pub const TradingPathLimit: u32 = 4;
@@ -1045,32 +897,11 @@ pub type RebasedStableAsset = module_support::RebasedStableAsset<
 	module_aggregated_dex::RebasedStableAssetErrorConvertor<Runtime>,
 >;
 
-pub type SelendraSwap = module_aggregated_dex::AggregatedSwap<Runtime>;
-
 impl module_dex_oracle::Config for Runtime {
 	type DEX = Dex;
 	type Time = Timestamp;
 	type UpdateOrigin = EnsureRootOrHalfCouncil;
 	type WeightInfo = weights::module_dex_oracle::WeightInfo<Runtime>;
-}
-
-parameter_types! {
-	pub FunanTreasuryAccount: AccountId = FunanTreasuryPalletId::get().into_account_truncating();
-}
-
-impl module_cdp_treasury::Config for Runtime {
-	type Event = Event;
-	type Currency = Currencies;
-	type GetStableCurrencyId = GetStableCurrencyId;
-	type AuctionManagerHandler = AuctionManager;
-	type UpdateOrigin = EnsureRootOrHalfFinancialCouncil;
-	type DEX = Dex;
-	type Swap = SelendraSwap;
-	type MaxAuctionsCount = ConstU32<50>;
-	type PalletId = CDPTreasuryPalletId;
-	type TreasuryAccount = FunanTreasuryAccount;
-	type WeightInfo = weights::module_cdp_treasury::WeightInfo<Runtime>;
-	type StableAsset = RebasedStableAsset;
 }
 
 impl module_transaction_pause::Config for Runtime {
@@ -1179,101 +1010,6 @@ impl orml_nft::Config for Runtime {
 	type TokenData = module_nft::TokenData<Balance>;
 	type MaxClassMetadata = ConstU32<1024>;
 	type MaxTokenMetadata = ConstU32<1024>;
-}
-
-parameter_types! {
-	// One storage item; key size 32, value size 8; .
-	pub ProxyDepositBase: Balance = deposit(1, 8);
-	// Additional storage item size of 33 bytes.
-	pub ProxyDepositFactor: Balance = deposit(0, 33);
-	pub AnnouncementDepositBase: Balance = deposit(1, 8);
-	pub AnnouncementDepositFactor: Balance = deposit(0, 66);
-}
-
-impl InstanceFilter<Call> for ProxyType {
-	fn filter(&self, c: &Call) -> bool {
-		match self {
-			// Always allowed Call::Utility no matter type.
-			// Only transactions allowed by Proxy.filter can be executed,
-			// otherwise `BadOrigin` will be returned in Call::Utility.
-			_ if matches!(c, Call::Utility(..)) => true,
-			ProxyType::Any => true,
-			ProxyType::CancelProxy => matches!(c, Call::Proxy(pallet_proxy::Call::reject_announcement { .. })),
-			ProxyType::Governance => {
-				matches!(
-					c,
-					Call::Authority(..)
-						| Call::Democracy(..) | Call::PhragmenElection(..)
-						| Call::Council(..)
-						| Call::FinancialCouncil(..)
-						| Call::TechnicalCommittee(..)
-						| Call::Treasury(..) | Call::Bounties(..)
-						| Call::Tips(..)
-				)
-			}
-			ProxyType::Auction => {
-				matches!(c, Call::Auction(orml_auction::Call::bid { .. }))
-			}
-			ProxyType::Swap => {
-				matches!(
-					c,
-					Call::Dex(module_dex::Call::swap_with_exact_supply { .. })
-						| Call::Dex(module_dex::Call::swap_with_exact_target { .. })
-				)
-			}
-			ProxyType::Loan => {
-				matches!(
-					c,
-					Call::Funan(module_funan::Call::adjust_loan { .. })
-						| Call::Funan(module_funan::Call::close_loan_has_debit_by_dex { .. })
-						| Call::Funan(module_funan::Call::adjust_loan_by_debit_value { .. })
-						| Call::Funan(module_funan::Call::transfer_debit { .. })
-				)
-			}
-			ProxyType::DexLiquidity => {
-				matches!(
-					c,
-					Call::Dex(module_dex::Call::add_liquidity { .. })
-						| Call::Dex(module_dex::Call::remove_liquidity { .. })
-				)
-			}
-			ProxyType::StableAssetSwap => {
-				matches!(c, Call::StableAsset(module_stable_asset::Call::swap { .. }))
-			}
-			ProxyType::StableAssetLiquidity => {
-				matches!(
-					c,
-					Call::StableAsset(module_stable_asset::Call::mint { .. })
-						| Call::StableAsset(module_stable_asset::Call::redeem_proportion { .. })
-						| Call::StableAsset(module_stable_asset::Call::redeem_single { .. })
-						| Call::StableAsset(module_stable_asset::Call::redeem_multi { .. })
-				)
-			}
-		}
-	}
-	fn is_superset(&self, o: &Self) -> bool {
-		match (self, o) {
-			(x, y) if x == y => true,
-			(ProxyType::Any, _) => true,
-			(_, ProxyType::Any) => false,
-			_ => false,
-		}
-	}
-}
-
-impl pallet_proxy::Config for Runtime {
-	type Event = Event;
-	type Call = Call;
-	type Currency = Balances;
-	type ProxyType = ProxyType;
-	type ProxyDepositBase = ProxyDepositBase;
-	type ProxyDepositFactor = ProxyDepositFactor;
-	type MaxProxies = ConstU32<32>;
-	type WeightInfo = ();
-	type MaxPending = ConstU32<32>;
-	type CallHasher = BlakeTwo256;
-	type AnnouncementDepositBase = AnnouncementDepositBase;
-	type AnnouncementDepositFactor = AnnouncementDepositFactor;
 }
 
 pub struct EnsurePoolAssetId;
@@ -1488,7 +1224,6 @@ construct_runtime!(
 		Recovery: pallet_recovery = 32,
 		Proxy: pallet_proxy = 33,
 		IdleScheduler: module_idle_scheduler = 34,
-
 		Indices: pallet_indices = 39,
 
 		// Consensus
@@ -1505,22 +1240,19 @@ construct_runtime!(
 		AuthorityDiscovery: pallet_authority_discovery = 48,
 		// placed behind indices to maintain it.
 		ElectionProviderMultiPhase: pallet_election_provider_multi_phase = 49,
+		VoterList: pallet_bags_list = 50,
+		NominationPools: pallet_nomination_pools = 51,
 
 		// Governance
-		Council: pallet_collective::<Instance1> = 50,
-		CouncilMembership: pallet_membership::<Instance1> = 51,
-		FinancialCouncil: pallet_collective::<Instance2> = 52,
-		FinancialCouncilMembership: pallet_membership::<Instance2> = 53,
-		TechnicalCommittee: pallet_collective::<Instance4> = 56,
-		TechnicalCommitteeMembership: pallet_membership::<Instance4> = 57,
-
-		// norminator
-		VoterList: pallet_bags_list = 60,
-		NominationPools: pallet_nomination_pools = 61,
-
-		Authority: orml_authority = 70,
-		PhragmenElection: pallet_elections_phragmen = 71,
-		Democracy: pallet_democracy = 72,
+		Authority: orml_authority = 60,
+		Council: pallet_collective::<Instance1> = 61,
+		CouncilMembership: pallet_membership::<Instance1> = 62,
+		FinancialCouncil: pallet_collective::<Instance2> = 63,
+		FinancialCouncilMembership: pallet_membership::<Instance2> = 64,
+		TechnicalCommittee: pallet_collective::<Instance4> = 65,
+		TechnicalMembership: pallet_membership::<Instance4> = 66,
+		PhragmenElection: pallet_elections_phragmen = 67,
+		Democracy: pallet_democracy = 68,
 
 		// Oracle
 		//
@@ -1567,33 +1299,36 @@ construct_runtime!(
 
 #[cfg(feature = "runtime-benchmarks")]
 #[macro_use]
-extern crate orml_benchmarking;
+extern crate frame_benchmarking;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benches {
 	define_benchmarks!(
-		[module_asset_registry, benchmarking::asset_registry]
-		[module_auction_manager, benchmarking::auction_manager]
-		[module_cdp_engine, benchmarking::cdp_engine]
-		[module_cdp_treasury, benchmarking::cdp_treasury]
-		[module_currencies, benchmarking::currencies]
-		[module_dex, benchmarking::dex]
-		[module_dex_oracle, benchmarking::dex_oracle]
-		[module_emergency_shutdown, benchmarking::emergency_shutdown]
-		[module_evm, benchmarking::evm]
-		[module_evm_accounts, benchmarking::evm_accounts]
-		[module_funan, benchmarking::funan]
-		[module_idle_scheduler, benchmarking::idle_scheduler]
-		[module_incentives, benchmarking::incentives]
-		[module_prices, benchmarking::prices]
-		[module_stable_asset, benchmarking::module_stable_asset]
-		[module_transaction_pause, benchmarking::transaction_pause]
-		[module_transaction_payment, benchmarking::transaction_payment]
-
-		[orml_auction, benchmarking::auction]
-		[orml_authority, benchmarking::authority]
-		[orml_oracle, benchmarking::oracle]
-		[orml_tokens, benchmarking::tokens]
+		[frame_benchmarking, BaselineBench::<Runtime>]
+		[pallet_babe, Babe]
+		[pallet_bags_list, VoterList]
+		[pallet_balances, Balances]
+		[pallet_bounties, Bounties]
+		[pallet_collective, Council]
+		[pallet_democracy, Democracy]
+		[pallet_election_provider_multi_phase, ElectionProviderMultiPhase]
+		[pallet_election_provider_support_benchmarking, EPSBench::<Runtime>]
+		[pallet_elections_phragmen, PhragmenElection]
+		[pallet_grandpa, Grandpa]
+		[pallet_im_online, ImOnline]
+		[pallet_multisig, Multisig]
+		[pallet_nomination_pools, NominationPoolsBench::<Runtime>]
+		[pallet_offences, OffencesBench::<Runtime>]
+		[pallet_preimage, Preimage]
+		[pallet_proxy, Proxy]
+		[pallet_scheduler, Scheduler]
+		[pallet_session, SessionBench::<Runtime>]
+		[pallet_staking, Staking]
+		[frame_system, SystemBench::<Runtime>]
+		[pallet_timestamp, Timestamp]
+		[pallet_tips, Tips]
+		[pallet_treasury, Treasury]
+		[pallet_utility, Utility]
 	);
 }
 
@@ -1916,37 +1651,57 @@ impl_runtime_apis! {
 		}
 	}
 
-	// benchmarks for selendra modules
 	#[cfg(feature = "runtime-benchmarks")]
 	impl frame_benchmarking::Benchmark<Block> for Runtime {
 		fn benchmark_metadata(extra: bool) -> (
 			Vec<frame_benchmarking::BenchmarkList>,
 			Vec<frame_support::traits::StorageInfo>,
 		) {
-			use frame_benchmarking::{list_benchmark as frame_list_benchmark, Benchmarking, BenchmarkList};
+			use frame_benchmarking::{baseline, Benchmarking, BenchmarkList};
 			use frame_support::traits::StorageInfoTrait;
 
-			use module_nft::benchmarking::Pallet as NftBench;
+			// Trying to add benchmarks directly to the Session Pallet caused cyclic dependency
+			// issues. To get around that, we separated the Session benchmarks into its own crate,
+			// which is why we need these two lines below.
+			use pallet_session_benchmarking::Pallet as SessionBench;
+			use pallet_offences_benchmarking::Pallet as OffencesBench;
+			use pallet_election_provider_support_benchmarking::Pallet as EPSBench;
+			use frame_system_benchmarking::Pallet as SystemBench;
+			use baseline::Pallet as BaselineBench;
+			use pallet_nomination_pools_benchmarking::Pallet as NominationPoolsBench;
 
 			let mut list = Vec::<BenchmarkList>::new();
-
-			frame_list_benchmark!(list, extra, module_nft, NftBench::<Runtime>);
 			list_benchmarks!(list, extra);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
 
-			return (list, storage_info)
+			(list, storage_info)
 		}
 
 		fn dispatch_benchmark(
 			config: frame_benchmarking::BenchmarkConfig
 		) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
-			use frame_benchmarking::{Benchmarking, BenchmarkBatch, add_benchmark as frame_add_benchmark, TrackedStorageKey};
-			use module_nft::benchmarking::Pallet as NftBench;
+			use frame_benchmarking::{baseline, Benchmarking, BenchmarkBatch,  TrackedStorageKey};
+
+			// Trying to add benchmarks directly to the Session Pallet caused cyclic dependency
+			// issues. To get around that, we separated the Session benchmarks into its own crate,
+			// which is why we need these two lines below.
+			use pallet_session_benchmarking::Pallet as SessionBench;
+			use pallet_offences_benchmarking::Pallet as OffencesBench;
+			use pallet_election_provider_support_benchmarking::Pallet as EPSBench;
+			use frame_system_benchmarking::Pallet as SystemBench;
+			use baseline::Pallet as BaselineBench;
+			use pallet_nomination_pools_benchmarking::Pallet as NominationPoolsBench;
+
+			impl pallet_session_benchmarking::Config for Runtime {}
+			impl pallet_offences_benchmarking::Config for Runtime {}
+			impl pallet_election_provider_support_benchmarking::Config for Runtime {}
+			impl frame_system_benchmarking::Config for Runtime {}
+			impl baseline::Config for Runtime {}
+			impl pallet_nomination_pools_benchmarking::Config for Runtime {}
 
 			let whitelist: Vec<TrackedStorageKey> = vec![
 				// Block Number
-				// frame_system::Number::<Runtime>::hashed_key().to_vec(),
 				hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef702a5c1b19ab7a04f536c519aca4983ac").to_vec().into(),
 				// Total Issuance
 				hex_literal::hex!("c2261276cc9d1f8598ea4b6a74b15c2f57c875e4cff74148e4628f264b974c80").to_vec().into(),
@@ -1956,18 +1711,15 @@ impl_runtime_apis! {
 				hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef70a98fdbe9ce6c55837576c60c7af3850").to_vec().into(),
 				// System Events
 				hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef780d41e5e16056765bc8461851072c9d7").to_vec().into(),
-				// Caller 0 Account
-				hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef7b99d880ec681799c0cf30e8886371da946c154ffd9992e395af90b5b13cc6f295c77033fce8a9045824a6690bbf99c6db269502f0a8d1d2a008542d5690a0749").to_vec().into(),
+				// System BlockWeight
+				hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef734abf5cb34d6244378cddbf18e849d96").to_vec().into(),
 				// Treasury Account
 				hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef7b99d880ec681799c0cf30e8886371da95ecffd7b6c0f78751baa9d281e0bfa3a6d6f646c70792f74727372790000000000000000000000000000000000000000").to_vec().into(),
 			];
+
 			let mut batches = Vec::<BenchmarkBatch>::new();
 			let params = (&config, &whitelist);
-
-			frame_add_benchmark!(params, batches, module_nft, NftBench::<Runtime>);
 			add_benchmarks!(params, batches);
-
-			if batches.is_empty() { return Err("Benchmark not found for this module.".into()) }
 			Ok(batches)
 		}
 	}

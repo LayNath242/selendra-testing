@@ -1,9 +1,9 @@
 
 use crate::{
-	dollar, parameter_types, weights, AllPrecompiles, Babe, Balances, Currencies, DispatchableTask,
+	dollar, parameter_types, weights, AllPrecompiles, Babe, Balances, Currencies,
 	EnsureRootOrHalfCouncil, EnsureRootOrTwoThirdsTechnicalCommittee, Event, GasToWeight,
-	IdleScheduler, Runtime, RuntimeBlockWeights, RuntimeDebug, TreasuryAccount, Weight,
-	EVM, H160, SEL,
+	IdleScheduler, Runtime, RuntimeDebug, TreasuryAccount, Balance,
+	EVM, H160, SEL, config::utility_config::ScheduledTasks
 };
 
 use codec::{Decode, Encode};
@@ -11,8 +11,6 @@ use scale_info::TypeInfo;
 
 pub use module_evm::{EvmChainId, EvmTask};
 use module_evm_accounts::EvmAddressMapping;
-
-use primitives::{define_combined_task, task::TaskResult, Balance};
 
 impl module_evm_accounts::Config for Runtime {
 	type Event = Event;
@@ -102,23 +100,3 @@ impl module_evm::Config for Runtime {
 impl module_evm_bridge::Config for Runtime {
 	type EVM = EVM;
 }
-
-define_combined_task! {
-	#[derive(Clone, Encode, Decode, PartialEq, RuntimeDebug, TypeInfo)]
-	pub enum ScheduledTasks {
-		EvmTask(EvmTask<Runtime>),
-	}
-}
-
-parameter_types!(
-	// At least 2% of max block weight should remain before idle tasks are dispatched.
-	pub MinimumWeightRemainInBlock: Weight = RuntimeBlockWeights::get().max_block / 50;
-);
-
-impl module_idle_scheduler::Config for Runtime {
-	type Event = Event;
-	type WeightInfo = ();
-	type Task = ScheduledTasks;
-	type MinimumWeightRemainInBlock = MinimumWeightRemainInBlock;
-}
-

@@ -37,7 +37,7 @@ use selendra_runtime::{
 	dollar, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, Block, CouncilConfig, CdpEngineConfig,
 	DexConfig, EVMConfig, GenesisConfig, GrandpaConfig, ImOnlineConfig,
 	OperatorMembershipSelendraConfig, OrmlNFTConfig, SS58Prefix, SessionConfig, SessionKeys, IndicesConfig,
-	StakerStatus, StakingConfig, SudoConfig, SystemConfig, TechnicalCommitteeMembershipConfig, TokensConfig,
+	StakerStatus, StakingConfig, SudoConfig, SystemConfig, TechnicalMembershipConfig, TokensConfig,
 	SEL, KUSD, CouncilMembershipConfig, FinancialCouncilMembershipConfig, CdpTreasuryConfig
 };
 
@@ -302,7 +302,7 @@ pub fn selendra_development_genesis(
 			phantom: Default::default(),
 		},
 		technical_committee: Default::default(),
-		technical_committee_membership: TechnicalCommitteeMembershipConfig {
+		technical_membership: TechnicalMembershipConfig {
 			members: vec![],
 			phantom: Default::default(),
 		},
@@ -405,7 +405,7 @@ pub fn selendra_genesis(
 			phantom: Default::default(),
 		},
 		technical_committee: Default::default(),
-		technical_committee_membership: TechnicalCommitteeMembershipConfig {
+		technical_membership: TechnicalMembershipConfig {
 			members: vec![],
 			phantom: Default::default(),
 		},
